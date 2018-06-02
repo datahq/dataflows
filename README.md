@@ -248,41 +248,135 @@ The flow framework knows whether a function is meant to hande a single row or a 
 - if it accepts a single `rows` parameter, then it's a rows processor.
 - if it accepts a single `package` parameter, then it's a package processor.
 
-Let's see an example of what we can do with a package processor:
+Let's see a few examples of what we can do with a package processors.
+
+First, let's add a field to the data:
 
 ```python
-from datastream import Flow, load, dump_to_path, printer
+from datastream import Flow, load, dump_to_path
 
-def find_double_winners(datapackage):
-	
-    # Fetch the emmy nominees stream
-    emmy = next(datapackage)
-    # filter all winners and create a set from their names
-    emmy_winners = set(
-        map(lambda x: x['nominee'], 
-            filter(lambda x: x['winner'],
-                   emmy))
-    )
-    # yield an empty iterator for the emmy data
-    yield iter([])
 
-    # Fetch the academy nominees stream
-    academy = next(datapackage)
-    # Filter all winners whose name appears in the emmy winners
-    # And yield the result
-    yield filter(lambda row: row['Winner'] and row['Name'] in emmy_winners,
-                 academy)
+def add_is_guitarist_column_to_schema(package):
+	# Add a new field to the first resource
+    package.pkg.resources[0]
+               .descriptor['schema']['fields']
+               .append(dict(
+            name='is_guitarist',
+            type='boolean'
+    ))
+    # Must yield the modified datapackage
+    yield package.pkg
+    # And its resources
+    yield from package
+
+def add_is_guitarist_column(row):
+	row['is_guitarist'] = row['instrument'] == 'guitar'
+    return row
 
 f = Flow(
-    # Emmy award nominees and winners
-    load('emmy.csv'),
-    # Academy award nominees and winners
-    load('academy.csv', encoding='utf8'),
-    # Find academy award winners who also won an Emmy 
-    find_double_winners,
-    dump_to_path('double_winners')
+    # Same one as above
+    load('beatles.csv'),
+    add_is_guitarist_column_to_schema,
+    add_is_guitarist_column,
+    dump_to_path('beatles_guitarists')
 )
 _ = f.process()
 
+```
+
+In this example we create two steps - one for adding the new field (`is_guitarist`) to the schema and another step to modify the actual data.
+
+We can combine the two into one step:
+
+```python
+from datastream import Flow, load, dump_to_path
+
+
+def add_is_guitarist_column(package):
+
+    # Add a new field to the first resource
+    package.pkg.resources[0].descriptor['schema']['fields'].append(dict(
+        name='is_guitarist',
+        type='boolean'
+    ))
+    # Must yield the modified datapackage
+    yield package.pkg
+
+    # Now iterate on all resources
+    resources = iter(package)
+    # Take the first resource
+    beatles = next(resources)
+
+    # And yield it with with the modification
+    def f(row):
+        row['is_guitarist'] = row['instrument'] == 'guitar'
+        return row
+
+    yield map(f, beatles)
+
+f = Flow(
+    # Same one as above
+    load('beatles.csv'),
+    add_is_guitarist_column,
+    dump_to_path('beatles_guitarists')
+)
+_ = f.process()
+```
+
+The contract for the `package` processing function is simple:
+
+First modify `package.pkg` (which is a `Package` instance) and yield it.
+
+Then, yield any resources that should exist on the output, with or without modifications.
+
+In the next example we're removing an entire resource in a package processor - this next one filters the list of Academy Award nominees to those who won both the Oscar and an Emmy award:
+
+```python
+    from datastream import Flow, load, dump_to_path
+
+    def find_double_winners(package):
+
+        # Remove the emmies resource - 
+        #    we're going to consume it now
+        package.pkg.remove_resource('emmies')
+        # Must yield the modified datapackage
+        yield package.pkg
+
+        # Now iterate on all resources
+        resources = iter(package)
+
+        # Emmies is the first - 
+        # read all its data and create a set of winner names
+        emmy = next(resources)
+        emmy_winners = set(
+            map(lambda x: x['nominee'], 
+                filter(lambda x: x['winner'],
+                       emmy))
+        )
+
+        # Oscars are next - 
+        # filter rows based on the emmy winner set
+        academy = next(resources)
+        yield filter(lambda row: (row['Winner'] and 
+                                  row['Name'] in emmy_winners),
+                     academy)
+
+    f = Flow(
+        # Emmy award nominees and winners
+        load('emmy.csv', name='emmies'),
+        # Academy award nominees and winners
+        load('academy.csv', encoding='utf8', name='oscars'),
+        find_double_winners,
+        dump_to_path('double_winners')
+    )
+    _ = f.process()
+
+# --> 
+# double_winners/academy.csv contains:
+# 1931/1932,5,Actress,1,Helen Hayes,The Sin of Madelon Claudet
+# 1932/1933,6,Actress,1,Katharine Hepburn,Morning Glory
+# 1935,8,Actress,1,Bette Davis,Dangerous
+# 1938,11,Actress,1,Bette Davis,Jezebel
+# ...
 ```
 
