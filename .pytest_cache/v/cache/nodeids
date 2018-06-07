@@ -1,0 +1,18 @@
+[
+  "tests/test_examples.py::test_example_1",
+  "tests/test_examples.py::test_example_2",
+  "tests/test_examples.py::test_example_3",
+  "tests/test_examples.py::test_example_4",
+  "tests/test_examples.py::test_example_5",
+  "tests/test_examples.py::test_example_6",
+  "tests/test_examples.py::test_example_7",
+  "tests/test_examples.py::test_example_75",
+  "tests/test_examples.py::test_example_8",
+  "tests/test_lib.py::test_add_computed_field",
+  "tests/test_lib.py::test_add_metadata",
+  "tests/test_lib.py::test_delete_field",
+  "tests/test_lib.py::test_find_replace",
+  "tests/test_lib.py::test_unpivot",
+  "tests/test_lib.py::test_concatenate",
+  "tests/test_lib.py::test_filter_rows"
+]

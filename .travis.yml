@@ -1,0 +1,28 @@
+dist: trusty
+sudo: required
+language: python
+python:
+- 3.4
+- 3.5
+- 3.6
+- 3.7
+env:
+  global:
+  - TOXENV="py${PYTHON_VERSION//./}"
+  - LANG=en_US.UTF-8
+install:
+- make install
+- pip install coveralls
+script:
+- make lint
+- make test
+after_success:
+- coveralls
+deploy:
+  provider: pypi
+  user: akariv
+  distributions: sdist bdist_wheel
+  on:
+    tags: true
+  password:
+    secure: Mojt569YIek3QxOruiO2kgXfLqVauVSHpXFHau+JTqqXCFaKnBm5Jaz6KcFiJ1Na+Bu9LJmeris2Szx+FoYdv1qi78XIbG1Ep4vao+ymsOnpMK/EkWSQlYDi3OLvY16gNyInqVsJhqxDUsbT6oz6FToe54qPrumfLR0W/ZbNdPtOull0BUkrCyOQByemnjBoyTh88zpVP8ntB7x+k3LmPEOmSmUpQcPHU9MsgLMFw89uwf/gskqK6KaUqcG95u+0MGgnEq3JOxKAkgQ3d+1bEXiAxXocTXQr2Turr70x+eWeEJW+tr7B0JarINKyDhNFz1x5KIjXBkUaogl3k2Z0wGq8evqWOAa5vhKDkNpKw7N3bg9ZSNhxuNgotKU27kVzJxLZ/7nZNdWDdW5WHVB0S6gSWzBBm8mTKlEuofaNPbngi9gY8M+DJDlsep340q0O3f9NBHQSBJtTYPqhONb/fkJaoCxM/hBpL0kmp1f/V3LSeHyE5qiTqpStivgHyDz2Rl3GMnk3ve2JA8rOl06z0pwudb5ATzDqkZSpklrKG9gxIkRlEK02XlYw7zSAZtyNO6hrcHvn+8ytBOKb/AyuS+wGpPWTJT6aaQa7hE87OlAIjJrvldYho+pYOutEK60mJTiPW8XPQ6j0B2w4z0zob3cqiBz6jm8Q0mvKIA0Em1U=

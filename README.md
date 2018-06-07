@@ -1,6 +1,6 @@
-# DataFlow
+# DataFlows
 
-DataFlow is a novel and intuitive way of building data processing flows.
+DataFlows is a novel and intuitive way of building data processing flows.
 
 - It's built for medium-data processing - data that fits on your hard drive, but is too big to load in Excel or as-is into Python, and not big enough to require spinning up a Hadoop cluster...
 - It's built upon the foundation of the Frictionless Data project - which means that all data prduced by these flows is easily reusable by others.
@@ -10,7 +10,7 @@ DataFlow is a novel and intuitive way of building data processing flows.
 Let's start with the traditional 'hello, world' example:
 
 ```python
-from datastream import Flow
+from dataflows import Flow
 
 data = [
   {'data': 'Hello'},
@@ -42,7 +42,7 @@ This very simple flow takes a list of `dict`s and applies a row processing funct
 We can load data from a file instead:
 
 ```python
-from datastream import Flow, load
+from dataflows import Flow, load
 
 # beatles.csv:
 # name,instrument 
@@ -78,7 +78,7 @@ The source file can be a CSV file, an Excel file or a Json file. You can use a l
 Data sources can be generators and not just lists or files. Let's take as an example a very simple scraper:
 
 ```python
-from datastream import Flow
+from dataflows import Flow
 
 from xml.etree import ElementTree
 from urllib.request import urlopen
@@ -126,7 +126,7 @@ This is nice, but we do prefer the numbers to be actual numbers and not strings.
 In order to do that, let's simply define their type to be numeric:
 
 ```python
-from datastream import Flow, set_type
+from dataflows import Flow, set_type
 
 def country_population():
     # same as before
@@ -161,7 +161,7 @@ What about large data files? In the above examples, the results are loaded into 
 We do it by using _dump_ processors:
 
 ```python
-from datastream import Flow, set_type, dump_to_path
+from dataflows import Flow, set_type, dump_to_path
 
 def country_population():
     # same as before
@@ -204,7 +204,7 @@ So far we've seen how to load data, process it row by row, and then inspect the 
 Let's see how we can do more complex processing by manipulating the entire data stream:
 
 ```python
-from datastream import Flow, set_type, dump_to_path
+from dataflows import Flow, set_type, dump_to_path
 
 # Generate all triplets (a,b,c) so that 1 <= a <= b < c <= 20
 def all_triplets():
@@ -253,7 +253,7 @@ Let's see a few examples of what we can do with a package processors.
 First, let's add a field to the data:
 
 ```python
-from datastream import Flow, load, dump_to_path
+from dataflows import Flow, load, dump_to_path
 
 
 def add_is_guitarist_column_to_schema(package):
@@ -289,7 +289,7 @@ In this example we create two steps - one for adding the new field (`is_guitaris
 We can combine the two into one step:
 
 ```python
-from datastream import Flow, load, dump_to_path
+from dataflows import Flow, load, dump_to_path
 
 
 def add_is_guitarist_column(package):
@@ -332,7 +332,7 @@ Then, yield any resources that should exist on the output, with or without modif
 In the next example we're removing an entire resource in a package processor - this next one filters the list of Academy Award nominees to those who won both the Oscar and an Emmy award:
 
 ```python
-    from datastream import Flow, load, dump_to_path
+    from dataflows import Flow, load, dump_to_path
 
     def find_double_winners(package):
 
