@@ -1,19 +1,8 @@
 import os
-import tempfile
-import logging
 import hashlib
-import copy
 import json
 
-import requests
-
-from datapackage import Resource
-from tableschema import Schema
-from tableschema.exceptions import CastError
-
 from ... import DataStreamProcessor, ResourceWrapper, schema_validator
-
-from .file_formats import CSVFormat, JSONFormat
 
 
 class DumperBase(DataStreamProcessor):
@@ -91,7 +80,7 @@ class DumperBase(DataStreamProcessor):
         for resource in resources:
             ret = self.process_resource(
                         ResourceWrapper(
-                            resource.res, 
+                            resource.res,
                             schema_validator(resource.res, resource)
                         )
             )

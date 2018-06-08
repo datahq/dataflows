@@ -3,6 +3,7 @@ from collections import Iterable
 
 from .datastream_processor import DataStreamProcessor
 
+
 class Flow:
     def __init__(self, *args):
         self.chain = args

@@ -17,5 +17,3 @@ class ZipDumper(FileDumper):
     def finalize(self):
         self.zip_file.close()
         super(ZipDumper, self).finalize()
-
-

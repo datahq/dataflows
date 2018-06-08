@@ -21,4 +21,3 @@ class load(DataStreamProcessor):
     def process_resources(self, resources):
         yield from super(load, self).process_resources(resources)
         yield self.res.iter(keyed=True)
-

@@ -47,13 +47,13 @@ def process_resource(fields, rows):
 
 
 def add_computed_field(fields, resources=None):
-    
+
     matcher = ResourceMatcher(resources)
 
     def func(package):
         for resource in package.pkg.descriptor['resources']:
             if matcher.match(resource['name']):
-                descriptor = resource#.descriptor
+                descriptor = resource
                 new_fields = [
                     {
                         'name': f['target'],
@@ -72,5 +72,3 @@ def add_computed_field(fields, resources=None):
                 yield process_resource(fields, resource)
 
     return func
-
-        

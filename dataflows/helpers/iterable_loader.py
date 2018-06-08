@@ -1,4 +1,4 @@
-import itertools 
+import itertools
 import decimal
 import datetime
 
@@ -6,6 +6,7 @@ from datapackage import Package, Resource
 from tableschema.storage import Storage
 
 from .. import DataStreamProcessor
+
 
 class iterable_storage(Storage):
 
@@ -38,7 +39,7 @@ class iterable_storage(Storage):
             return 'datetime'
         elif isinstance(value, datetime.date):
             return 'date'
-        assert 'Unknown Python type: %r' % value        
+        assert 'Unknown Python type: %r' % value
 
     def describe(self, _, descriptor=None):
         if descriptor is not None:
@@ -53,10 +54,10 @@ class iterable_storage(Storage):
                         for name, value in rec.items()
                     ]
                 )
-            except:
+            except Exception:
                 self.schema = dict(fields=[])
         return self.schema
-    
+
     def iter(self, _):
         return self.iterable
 
@@ -81,7 +82,7 @@ class iterable_loader(DataStreamProcessor):
                 yield dict(zip(('col{}'.format(i) for i in range(len(x))), x))
 
     def process_datapackage(self, dp: Package):
-        name = self.name 
+        name = self.name
         if name is None:
             name = 'res_{}'.format(len(dp.resources) + 1)
         self.res = Resource(dict(
@@ -95,4 +96,3 @@ class iterable_loader(DataStreamProcessor):
     def process_resources(self, resources):
         yield from super(iterable_loader, self).process_resources(resources)
         yield self.res.iter(keyed=True)
-

@@ -1,10 +1,10 @@
 from itertools import islice
-from datapackage import Package, Resource
+from datapackage import Resource
 from .. import DataStreamProcessor, schema_validator
 
 
 class set_type(DataStreamProcessor):
-    
+
     def __init__(self, name, **options):
         super(set_type, self).__init__()
         self.name = name

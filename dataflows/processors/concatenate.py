@@ -113,5 +113,4 @@ def concatenate(fields, target={}, sources=None):
             else:
                 yield resource
 
-
     return func

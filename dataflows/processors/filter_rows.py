@@ -2,6 +2,7 @@ import operator
 
 from ..helpers.resource_matcher import ResourceMatcher
 
+
 def process_resource(rows, conditions):
     for row in rows:
         if any(func(row[k], v) for func, k, v in conditions):

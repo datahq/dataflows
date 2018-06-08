@@ -1,7 +1,6 @@
 import logging
 import itertools
 import collections
-from copy import deepcopy
 
 from datapackage import Package
 from tableschema.exceptions import CastError
@@ -44,19 +43,19 @@ class DataStreamProcessor:
         self.datapackage = self.process_datapackage(datastream.dp)
         self.datapackage.commit()
         res_iter = datastream.res_iter
-        
+
         def get_res(name):
             ret = self.datapackage.get_resource(name)
             if ret is None:
                 ret = dp_copy.get_resource(name)
             assert ret is not None
             return ret
-            
+
         res_iter = (ResourceWrapper(get_res(rw.res.name), rw.it)
                     for rw in res_iter)
         res_iter = self.process_resources(res_iter)
-        res_iter = (it if isinstance(it, ResourceWrapper) else ResourceWrapper(res, it) 
-                    for res, it 
+        res_iter = (it if isinstance(it, ResourceWrapper) else ResourceWrapper(res, it)
+                    for res, it
                     in itertools.zip_longest(self.datapackage.resources, res_iter))
 
         return DataStream(self.datapackage, res_iter, datastream.stats + [self.stats])
@@ -70,7 +69,7 @@ class DataStreamProcessor:
             for err in e.errors:
                 logging.error('%s', err)
         return ds.dp, ds.merge_stats()
-       
+
     def results(self):
         ds = self._process()
         results = [
@@ -78,4 +77,3 @@ class DataStreamProcessor:
             for res in ds.res_iter
         ]
         return results, ds.dp, ds.merge_stats()
-       

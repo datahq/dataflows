@@ -21,7 +21,7 @@ def unpivot_rows(rows, fields_to_unpivot, fields_to_keep, extra_value):
 
 
 def unpivot(unpivot_fields, extra_keys, extra_value, resources=None):
-    
+
     matcher = ResourceMatcher(resources)
 
     def func(package):
@@ -70,9 +70,9 @@ def unpivot(unpivot_fields, extra_keys, extra_value, resources=None):
             if not matcher.match(resource.res.name):
                 yield resource
             else:
-                yield unpivot_rows(resource, 
-                                   unpivot_fields_without_regex, 
+                yield unpivot_rows(resource,
+                                   unpivot_fields_without_regex,
                                    fields_to_keep,
                                    extra_value)
-        
+
     return func

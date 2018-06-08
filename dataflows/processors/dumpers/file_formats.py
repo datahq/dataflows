@@ -116,7 +116,6 @@ class CSVFormat(FileFormat):
         )
         super(CSVFormat, cls).prepare_resource(resource)
 
-
     def write_transformed_row(self, transformed_row):
         self.writer.writerow(transformed_row)
 

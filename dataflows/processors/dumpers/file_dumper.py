@@ -1,5 +1,4 @@
 import os
-import copy
 import json
 import tempfile
 import hashlib
@@ -8,6 +7,7 @@ from datapackage import Resource
 
 from .dumper_base import DumperBase
 from .file_formats import CSVFormat, JSONFormat
+
 
 class FileDumper(DumperBase):
 
@@ -88,9 +88,6 @@ class FileDumper(DumperBase):
             schema = resource.res.schema
 
             temp_file = tempfile.NamedTemporaryFile(mode="w+", delete=False)
-            fields = schema.fields
-            headers = list(map(lambda field: field.name, fields))
-
             writer = self.file_formatters[resource.res.name](temp_file, schema)
 
             return self.rows_processor(resource,

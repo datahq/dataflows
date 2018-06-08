@@ -1,4 +1,4 @@
-from datapackage import Package, Resource
+from datapackage import Package
 from .. import DataStreamProcessor
 
 
@@ -11,4 +11,3 @@ class printer(DataStreamProcessor):
     # def process_row(self, row):
     #     print(row)
     #     return row
-

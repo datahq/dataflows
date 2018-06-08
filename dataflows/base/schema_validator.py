@@ -26,4 +26,3 @@ def schema_validator(resource: Resource, iterator):
                 logging.warning('Encountered field %r, not in schema', k)
 
         yield row
-

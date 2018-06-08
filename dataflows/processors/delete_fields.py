@@ -35,4 +35,3 @@ def delete_fields(fields, resources=None):
                 yield process_resource(resource, fields)
 
     return func
-        
