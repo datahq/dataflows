@@ -152,3 +152,44 @@ def test_filter_rows():
     assert results[0][0] == dict(a = 1, b = 4)
     assert len(results[0]) == 1
     assert len(results) == 1
+
+
+def test_sort_rows():
+    from dataflows import sort_rows
+    
+    f = Flow(
+        [
+            {'a': 1, 'b': 3},
+            {'a': 2, 'b': 3},
+            {'a': 3, 'b': 1},
+            {'a': 4, 'b': 1},
+        ],
+        sort_rows(key='{b}{a}'),
+    )
+    results, _, _ = f.results()
+    assert list(results[0]) == [
+        {'a': 3, 'b': 1},
+        {'a': 4, 'b': 1},
+        {'a': 1, 'b': 3},
+        {'a': 2, 'b': 3},
+    ]
+
+
+def test_duplicate():
+    from dataflows import duplicate
+    
+    a = [
+            {'a': 1, 'b': 3},
+            {'a': 2, 'b': 3},
+            {'a': 3, 'b': 1},
+            {'a': 4, 'b': 1},
+        ]
+
+    f = Flow(
+        a,
+        duplicate(),
+    )
+    results, _, _ = f.results()
+    assert list(results[0]) == a
+    assert list(results[1]) == a
+

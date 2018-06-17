@@ -22,6 +22,7 @@ PACKAGE = 'dataflows'
 NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
     'datapackage>=1.2.2',
+    'kvfile',
 ]
 SPEEDUP_REQUIRES = [
     'plyvel<1',
