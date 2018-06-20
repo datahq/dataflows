@@ -23,6 +23,8 @@ NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
     'datapackage>=1.2.2',
     'kvfile',
+    'click',
+    'jinja2',
 ]
 SPEEDUP_REQUIRES = [
     'plyvel<1',
@@ -67,4 +69,9 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
+    entry_points={
+      'console_scripts': [
+        'dataflows = dataflows.cli:init',
+      ]
+    },
 )

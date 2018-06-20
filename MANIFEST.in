@@ -4,5 +4,6 @@ include Makefile
 include pylintrc
 include README.md
 include tox.ini
+include *.tpl
 prune .tox
 

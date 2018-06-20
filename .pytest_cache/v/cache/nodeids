@@ -14,5 +14,7 @@
   "tests/test_lib.py::test_find_replace",
   "tests/test_lib.py::test_unpivot",
   "tests/test_lib.py::test_concatenate",
-  "tests/test_lib.py::test_filter_rows"
+  "tests/test_lib.py::test_filter_rows",
+  "tests/test_lib.py::test_sort_rows",
+  "tests/test_lib.py::test_duplicate"
 ]

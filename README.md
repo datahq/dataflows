@@ -380,3 +380,56 @@ In the next example we're removing an entire resource in a package processor - t
 # ...
 ```
 
+## Builtin Processors
+
+DataFlows comes with a few built-in processors which do most of the heavy lifting in many common scenarios - 
+leaving you to implement only the minimum code that is specific to your specific problem.
+
+### Load and Save Data
+#### load
+Loads data from various source types (local files, remote URLS, Google Spreadsheets, databases...)
+
+#### printer
+Just prints whatever it sees. Good for debugging.
+
+#### dump_to_path
+Store the results to a specified path on disk, in a valid datapackage
+
+#### dump_to_zip
+Store the results in a valid datapackage, all files archived in one zip file
+
+#### dump_to_sql
+Store the results in a relational database (creates one or more tables or updates existing tables)
+
+### Manipulate row-by-row
+#### delete_fields.py
+Removes some columns for the data
+
+#### add_computed_field
+Adds new fields whose values are based on existing columns
+
+#### find_replace.py
+Look for specific patterns in specific fields and replace them with new data
+
+#### set_type.py
+Parse incoming data based on provided schema, validate the data in the process
+ 
+### Manipulate the entire resource
+#### sort_rows.py
+Sort incoming data based on key
+
+#### unpivot.py
+Unpivot a table - convert one row with multiple value columns to multiple rows with one value column
+
+#### filter_rows.py
+Filter rows based on inclusive and exclusive value filters
+
+### Manipulate package
+#### add_metadata.py
+Add high-level metadata about your package
+
+#### concatenate.py
+Concatenate multiple streams of data to a single one, resolving differently named columns along the way
+
+#### duplicate.py
+Duplicate a single stream of data to make two streams
