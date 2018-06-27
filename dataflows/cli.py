@@ -18,7 +18,7 @@ PROCESSING = dict((
   ('Sort all rows by key',                'sort'),
   ('Filter according to column values',   'filter'),
   ('Search & replace values in the data', 'find_replace'),
-  ('Delete some columns',                 'data_fields'),
+  ('Delete some columns',                 'delete_fields'),
   ('Normalize and validate numbers, dates and other types', 'set_type'),
   ('Un-pivot the data',                   'unpivot'),
   ('Custom row-by-row processing',        'custom'),
@@ -28,8 +28,8 @@ OUTPUTS = dict((
   ('As a Python list',                        'list'),
   ('A CSV file (in a data package)',          'dp_csv'),
   ('A CSV file (in a zipped data package)',   'dp_csv_zip'),
-  ('A JSON file (in a data package)',         'dp_csv'),
-  ('A JSON file (in a zipped data package)',  'dp_csv_zip'),
+  ('A JSON file (in a data package)',         'dp_json'),
+  ('A JSON file (in a zipped data package)',  'dp_json_zip'),
   ('An SQL database',                         'sql'),
 ))
 
@@ -78,12 +78,14 @@ def extract_format(ctx, url):
   ctx['format'] = None
   return True
 
+
 # Render
 env = Environment(loader=PackageLoader('dataflows'),
+                  trim_blocks=True, lstrip_blocks=True,
                   autoescape=False)
 def render(parameters):
-  env.get_template('main.tpl')
-  return ''
+  tpl = env.get_template('main.tpl.py')
+  return tpl.render(**parameters, )
 
 # Main CLI routine
 @click.command()
@@ -167,7 +169,10 @@ Press any key to start...
 ]
   answers = inquirer.prompt(questions, answers=dict(a=1), theme=themes.GreenPassion())
   answers['slug'] = slugify.slugify(answers['title'], separator='_')
-  render(answers)
+
+  filename = '{slug}.py'.format(**answers)
+  with open(filename, 'w') as out:
+    out.write(render(answers))
 
   answers = inquirer.prompt([
     inquirer.Confirm('edit',
@@ -175,7 +180,7 @@ Press any key to start...
                      default=False)
   ])
   if answers['edit']:
-    click.edit(filename='cli.py')
+    click.edit(filename=filename)
   print('Done!')
 
 
