@@ -31,4 +31,3 @@ def sort_rows(key, resources=None):
             yield from rows
 
     return func
-

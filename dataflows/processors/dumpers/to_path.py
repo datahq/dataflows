@@ -6,7 +6,7 @@ from .file_dumper import FileDumper
 
 class PathDumper(FileDumper):
 
-    def __init__(self, out_path='.', **options):
+    def __init__(self, out_path, **options):
         super(PathDumper, self).__init__(options)
         self.out_path = out_path
         PathDumper.__makedirs(self.out_path)
