@@ -15,8 +15,8 @@ def concatenator(resources, all_target_fields, field_mapping):
             yield processed
 
 
-def concatenate(fields, target={}, sources=None):
-    matcher = ResourceMatcher(sources)
+def concatenate(fields, target={}, resources=None):
+    matcher = ResourceMatcher(resources)
 
     def func(package):
         # Prepare target resource

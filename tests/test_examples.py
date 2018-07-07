@@ -42,7 +42,7 @@ def country_population():
     tables = tree.findall('.//table')
     for table in tables:
         if 'wikitable' in table.attrib.get('class', ''):
-            rows = table.findall('tr')
+            rows = table.findall('.//tr')
             for row in rows:
                 cells = row.findall('td')
                 if len(cells) > 3:

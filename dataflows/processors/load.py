@@ -15,6 +15,7 @@ class load(DataStreamProcessor):
         self.res.infer()
         if self.name is not None:
             self.res.descriptor['name'] = self.name
+        self.res.descriptor['path'] = '{name}.{format}'.format(**self.res.descriptor)
         dp.add_resource(self.res.descriptor)
         return dp
 
