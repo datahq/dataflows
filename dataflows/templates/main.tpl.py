@@ -1,4 +1,4 @@
-from dataflows import Flow, load, dump_to_path, dump_to_zip, printer
+from dataflows import Flow, load, dump_to_path, dump_to_zip, printer, add_metadata
 from dataflows import sort_rows, filter_rows, find_replace, delete_fields, set_type, unpivot
 
 
@@ -53,7 +53,7 @@ def {{slug}}():
         my_custom_processing,
         {% endif %}
         # Save the results
-        add_metadata(name='{{slug}}', title='''{{title}}''')
+        add_metadata(name='{{slug}}', title='''{{title}}'''),
         {% if output == 'print' %}
         printer(),
         {% endif %}
