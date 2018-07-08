@@ -1,4 +1,4 @@
-# ![logo](/Users/adam/code/datastream/logo-s.png) ~DataFlows~ 
+# ![logo](logo-s.png) DataFlows
 
 DataFlows is a novel and intuitive way of building data processing flows.
 
