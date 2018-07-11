@@ -94,15 +94,17 @@ def render(parameters):
     tpl = env.get_template('main.tpl.py')
     return tpl.render(**parameters)
 
+
 @click.group()
 def cli():
     pass
+
 
 # Main CLI routine
 @cli.command()
 @click.argument('arg', default='interactive')
 def init(arg):
-    """Bootstrap a processing pipeline script. 
+    """Bootstrap a processing pipeline script.
 ARG is either a path or a URL for some data to read from, 'hello-world' for a full working code example,
 or leave empty for an interactive walkthrough.
     """
@@ -117,7 +119,7 @@ or leave empty for an interactive walkthrough.
         answers = {}
     elif arg == 'hello-world':
         raise NotImplementedError()
-    else:    
+    else:
         url = arg
         answers = dict(
             input='remote',
@@ -154,34 +156,34 @@ or leave empty for an interactive walkthrough.
                                 lambda ctx: ctx.get('input_url') is not None),
                     validate=fall(extract_format, not_empty, valid_url)),
         inquirer.List('format',
-                    message="We couldn't detect the source format - which is it",
-                    choices=FORMATS,
-                    ignore=fany(lambda ctx: ctx['input'] != 'remote',
-                                lambda ctx: ctx.get('format') in FORMATS)
-                    ),                
+                      message="We couldn't detect the source format - which is it",
+                      choices=FORMATS,
+                      ignore=fany(lambda ctx: ctx['input'] != 'remote',
+                                  lambda ctx: ctx.get('format') in FORMATS)
+                      ),
         inquirer.Text('sheet',
-                    message="Which sheet in the spreadsheet should be processed (name or index)",
-                    validate=not_empty,
-                    ignore=lambda ctx: ctx.get('format') not in ('xls', 'xlsx', 'ods'),
-                    ),
+                      message="Which sheet in the spreadsheet should be processed (name or index)",
+                      validate=not_empty,
+                      ignore=lambda ctx: ctx.get('format') not in ('xls', 'xlsx', 'ods'),
+                      ),
         inquirer.Text('input_url',
-                    message="What is the connection string to the database",
-                    validate=not_empty,
-                    ignore=fany(lambda ctx: ctx['input'] != 'sql',
-                                lambda ctx: ctx.get('input_url') is not None),
-                    ),
+                      message="What is the connection string to the database",
+                      validate=not_empty,
+                      ignore=fany(lambda ctx: ctx['input'] != 'sql',
+                                  lambda ctx: ctx.get('input_url') is not None),
+                      ),
         inquirer.Text('input_db_table',
-                    message="...and the name of the database table to extract",
-                    validate=not_empty,
-                    ignore=fany(lambda ctx: ctx['input'] != 'sql',
-                                lambda ctx: ctx.get('input_db_table') is not None),
-        ),
+                      message="...and the name of the database table to extract",
+                      validate=not_empty,
+                      ignore=fany(lambda ctx: ctx['input'] != 'sql',
+                                  lambda ctx: ctx.get('input_db_table') is not None),
+                      ),
 
         inquirer.Text('input_url',
-                    message="Describe that other source (shortly)",
-                    ignore=fany(lambda ctx: ctx['input'] != 'other',
-                                lambda ctx: ctx.get('input_url') is not None),
-        ),
+                      message="Describe that other source (shortly)",
+                      ignore=fany(lambda ctx: ctx['input'] != 'other',
+                                  lambda ctx: ctx.get('input_url') is not None),
+                      ),
 
         # Processing
         inquirer.Checkbox('processing_str',
@@ -197,17 +199,17 @@ or leave empty for an interactive walkthrough.
                     ignore=lambda ctx: ctx.get('output') is not None,
                     validate=convert_output),
         inquirer.Text('output_url',
-                    message="What is the connection string to the database",
-                    validate=not_empty,
-                    ignore=fany(lambda ctx: ctx['output'] != 'sql',
-                                lambda ctx: ctx.get('output_url') is not None),
-        ),
+                      message="What is the connection string to the database",
+                      validate=not_empty,
+                      ignore=fany(lambda ctx: ctx['output'] != 'sql',
+                                  lambda ctx: ctx.get('output_url') is not None),
+                      ),
         inquirer.Text('output_db_table',
-                    message="...and the name of the database table to write to",
-                    validate=not_empty,
-                    ignore=fany(lambda ctx: ctx['output'] != 'sql',
-                                lambda ctx: ctx.get('output_db_table') is not None),
-        ),
+                      message="...and the name of the database table to write to",
+                      validate=not_empty,
+                      ignore=fany(lambda ctx: ctx['output'] != 'sql',
+                                  lambda ctx: ctx.get('output_db_table') is not None),
+                      ),
 
         # # Finalize
         inquirer.Text('title',
@@ -220,7 +222,6 @@ or leave empty for an interactive walkthrough.
         return
     answers['slug'] = slugify.slugify(answers['title'], separator='_')
 
-
     filename = '{slug}.py'.format(**answers)
     with open(filename, 'w') as out:
         print('Writing processing code into {}'.format(filename))
@@ -228,7 +229,7 @@ or leave empty for an interactive walkthrough.
 
     try:
         print('Running {}'.format(filename))
-        ret = subprocess.check_output('python '+filename, 
+        ret = subprocess.check_output('python '+filename,
                                       stderr=subprocess.PIPE, universal_newlines=True, shell=True)
         print(ret)
         print('Done!')

@@ -1,4 +1,3 @@
-from datapackage import Package
 from tabulate import tabulate
 
 
@@ -8,9 +7,9 @@ def printer():
         spec = rows.res
         print('{}:'.format(spec.name))
 
-        field_names = [ f.name for f in spec.schema.fields ]
+        field_names = [f.name for f in spec.schema.fields]
         headers = ['#'] + [
-            '{}\n({})'.format(f.name, f.type) for f in spec.schema.fields 
+            '{}\n({})'.format(f.name, f.type) for f in spec.schema.fields
         ]
         toprint = []
         last = []
@@ -23,7 +22,7 @@ def printer():
             if index - x == 11:
                 x *= 10
 
-            if 0 <= index - x <= 10: 
+            if 0 <= index - x <= 10:
                 last.clear()
                 if toprint and toprint[-1][0] != index - 1:
                     toprint.append(['...'])
@@ -40,5 +39,5 @@ def printer():
 
         toprint += last
         print(tabulate(toprint, headers=headers))
-        
+
     return func
