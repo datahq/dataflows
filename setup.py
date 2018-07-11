@@ -71,7 +71,7 @@ setup(
     ],
     entry_points={
       'console_scripts': [
-        'dataflows = dataflows.cli:init',
+        'dataflows = dataflows.cli:cli',
       ]
     },
 )

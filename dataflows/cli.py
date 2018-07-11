@@ -1,4 +1,6 @@
 import os
+import sys
+import subprocess
 
 import slugify
 import click
@@ -92,27 +94,53 @@ def render(parameters):
     tpl = env.get_template('main.tpl.py')
     return tpl.render(**parameters)
 
+@click.group()
+def cli():
+    pass
 
 # Main CLI routine
-@click.command()
-def init():
-    input("""Hi There!
-DataFlows will now bootstrap a data processing flow based on your needs.
+@cli.command()
+@click.argument('arg', default='interactive')
+def init(arg):
+    """Bootstrap a processing pipeline script. 
+ARG is either a path or a URL for some data to read from, 'hello-world' for a full working code example,
+or leave empty for an interactive walkthrough.
+    """
 
-Press any key to start...
-""")
+    if arg == 'interactive':
+        input("""Hi There!
+    DataFlows will now bootstrap a data processing flow based on your needs.
+
+    Press any key to start...
+    """)
+
+        answers = {}
+    elif arg == 'hello-world':
+        raise NotImplementedError()
+    else:    
+        url = arg
+        answers = dict(
+            input='remote',
+            title=os.path.basename(url),
+            input_url=url,
+            processing=[],
+            output='print'
+        )
+        extract_format(answers, url)
 
     questions = [
         # Input
         inquirer.List('input_str',
                     message='What is the source of your data?',
                     choices=INPUTS.keys(),
+                    ignore=lambda ctx: ctx.get('input') is not None,
                     validate=convert_input),
 
         # Input Parameters
         inquirer.Text('input_url',
                     message="What is the path of that file",
-                    ignore=lambda ctx: ctx['input'] != 'file',
+                    ignore=fany(lambda ctx: ctx['input'] != 'file',
+                                lambda ctx: ctx.get('input_url') is not None),
                     validate=fall(not_empty, extract_format)),
         inquirer.List('format',
                     message="We couldn't detect the file format - which is it?",
@@ -122,73 +150,99 @@ Press any key to start...
 
         inquirer.Text('input_url',
                     message="Where is that file located (URL)",
-                    ignore=lambda ctx: ctx['input'] != 'remote',
+                    ignore=fany(lambda ctx: ctx['input'] != 'remote',
+                                lambda ctx: ctx.get('input_url') is not None),
                     validate=fall(extract_format, not_empty, valid_url)),
         inquirer.List('format',
                     message="We couldn't detect the source format - which is it",
                     choices=FORMATS,
                     ignore=fany(lambda ctx: ctx['input'] != 'remote',
-                                lambda ctx: ctx.get('format') in FORMATS)),
-
+                                lambda ctx: ctx.get('format') in FORMATS)
+                    ),                
         inquirer.Text('sheet',
                     message="Which sheet in the spreadsheet should be processed (name or index)",
                     validate=not_empty,
-                    ignore=lambda ctx: ctx.get('format') not in ('xls', 'xlsx', 'ods')),
-
+                    ignore=lambda ctx: ctx.get('format') not in ('xls', 'xlsx', 'ods'),
+                    ),
         inquirer.Text('input_url',
                     message="What is the connection string to the database",
                     validate=not_empty,
-                    ignore=lambda ctx: ctx['input'] != 'sql'),
+                    ignore=fany(lambda ctx: ctx['input'] != 'sql',
+                                lambda ctx: ctx.get('input_url') is not None),
+                    ),
         inquirer.Text('input_db_table',
                     message="...and the name of the database table to extract",
                     validate=not_empty,
-                    ignore=lambda ctx: ctx['input'] != 'sql'),
+                    ignore=fany(lambda ctx: ctx['input'] != 'sql',
+                                lambda ctx: ctx.get('input_db_table') is not None),
+        ),
 
         inquirer.Text('input_url',
                     message="Describe that other source (shortly)",
-                    ignore=lambda ctx: ctx['input'] != 'other'),
+                    ignore=fany(lambda ctx: ctx['input'] != 'other',
+                                lambda ctx: ctx.get('input_url') is not None),
+        ),
 
         # Processing
         inquirer.Checkbox('processing_str',
                         message="What kind of processing would you like to run on the data",
                         choices=PROCESSING.keys(),
+                        ignore=lambda ctx: ctx.get('processing') is not None,
                         validate=convert_processing),
 
         # Output
         inquirer.List('output_str',
                     message="Finally, where would you like the output data",
                     choices=OUTPUTS.keys(),
+                    ignore=lambda ctx: ctx.get('output') is not None,
                     validate=convert_output),
         inquirer.Text('output_url',
                     message="What is the connection string to the database",
                     validate=not_empty,
-                    ignore=lambda ctx: ctx['output'] != 'sql'),
+                    ignore=fany(lambda ctx: ctx['output'] != 'sql',
+                                lambda ctx: ctx.get('output_url') is not None),
+        ),
         inquirer.Text('output_db_table',
                     message="...and the name of the database table to write to",
                     validate=not_empty,
-                    ignore=lambda ctx: ctx['output'] != 'sql'),
+                    ignore=fany(lambda ctx: ctx['output'] != 'sql',
+                                lambda ctx: ctx.get('output_db_table') is not None),
+        ),
 
-        # Finalize
+        # # Finalize
         inquirer.Text('title',
                     message="That's it! Now, just provide a title for your processing flow",
+                    ignore=lambda ctx: ctx.get('title') is not None,
                     validate=not_empty),
     ]
-    answers = inquirer.prompt(questions, answers=dict(a=1), theme=themes.GreenPassion())
+    answers = inquirer.prompt(questions, answers=answers, theme=themes.GreenPassion())
+    if answers is None:
+        return
     answers['slug'] = slugify.slugify(answers['title'], separator='_')
+
 
     filename = '{slug}.py'.format(**answers)
     with open(filename, 'w') as out:
+        print('Writing processing code into {}'.format(filename))
         out.write(render(answers))
 
-    answers = inquirer.prompt([
-        inquirer.Confirm('edit',
-                        message='Would you like to open {} in the default editor?'.format(filename),
-                        default=False)
-    ])
-    if answers['edit']:
-        click.edit(filename=filename)
-    print('Done!')
+    try:
+        print('Running {}'.format(filename))
+        ret = subprocess.check_output('python '+filename, 
+                                      stderr=subprocess.PIPE, universal_newlines=True, shell=True)
+        print(ret)
+        print('Done!')
+    except subprocess.CalledProcessError as e:
+        print("Processing failed, here's the error:")
+        print(e.stderr)
+        answers = inquirer.prompt([
+            inquirer.Confirm('edit',
+                            message='Would you like to open {} in the default editor?'.format(filename),
+                            default=False)
+        ])
+        if answers['edit']:
+            click.edit(filename=filename)
 
 
 if __name__ == '__main__':
-    init()
+    sys.exit(cli())
