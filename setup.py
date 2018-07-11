@@ -21,10 +21,13 @@ def read(*paths):
 PACKAGE = 'dataflows'
 NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
-    'datapackage>=1.2.2',
+    'datapackage>=1.3.1',
     'kvfile',
     'click',
     'jinja2',
+    'awesome-slugify',
+    'inquirer',
+    'tabulate',
 ]
 SPEEDUP_REQUIRES = [
     'plyvel<1',
@@ -74,4 +77,8 @@ setup(
         'dataflows = dataflows.cli:cli',
       ]
     },
+    dependency_links=[
+        'https://github.com/frictionlessdata/datapackage-py/archive/feature/expose-tableschema-infer-options.zip#egg=datapackage-1.3.1alpha'  # Link with version at the end
+    ]
+
 )

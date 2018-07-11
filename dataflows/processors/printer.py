@@ -1,13 +1,44 @@
 from datapackage import Package
-from .. import DataStreamProcessor
+from tabulate import tabulate
 
 
-class printer(DataStreamProcessor):
+def printer():
 
-    def process_datapackage(self, dp: Package):
-        print(dp.descriptor)
-        return dp
+    def func(rows):
+        spec = rows.res
+        print('{}:'.format(spec.name))
 
-    # def process_row(self, row):
-    #     print(row)
-    #     return row
+        field_names = [ f.name for f in spec.schema.fields ]
+        headers = ['#'] + [
+            '{}\n({})'.format(f.name, f.type) for f in spec.schema.fields 
+        ]
+        toprint = []
+        last = []
+        x = 1
+
+        for i, row in enumerate(rows):
+            index = i + 1
+            row = [index] + [row[f] for f in field_names]
+
+            if index - x == 11:
+                x *= 10
+
+            if 0 <= index - x <= 10: 
+                last.clear()
+                if toprint and toprint[-1][0] != index - 1:
+                    toprint.append(['...'])
+                toprint.append(row)
+            else:
+                last.append(row)
+                if len(last) > 10:
+                    last = last[1:]
+
+            yield row
+
+        if toprint and last and toprint[-1][0] != last[0][0] - 1:
+            toprint.append(['...'])
+
+        toprint += last
+        print(tabulate(toprint, headers=headers))
+        
+    return func
