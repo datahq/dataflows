@@ -19,7 +19,7 @@ class load(DataStreamProcessor):
         else:
             base_path = None
         self.res = Resource(dict(path=self.path, **self.options), base_path=base_path)
-        self.res.infer(infer_options={'confidence': 1, 'limit': 1000})
+        self.res.infer(confidence=1, limit=1000)
         if self.name is not None:
             self.res.descriptor['name'] = self.name
         self.res.descriptor['path'] = '{name}.{format}'.format(**self.res.descriptor)

@@ -21,7 +21,7 @@ def read(*paths):
 PACKAGE = 'dataflows'
 NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
-    'datapackage>=1.3.1',
+    'datapackage>=1.3.2',
     'kvfile',
     'click',
     'jinja2',

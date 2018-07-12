@@ -109,6 +109,7 @@ ARG is either a path or a URL for some data to read from, 'hello-world' for a fu
 or leave empty for an interactive walkthrough.
     """
 
+    answers = {'a': 1}
     if arg == 'interactive':
         input("""Hi There!
     DataFlows will now bootstrap a data processing flow based on your needs.
@@ -116,7 +117,6 @@ or leave empty for an interactive walkthrough.
     Press any key to start...
     """)
 
-        answers = {}
     elif arg == 'hello-world':
         raise NotImplementedError()
     else:
@@ -141,18 +141,18 @@ or leave empty for an interactive walkthrough.
         # Input Parameters
         inquirer.Text('input_url',
                     message="What is the path of that file",
-                    ignore=fany(lambda ctx: ctx['input'] != 'file',
+                    ignore=fany(lambda ctx: ctx.get('input') != 'file',
                                 lambda ctx: ctx.get('input_url') is not None),
                     validate=fall(not_empty, extract_format)),
         inquirer.List('format',
                     message="We couldn't detect the file format - which is it?",
                     choices=FORMATS[:-1],
-                    ignore=fany(lambda ctx: ctx['input'] != 'file',
+                    ignore=fany(lambda ctx: ctx.get('input') != 'file',
                                 lambda ctx: ctx.get('format') in FORMATS)),
 
         inquirer.Text('input_url',
                     message="Where is that file located (URL)",
-                    ignore=fany(lambda ctx: ctx['input'] != 'remote',
+                    ignore=fany(lambda ctx: ctx.get('input') != 'remote',
                                 lambda ctx: ctx.get('input_url') is not None),
                     validate=fall(extract_format, not_empty, valid_url)),
         inquirer.List('format',
