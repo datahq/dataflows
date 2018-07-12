@@ -16,6 +16,8 @@ def printer():
         x = 1
 
         for i, row in enumerate(rows):
+            yield row
+
             index = i + 1
             row = [index] + [row[f] for f in field_names]
 
@@ -31,8 +33,6 @@ def printer():
                 last.append(row)
                 if len(last) > 10:
                     last = last[1:]
-
-            yield row
 
         if toprint and last and toprint[-1][0] != last[0][0] - 1:
             toprint.append(['...'])

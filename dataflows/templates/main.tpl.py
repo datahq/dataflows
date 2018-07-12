@@ -54,12 +54,12 @@ def {{slug}}():
         {% endif %}
         # Save the results
         add_metadata(name='{{slug}}', title='''{{title}}'''),
-        {% if output == 'print' %}
+        {% if output in ('print', 'print_n_pkg')  %}
         printer(),
         {% endif %}
         {% if output == 'list' %}
         {% endif %}
-        {% if output == 'dp_csv' %}
+        {% if output in ('dp_csv', 'print_n_pkg') %}
         dump_to_path('{{slug}}'),
         {% endif %}
         {% if output == 'dp_csv_zip' %}

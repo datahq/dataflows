@@ -31,7 +31,7 @@ OUTPUTS = dict((
   ('A CSV file (in a data package)',          'dp_csv'),
   ('A CSV file (in a zipped data package)',   'dp_csv_zip'),
   ('A JSON file (in a data package)',         'dp_json'),
-  ('A JSON file (in a zipped data package)',  'dp_json_zip'),
+  ('A JSON file (in a zipped data package)',  'dp_json_pkg'),
   ('An SQL database',                         'sql'),
 ))
 
@@ -126,7 +126,7 @@ or leave empty for an interactive walkthrough.
             title=os.path.basename(url),
             input_url=url,
             processing=[],
-            output='print'
+            output='print_n_pkg'
         )
         extract_format(answers, url)
 
