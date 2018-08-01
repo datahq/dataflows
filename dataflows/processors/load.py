@@ -18,7 +18,7 @@ class load(DataStreamProcessor):
             self.path = os.path.basename(self.path)
         else:
             base_path = None
-        self.res = Resource(dict(path=self.path, **self.options), base_path=base_path)
+        self.res = Resource(dict(path=self.path, profile='tabular-data-resource', **self.options), base_path=base_path)
         self.res.infer(confidence=1, limit=1000)
         if self.name is not None:
             self.res.descriptor['name'] = self.name

@@ -3,5 +3,6 @@
     "cSpell.words": [
         "fany"
     ],
-    "editor.detectIndentation": false
+    "editor.detectIndentation": false,
+    "python.jediEnabled": false
 }
