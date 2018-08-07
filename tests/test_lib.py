@@ -175,6 +175,19 @@ def test_sort_rows():
     ]
 
 
+def test_sort_reverse_many_rows():
+    from dataflows import sort_rows
+
+    f = Flow(
+        ({'a': i, 'b': i%5} for i in range(1000)),
+        sort_rows(key='{b}{a}', reverse=True, batch_size=0),
+    )
+    results, _, _ = f.results()
+    results = results[0]
+    assert results[0:2] == [{'a': 999, 'b': 4}, {'a': 994, 'b': 4}]
+    assert results[998:1000] == [{'a': 100, 'b': 0}, {'a': 0, 'b': 0}]
+
+
 def test_duplicate():
     from dataflows import duplicate
     
@@ -203,8 +216,8 @@ def test_duplicate_many_rows():
     )
 
     results, _, _ = f.results()
-    assert len(list(results[0])) == 1000
-    assert len(list(results[1])) == 1000
+    assert len(results[0]) == 1000
+    assert len(results[1]) == 1000
 
     f = Flow(
         ({'a': i, 'b': i} for i in range(10000)),
@@ -212,5 +225,5 @@ def test_duplicate_many_rows():
     )
 
     results, _, _ = f.results()
-    assert len(list(results[0])) == 10000
-    assert len(list(results[1])) == 10000
+    assert len(results[0]) == 10000
+    assert len(results[1]) == 10000
