@@ -205,11 +205,11 @@ def set_Type(name, **options):
 Sort incoming data based on key.
 
 `sort_rows` accepts a list of resources and a key (as a Python format string on row fields).
-It will output the rows for each resource, sorted according to the key (in ascending order).
+It will output the rows for each resource, sorted according to the key (in ascending order by default).
 
 
 ```python
-def sort_rows(key, resources=None):
+def sort_rows(key, resources=None, reverse=False):
     pass
 ```
 
@@ -219,6 +219,7 @@ def sort_rows(key, resources=None):
   - A regular expression matching resource names
   - A list of resource names
   - `None` indicates operation should be done on all resources
+- `reverse` - Set to True to return results in descending order
 
 #### unpivot.py
 Unpivot a table - convert one row with multiple value columns to multiple rows with one value column
