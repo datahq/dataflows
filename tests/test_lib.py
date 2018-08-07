@@ -193,3 +193,24 @@ def test_duplicate():
     assert list(results[0]) == a
     assert list(results[1]) == a
 
+
+def test_duplicate_many_rows():
+    from dataflows import duplicate
+
+    f = Flow(
+        ({'a': i, 'b': i} for i in range(1000)),
+        duplicate(),
+    )
+
+    results, _, _ = f.results()
+    assert len(list(results[0])) == 1000
+    assert len(list(results[1])) == 1000
+
+    f = Flow(
+        ({'a': i, 'b': i} for i in range(10000)),
+        duplicate(batch_size=0),
+    )
+
+    results, _, _ = f.results()
+    assert len(list(results[0])) == 10000
+    assert len(list(results[1])) == 10000
