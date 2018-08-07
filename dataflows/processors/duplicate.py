@@ -2,11 +2,8 @@ import copy
 from kvfile import KVFile
 
 
-def saver(resource, db):
-    for idx, row in enumerate(resource):
-        key = "{:08x}".format(idx)
-        db.set(key, row)
-        yield row
+def saver(resource, db, batch_size):
+    db.insert((("{:08x}".format(idx), row) for idx, row in enumerate(resource)), batch_size=batch_size)
 
 
 def loader(db):
@@ -14,7 +11,7 @@ def loader(db):
         yield value
 
 
-def duplicate(source=None, target_name=None, target_path=None):
+def duplicate(source=None, target_name=None, target_path=None, batch_size=1000):
     def func(package):
         source_, target_name_, target_path_ = source, target_name, target_path
         if source_ is None:
@@ -40,7 +37,8 @@ def duplicate(source=None, target_name=None, target_path=None):
         for resource in package:
             if resource.res.name == source_:
                 db = KVFile()
-                yield saver(resource, db)
+                saver(resource, db, batch_size)
+                yield loader(db)
                 yield loader(db)
             else:
                 yield resource
