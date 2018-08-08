@@ -227,3 +227,39 @@ def test_duplicate_many_rows():
     results, _, _ = f.results()
     assert len(results[0]) == 10000
     assert len(results[1]) == 10000
+
+
+def test_cache():
+    import os
+    from dataflows import cache
+
+    stats = {'a': 0, 'foo': 0}
+
+    def incr_stat(name):
+        stats[name] += 1
+        return stats[name]
+
+    cache_path = '.cache/test_cache'
+    expected_files = ['datapackage.json', 'res_1.csv', 'res_2.csv']
+
+    for f in expected_files:
+        if os.path.exists(cache_path + '/' + f):
+            os.remove(cache_path + '/' + f)
+    if os.path.exists(cache_path):
+        os.rmdir(cache_path)
+
+    f = Flow(
+        cache(cache_path,
+              ({'a': incr_stat('a'), 'i': i} for i in range(10)),
+              ({'foo': incr_stat('foo')} for _ in range(20)),)
+    )
+
+    for _ in range(3):
+        results, *_ = f.results()
+        assert results == [[{'a': i+1, 'i': i} for i in range(10)],
+                           [{'foo': i+1} for i in range(20)]]
+
+    assert stats['a'] == 10
+    assert stats['foo'] == 20
+    for f in expected_files:
+        assert os.path.exists(cache_path + '/' + f)

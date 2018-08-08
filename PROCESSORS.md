@@ -109,6 +109,20 @@ def dump_to_zip(out_file,
 #### dump_to_sql
 Store the results in a relational database (creates one or more tables or updates existing tables)
 
+#### cache.py
+Cache results from running a series of steps, if cache exists - loads from cache instead of running the steps.
+
+Cache invalidation should be handled manually - by deleting the cache path.
+
+```python
+def cache(cache_path, steps*):
+    pass
+```
+
+- `cache_path` - path to a unique directory that will hold the cache for the provided series of steps
+- `steps*` - step functions to run to create the cache (same as the `Flow` class arguments)
+
+
 ### Manipulate row-by-row
 #### delete_fields
 Delete fields (columns) from streamed resources
