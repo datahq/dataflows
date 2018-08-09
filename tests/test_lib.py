@@ -229,8 +229,39 @@ def test_duplicate_many_rows():
     assert len(results[1]) == 10000
 
 
+def test_flow_as_step():
+    def upper(row):
+        for k in row:
+            row[k] = row[k].upper()
+
+    def lower_first_letter(row):
+        for k in row:
+            row[k] = row[k][0].lower() + row[k][1:]
+
+    text_processing_flow = Flow(upper, lower_first_letter)
+
+    assert Flow([{'foo': 'bar'}], text_processing_flow).results()[0] == [[{'foo': 'bAR'}]]
+
+
+def test_load_from_package():
+    from dataflows import dump_to_path, load
+
+    Flow(
+        [{'foo': 'bar'}],
+        dump_to_path('data/load_from_package')
+    ).process()
+
+    ds = Flow(
+        load('data/load_from_package/datapackage.json', resources=None)
+    ).datastream()
+
+    assert len(ds.dp.resources) == 1
+    assert [list(res) for res in ds.res_iter] == [[{'foo': 'bar'}]]
+
+
 def test_cache():
     import os
+    import shutil
     from dataflows import cache
 
     stats = {'a': 0, 'foo': 0}
@@ -240,24 +271,37 @@ def test_cache():
         return stats[name]
 
     cache_path = '.cache/test_cache'
-    expected_files = ['datapackage.json', 'res_1.csv', 'res_2.csv']
+    expected_files = ['datapackage.json', 'res_1.csv', 'cached_resource.csv']
 
-    for f in expected_files:
-        if os.path.exists(cache_path + '/' + f):
-            os.remove(cache_path + '/' + f)
-    if os.path.exists(cache_path):
-        os.rmdir(cache_path)
+    shutil.rmtree(cache_path, ignore_errors=True)
+
+    def load_data(resource_name):
+
+        def processor(package):
+            package.pkg.add_resource({'name': resource_name,
+                                      'path': resource_name+'.csv',
+                                      'schema': {'fields': [{'name': 'foo', 'type': 'integer'}]}})
+            yield package.pkg
+            yield from package
+            yield ({'foo': incr_stat('foo')} for _ in range(20))
+
+        return processor
 
     f = Flow(
-        cache(cache_path,
-              ({'a': incr_stat('a'), 'i': i} for i in range(10)),
-              ({'foo': incr_stat('foo')} for _ in range(20)),)
+        cache(
+            cache(
+                ({'a': incr_stat('a'), 'i': i} for i in range(10)),
+                cache_path=cache_path + '/first_cache'
+            ),
+            load_data('cached_resource'),
+            cache_path=cache_path
+        )
     )
 
-    for _ in range(3):
+    for i in range(3):
         results, *_ = f.results()
         assert results == [[{'a': i+1, 'i': i} for i in range(10)],
-                           [{'foo': i+1} for i in range(20)]]
+                           [{'foo': i+1} for i in range(20)]], 'failed iteration {}'.format(i)
 
     assert stats['a'] == 10
     assert stats['foo'] == 20

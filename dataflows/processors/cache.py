@@ -1,26 +1,20 @@
 import os
-from datapackage import Package
-from dataflows import PackageWrapper, DataStream, Flow
-from . import dump_to_path
+from dataflows import Flow, DataStream
+from . import dump_to_path, load
 
 
-def cache(cache_path, *steps):
+def cache(*steps, cache_path):
     cache_package_json_path = os.path.join(cache_path, 'datapackage.json')
 
-    def processor(package: PackageWrapper):
+    def processor(package):
         if os.path.exists(cache_package_json_path):
             print('using cache data from {}'.format(cache_path))
-            dp = Package(cache_package_json_path)
-            res_iter = (resource.iter(keyed=True) for resource in dp.resources)
+            flow = Flow(load(cache_package_json_path, resources=None))
         else:
             print('loading fresh data, saving cache to: {}'.format(cache_path))
-            ds: DataStream = Flow(*steps + (dump_to_path(cache_path),))._chain()._process()
-            dp = ds.dp
-            res_iter = ds.res_iter
-        for resource in dp.resources:
-            package.pkg.add_resource(resource.descriptor)
-        yield package.pkg
-        yield from package
-        yield from res_iter
+            flow = Flow(*steps + (dump_to_path(cache_path),))
+        ds = flow.datastream(DataStream(package.pkg, package))
+        yield ds.dp
+        yield from ds.res_iter
 
     return processor
