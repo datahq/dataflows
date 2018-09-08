@@ -32,7 +32,7 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 Loads data from various source types (local files, remote URLS, Google Spreadsheets, databases...)
 
 ```python
-def load(path, name=None, **options):
+def load(path, name=None, resources=None, **options):
     pass
 ```
 
@@ -40,6 +40,12 @@ def load(path, name=None, **options):
     - a local path (e.g. `/path/to/the/data.csv`)
     - a remote URL (e.g. `https://path.to/the/data.csv`)
     - Other supported links, based on the current support of schemes and formats in [tabulator](https://github.com/frictionlessdata/tabulator-py#schemes)
+    - a local path or remote URL to a datapackage.json file (e.g. `https://path.to/data_package/datapackage.json`)
+- `resources` - required if path points to a datapackage.json file. Value should be one of the following:
+    - Name of a single resource to load
+    - A regular expression matching resource names to load
+    - A list of resource names to load
+    - `None` indicates to load all resources
 - `options` - based on the loaded file, extra options (e.g. `sheet` for Excel files etc., see the link to tabulator above)
 
 #### printer
@@ -108,6 +114,54 @@ def dump_to_zip(out_file,
 (rest of parameters are detailed in `dump_to_path`)
 #### dump_to_sql
 Store the results in a relational database (creates one or more tables or updates existing tables)
+
+#### cache
+Cache results from running a series of steps, if cache exists - loads from cache instead of running the steps.
+
+Cache invalidation should be handled manually - by deleting the cache path.
+
+```python
+def cache(steps*, cache_path):
+    pass
+```
+
+- `steps*` - step functions to run to create the cache (same as the `Flow` class arguments)
+- `cache_path` - path to a unique directory that will hold the cache for the provided series of steps
+
+```python
+f = Flow(
+    cache(
+        load('http://example.com/large_resource.csv'),
+        load('http://example.com/another_large_resource.csv'),
+        cache_path='.cache/unique-cache-identifier'
+    ),
+    printer()
+)
+
+# first run will load the resources and save to the cache_path
+f.process()
+
+# next runs will load the resources from the cache_path
+f.process()
+```
+
+The cache processor should always be the first step in the flow, you can nest cache processors for incremental caching.
+
+In the following example, you can refresh `another_resource` by deleting it's cache path, the `very_large_resources` cache will not be refreshed.
+
+```python
+f = Flow(
+    cache(
+        cache(
+            load('http://example.com/very_large_resource.csv'),
+            load('http://example.com/another_very_large_resource.csv'),
+            cache_path='.cache/very_large_resources'
+        ),
+        load('http://example.com/another_resource.csv')
+        cache_path='.cache/another_resource'
+    )
+)
+```
 
 ### Manipulate row-by-row
 #### delete_fields

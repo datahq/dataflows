@@ -12,3 +12,4 @@ from .filter_rows import filter_rows
 from .find_replace import find_replace
 from .sort_rows import sort_rows
 from .unpivot import unpivot
+from .cache import cache
