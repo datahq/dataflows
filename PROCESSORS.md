@@ -32,7 +32,7 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 Loads data from various source types (local files, remote URLS, Google Spreadsheets, databases...)
 
 ```python
-def load(path, name=None, resources=False, **options):
+def load(path, name=None, resources=None, **options):
     pass
 ```
 
@@ -147,7 +147,7 @@ f.process()
 
 The cache processor should always be the first step in the flow, you can nest cache processors for incremental caching.
 
-In the following example, if can refresh `another_resource` by deleting it's cache path, the `very_large_resources` cache will not be refreshed.
+In the following example, you can refresh `another_resource` by deleting it's cache path, the `very_large_resources` cache will not be refreshed.
 
 ```python
 f = Flow(

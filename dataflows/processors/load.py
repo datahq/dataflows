@@ -7,18 +7,16 @@ from ..helpers.resource_matcher import ResourceMatcher
 
 class load(DataStreamProcessor):
 
-    def __init__(self, path, name=None, resources=False, **options):
+    def __init__(self, path, name=None, resources=None, **options):
         super(load, self).__init__()
         self.path = path
         self.options = options
         self.name = name
-        if resources is False:
-            self.resource_matcher = None
-        else:
-            self.resource_matcher = ResourceMatcher(resources)
+        self.resource_matcher = ResourceMatcher(resources)
+        self.load_dp = None
 
     def process_datapackage(self, dp: Package):
-        if self.resource_matcher:
+        if os.path.basename(self.path) == 'datapackage.json':
             self.load_dp = Package(self.path)
             for resource in self.load_dp.resources:
                 if self.resource_matcher.match(resource.name):
@@ -41,7 +39,7 @@ class load(DataStreamProcessor):
 
     def process_resources(self, resources):
         yield from super(load, self).process_resources(resources)
-        if self.resource_matcher:
+        if self.load_dp is not None:
             yield from (resource.iter(keyed=True) for resource in self.load_dp.resources
                         if self.resource_matcher.match(resource.name))
         else:
