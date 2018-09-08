@@ -379,3 +379,21 @@ In the next example we're removing an entire resource in a package processor - t
 DataFlows comes with a few built-in processors which do most of the heavy lifting in many common scenarios, leaving you to implement only the minimum code that is specific to your specific problem.
 
 A complete list, which also includes an API reference for each one of them, can be found in the [Built-in Processors](PROCESSORS.md) page.
+
+## Nested Flows
+
+The flow object itself can be used as a step in another flow
+
+```python
+def upper(row):
+    for k in row:
+        row[k] = row[k].upper()
+
+def lower_first_letter(row):
+    for k in row:
+        row[k][0] = row[k][0].lower()
+
+text_processing_flow = Flow(upper, lower_first_letter)
+
+assert Flow([{'foo': 'bar'}], text_processing_flow).results()[0] == [[{'foo': 'bAR'}]]
+```

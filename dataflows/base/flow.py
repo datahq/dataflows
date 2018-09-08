@@ -14,12 +14,16 @@ class Flow:
     def process(self):
         return self._chain().process()
 
-    def _chain(self):
+    def datastream(self, ds=None):
+        return self._chain(ds)._process()
+
+    def _chain(self, ds=None):
         from ..helpers import datapackage_processor, rows_processor, row_processor, iterable_loader
 
-        ds = None
         for link in self.chain:
-            if isinstance(link, DataStreamProcessor):
+            if isinstance(link, Flow):
+                ds = link._chain(ds)
+            elif isinstance(link, DataStreamProcessor):
                 ds = link(ds)
             elif isfunction(link):
                 sig = signature(link)
