@@ -27,9 +27,11 @@ class load(DataStreamProcessor):
                 self.path = os.path.basename(self.path)
             else:
                 base_path = None
-            self.res = Resource(dict(path=self.path, 
-                                     format=self.options['format'],
-                                     profile='tabular-data-resource'),
+            descriptor = dict(path=self.path,
+                              profile='tabular-data-resource')
+            if 'format' in self.options:
+                descriptor['format'] = self.options['format']
+            self.res = Resource(descriptor,
                                 base_path=base_path,
                                 **self.options)
             self.res.infer(confidence=1, limit=1000)
