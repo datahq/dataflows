@@ -111,7 +111,7 @@ def test_example_6():
     _ = f.process()
 
 def test_validate():
-    from dataflows import Flow, validate, set_type, printer
+    from dataflows import Flow, validate, set_type, printer, ValidationError
 
     def adder(row):
         row['a'] += 0.5
@@ -128,7 +128,7 @@ def test_validate():
     try:
         _ = f.process()
         assert False
-    except ValueError:
+    except ValidationError:
         pass
 
 
@@ -225,6 +225,29 @@ def test_example_8():
         # Academy award nominees and winners
         load('data/academy.csv', encoding='utf8', name='oscars'),
         find_double_winners,
+        dump_to_path('out/double_winners')
+    )
+    _ = f.process()
+
+def test_example_9():
+    from dataflows import Flow, load, dump_to_path, join, concatenate, filter_rows
+
+    f = Flow(
+        # Emmy award nominees and winners
+        load('data/emmy.csv', name='emmies'),
+        filter_rows(equals=[dict(winner=1)]),
+        concatenate(dict(
+                emmy_nominee=['nominee'],
+            ), 
+            dict(name='emmies_filtered'),
+            resources='emmies'),
+        # Academy award nominees and winners
+        load('data/academy.csv', encoding='utf8', name='oscars'),
+        join('emmies_filtered', ['emmy_nominee'],  # Source resource
+             'oscars', ['Name'],                   # Target resource
+             full=False   # Don't add new fields, remove unmatched rows
+        ),
+        filter_rows(equals=[dict(Winner='1')]),
         dump_to_path('out/double_winners')
     )
     _ = f.process()

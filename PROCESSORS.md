@@ -378,3 +378,73 @@ def duplicate(source=None, target_name=None, target_path=None):
 - `target_name` - Name of the new, duplicated resource.
 - `target_path` - Path for the new, duplicated resource.
 
+#### join.py
+Joins two streamed resources.
+
+"Joining" in our case means taking the *target* resource, and adding fields to each of its rows by looking up data in the _source_ resource.
+
+A special case for the join operation is when there is no target stream, and all unique rows from the source are used to create it.
+This mode is called _deduplication_ mode - The target resource will be created and de-duplicated rows from the source will be added to it.
+
+```python
+def join(source_name, source_key, target_name, target_key, fields={}, full=True, source_delete=True):
+    pass
+
+def join_self(source_name, source_key, target_name, fields):
+    pass
+```
+
+- `source_name` - name of the _source_ resource
+- `source_name` - One of
+    - List of field names which should be used as the lookup key
+    - String, which would be interpreted as a Python format string used to form the key (e.g. `{<field_name_1>}:{field_name_2}`)
+- `source_delete` - delete source from data-package after joining (`True` by default)
+
+- `target_name` - name of the _target_ resource to hold the joined data. 
+- `target_key` - as in `source_key`
+
+- `fields` - mapping of fields from the source resource to the target resource.
+  Keys should be field names in the target resource.
+  Values can define two attributes:
+  - `name` - field name in the source (by default is the same as the target field name)
+
+  - `aggregate` - aggregation strategy (how to handle multiple _source_ rows with the same key). Can take the following options:
+    - `sum` - summarise aggregated values.
+      For numeric values it's the arithmetic sum, for strings the concatenation of strings and for other types will error.
+
+    - `avg` - calculate the average of aggregated values.
+
+      For numeric values it's the arithmetic average and for other types will err.
+
+    - `max` - calculate the maximum of aggregated values.
+
+      For numeric values it's the arithmetic maximum, for strings the dictionary maximum and for other types will error.
+
+    - `min` - calculate the minimum of aggregated values.
+
+      For numeric values it's the arithmetic minimum, for strings the dictionary minimum and for other types will error.
+
+    - `first` - take the first value encountered
+
+    - `last` - take the last value encountered
+
+    - `count` - count the number of occurrences of a specific key
+      For this method, specifying `name` is not required. In case it is specified, `count` will count the number of non-null values for that source field.
+    
+    - `counters` - count the number of occurrences of distinct values
+      Will return an array of 2-tuples of the form `[value, count-of-value]`.
+
+    - `set` - collect all distinct values of the aggregated field, unordered
+
+    - `array` - collect all values of the aggregated field, in order of appearance
+
+    - `any` - pick any value.
+
+    By default, `aggregate` takes the `any` value.
+
+  If neither `name` or `aggregate` need to be specified, the mapping can map to the empty object `{}` or to `null`.
+- `full` - Boolean,
+  - If `True` (the default), failed lookups in the source will result in "null" values at the source.
+  - if `False`, failed lookups in the source will result in dropping the row from the target.
+
+_Important: the "source" resource **must** appear before the "target" resource in the data-package._
