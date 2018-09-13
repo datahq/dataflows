@@ -23,7 +23,7 @@ class load(DataStreamProcessor):
                     dp.add_resource(resource.descriptor)
         else:
             if os.path.exists(self.path):
-                base_path = os.path.dirname(self.path)
+                base_path = os.path.dirname(self.path) or '.'
                 self.path = os.path.basename(self.path)
             else:
                 base_path = None

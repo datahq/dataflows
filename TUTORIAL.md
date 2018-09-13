@@ -367,12 +367,51 @@ In the next example we're removing an entire resource in a package processor - t
 
 # --> 
 # double_winners/academy.csv contains:
+#
+# Year,Ceremony,Award,Winner,Name,Film
 # 1931/1932,5,Actress,1,Helen Hayes,The Sin of Madelon Claudet
 # 1932/1933,6,Actress,1,Katharine Hepburn,Morning Glory
 # 1935,8,Actress,1,Bette Davis,Dangerous
 # 1938,11,Actress,1,Bette Davis,Jezebel
 # ...
 ```
+
+This was a bit complicated, but luckily we have the `join`, `concatenate` and `filter_rows` processors which make such combinations a snap:
+
+```python
+    from dataflows import Flow, load, dump_to_path, join, concatenate, filter_rows
+
+    f = Flow(
+        # Emmy award nominees and winners
+        load('emmy.csv', name='emmies'),
+        filter_rows(equals=[dict(winner=1)]),
+        concatenate(dict(
+                emmy_nominee=['nominee'],
+            ), 
+            dict(name='emmies_filtered'),
+            resources='emmies'),
+        # Academy award nominees and winners
+        load('academy.csv', encoding='utf8', name='oscars'),
+        join('emmies_filtered', ['emmy_nominee'],  # Source resource
+             'oscars', ['Name'],                   # Target resource
+             full=False   # Don't add new fields, remove unmatched rows
+        ),
+        filter_rows(equals=[dict(Winner='1')]),
+        dump_to_path('double_winners')
+    )
+    _ = f.process()
+
+# --> 
+# double_winners/oscars.csv contains:
+#
+# Year,Ceremony,Award,Winner,Name,Film
+# 1931/1932,5,Actress,1,Helen Hayes,The Sin of Madelon Claudet
+# 1932/1933,6,Actress,1,Katharine Hepburn,Morning Glory
+# 1935,8,Actress,1,Bette Davis,Dangerous
+# 1938,11,Actress,1,Bette Davis,Jezebel
+# ...
+```
+
 
 ## Builtin Processors
 
