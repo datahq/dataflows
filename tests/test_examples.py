@@ -234,7 +234,7 @@ def test_example_9():
 
     f = Flow(
         # Emmy award nominees and winners
-        load('emmy.csv', name='emmies'),
+        load('data/emmy.csv', name='emmies'),
         filter_rows(equals=[dict(winner=1)]),
         concatenate(dict(
                 emmy_nominee=['nominee'],
@@ -242,12 +242,12 @@ def test_example_9():
             dict(name='emmies_filtered'),
             resources='emmies'),
         # Academy award nominees and winners
-        load('academy.csv', encoding='utf8', name='oscars'),
+        load('data/academy.csv', encoding='utf8', name='oscars'),
         join('emmies_filtered', ['emmy_nominee'],  # Source resource
              'oscars', ['Name'],                   # Target resource
              full=False   # Don't add new fields, remove unmatched rows
         ),
         filter_rows(equals=[dict(Winner='1')]),
-        dump_to_path('double_winners')
+        dump_to_path('out/double_winners')
     )
     _ = f.process()
