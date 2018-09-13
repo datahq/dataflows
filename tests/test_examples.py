@@ -110,6 +110,28 @@ def test_example_6():
     )
     _ = f.process()
 
+def test_validate():
+    from dataflows import Flow, validate, set_type, printer
+
+    def adder(row):
+        row['a'] += 0.5
+        row['a'] = str(row['a'])
+
+
+    f = Flow(
+        (dict(a=x) for x in range(10)),
+        set_type('a', type='integer'),
+        adder,
+        validate(),
+        printer()
+    )
+    try:
+        _ = f.process()
+        assert False
+    except ValueError:
+        pass
+
+
 def test_example_7():
     from dataflows import Flow, load, dump_to_path
 

@@ -1,5 +1,5 @@
 from dataflows import Flow, load, dump_to_path, dump_to_zip, printer, add_metadata
-from dataflows import sort_rows, filter_rows, find_replace, delete_fields, set_type, unpivot
+from dataflows import sort_rows, filter_rows, find_replace, delete_fields, set_type, validate, unpivot
 
 
 {% if 'custom' in processing %}
@@ -43,8 +43,9 @@ def {{slug}}():
         delete_fields(['field_name']),  # Pass a list of field names to delete from the data
         {% endif %}
         {% if 'set_type' in processing %}
-        set_type('field_name', type='number', constraints=dict(minimum=3)),  # There are quite a few options you can user here
+        set_type('field_name', type='number', constraints=dict(minimum=3)),  # There are quite a few options you can use here
                                                                              # Take a look at https://frictionlessdata.io/specs/table-schema/
+        # Or you can simply use validate() here instead                                                                             
         {% endif %}
         {% if 'unpivot' in processing %}
         unpivot(unpivot_fields, extra_keys, extra_value),  # See documentation on the meaning of each of these parameters

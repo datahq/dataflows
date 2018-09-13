@@ -14,7 +14,8 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 - **delete_fields** - Removes some columns from the data
 - **add_computed_field** - Adds new fields whose values are based on existing columns
 - **find_replace** - Look for specific patterns in specific fields and replace them with new data
-- **set_type** - Parse incoming data based on provided schema, validate the data in the process
+- **set_type** - Modify schema, parse incoming data based on new schema, validate the data in the process
+- **validate** - Parse incoming data based on existing schema, validate the incoming data in the process
 
 ### Manipulate the entire resource
 - **sort_rows** - Sort incoming data based on key
@@ -243,7 +244,7 @@ Sets a field's data type and type options and validates its data based on its ne
 This processor modifies the last resource in the package.
 
 ```python
-def set_Type(name, **options):
+def set_type(name, **options):
     pass
 ```
 
@@ -253,6 +254,14 @@ def set_Type(name, **options):
   - `format` - e.g. for date fields 
   etc.
  (more info on possible options can be found in the [tableschema spec](https://frictionlessdata.io/specs/table-schema/))
+
+#### validate.py
+Validate incoming data based on existing type definitions.
+
+```python
+def validate():
+    pass
+```
 
 ### Manipulate the entire resource
 #### sort_rows.py

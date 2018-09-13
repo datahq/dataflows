@@ -1,6 +1,7 @@
 from .load import load
 from .printer import printer
 from .set_type import set_type
+from .validate import validate
 from .dumpers import dump_to_path, dump_to_zip
 
 from .add_computed_field import add_computed_field
