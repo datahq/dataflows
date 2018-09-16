@@ -252,11 +252,46 @@ def test_load_from_package():
     ).process()
 
     ds = Flow(
-        load('data/load_from_package/datapackage.json', resources=None)
+        load('data/load_from_package/datapackage.json')
     ).datastream()
 
     assert len(ds.dp.resources) == 1
     assert [list(res) for res in ds.res_iter] == [[{'foo': 'bar'}]]
+
+
+def test_load_from_package_resource_matching():
+    from dataflows import dump_to_path, load
+
+    Flow(
+        [{'foo': 'bar'}],
+        [{'foo': 'baz'}],
+        dump_to_path('data/load_from_package')
+    ).process()
+
+    ds = Flow(
+        load('data/load_from_package/datapackage.json', resources=['res_2'])
+    ).datastream()
+
+    assert len(ds.dp.resources) == 1
+    assert [list(res) for res in ds.res_iter] == [[{'foo': 'baz'}]]
+
+
+
+def test_load_from_package_resources():
+    from dataflows import load
+
+    datapackage = {'resources': [{'name': 'my-resource-{}'.format(i),
+                                  'path': 'my-resource-{}.csv'.format(i),
+                                  'schema': {'fields': [{'name': 'foo', 'type': 'string'}]}} for i in range(2)]}
+    resources = ((row for row in [{'foo': 'bar{}'.format(i)}, {'foo': 'baz{}'.format(i)}]) for i in range(2))
+
+    data, dp, *_ = Flow(
+        load((datapackage, resources), resources=['my-resource-1']),
+    ).results()
+
+    assert len(dp.resources) == 1
+    assert dp.get_resource('my-resource-1').descriptor['path'] == 'my-resource-1.csv'
+    assert data[0][1] == {'foo': 'baz1'}
 
 
 def test_cache():
