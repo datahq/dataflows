@@ -35,16 +35,17 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 Loads data from various source types (local files, remote URLS, Google Spreadsheets, databases...)
 
 ```python
-def load(path, name=None, resources=None, **options):
+def load(source, name=None, resources=None, **options):
     pass
 ```
 
-- `path` - location of the data that is to be loaded. This can be either:
+- `source` - location of the data that is to be loaded. This can be either:
     - a local path (e.g. `/path/to/the/data.csv`)
     - a remote URL (e.g. `https://path.to/the/data.csv`)
     - Other supported links, based on the current support of schemes and formats in [tabulator](https://github.com/frictionlessdata/tabulator-py#schemes)
     - a local path or remote URL to a datapackage.json file (e.g. `https://path.to/data_package/datapackage.json`)
-- `resources` - required if path points to a datapackage.json file. Value should be one of the following:
+    - a tuple containing (datapackage_descriptor, resources_iterator)
+- `resources` - optional, relevant only if source points to a datapackage.json file or datapackage / resourecs tuple. Value should be one of the following:
     - Name of a single resource to load
     - A regular expression matching resource names to load
     - A list of resource names to load

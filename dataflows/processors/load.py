@@ -7,27 +7,32 @@ from ..helpers.resource_matcher import ResourceMatcher
 
 class load(DataStreamProcessor):
 
-    def __init__(self, path, name=None, resources=None, **options):
+    def __init__(self, load_source, name=None, resources=None, **options):
         super(load, self).__init__()
-        self.path = path
+        self.load_source = load_source
         self.options = options
         self.name = name
         self.resource_matcher = ResourceMatcher(resources)
         self.load_dp = None
 
     def process_datapackage(self, dp: Package):
-        if os.path.basename(self.path) == 'datapackage.json':
-            self.load_dp = Package(self.path)
+        if isinstance(self.load_source, tuple):
+            datapackage_descriptor, _ = self.load_source
+            for resource_descriptor in datapackage_descriptor['resources']:
+                if self.resource_matcher.match(resource_descriptor['name']):
+                    dp.add_resource(resource_descriptor)
+        elif os.path.basename(self.load_source) == 'datapackage.json':
+            self.load_dp = Package(self.load_source)
             for resource in self.load_dp.resources:
                 if self.resource_matcher.match(resource.name):
                     dp.add_resource(resource.descriptor)
         else:
-            if os.path.exists(self.path):
-                base_path = os.path.dirname(self.path) or '.'
-                self.path = os.path.basename(self.path)
+            if os.path.exists(self.load_source):
+                base_path = os.path.dirname(self.load_source) or '.'
+                self.load_source = os.path.basename(self.load_source)
             else:
                 base_path = None
-            descriptor = dict(path=self.path,
+            descriptor = dict(path=self.load_source,
                               profile='tabular-data-resource')
             if 'format' in self.options:
                 descriptor['format'] = self.options['format']
@@ -43,7 +48,11 @@ class load(DataStreamProcessor):
 
     def process_resources(self, resources):
         yield from super(load, self).process_resources(resources)
-        if self.load_dp is not None:
+        if isinstance(self.load_source, tuple):
+            datapackage_descriptor, resources = self.load_source
+            yield from (resource for resource, descriptor in zip(resources, datapackage_descriptor['resources'])
+                        if self.resource_matcher.match(descriptor['name']))
+        elif self.load_dp is not None:
             yield from (resource.iter(keyed=True) for resource in self.load_dp.resources
                         if self.resource_matcher.match(resource.name))
         else:
