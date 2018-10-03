@@ -251,3 +251,22 @@ def test_example_9():
         dump_to_path('out/double_winners')
     )
     _ = f.process()
+
+def test_rename_resource():
+    from dataflows import Flow, printer, PackageWrapper, ResourceWrapper
+
+    def rename(package: PackageWrapper):
+        package.pkg.descriptor['resources'][0]['name'] = 'renamed'
+        yield package.pkg
+        res_iter = iter(package)
+        first: ResourceWrapper = next(res_iter)
+        yield first.it
+        yield from package
+
+    f = Flow(
+        ({'a': x} for x in range(10)),
+        rename,
+        printer()
+    )
+    results, dp, stats = f.results()
+    print(dp.descriptor)

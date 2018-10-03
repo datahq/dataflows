@@ -28,6 +28,7 @@ INSTALL_REQUIRES = [
     'awesome-slugify',
     'inquirer',
     'tabulate',
+    'tableschema-sql',
 ]
 SPEEDUP_REQUIRES = [
     'plyvel<1',

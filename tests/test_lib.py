@@ -6,6 +6,26 @@ data = [
     dict(x=3, y='c'),
 ]
 
+def test_dump_to_sql():
+    from dataflows import Flow, printer, dump_to_sql
+    from sqlalchemy import create_engine
+
+    f = Flow(
+        data,
+        printer(),
+        dump_to_sql(dict(
+                output_table={
+                    'resource-name': 'res_1'
+                }
+            ),
+            engine='sqlite:///test.db')
+    )
+    f.process()
+
+    # Check validity
+    engine = create_engine('sqlite:///test.db')
+    result = list(dict(x) for x in engine.execute('select * from output_table'))
+    assert result == data
 
 def test_add_computed_field():
     from dataflows import add_computed_field

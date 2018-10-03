@@ -10,6 +10,8 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 - **dump_to_zip** - Store the results in a valid datapackage, all files archived in one zipped file
 - **dump_to_sql** - Store the results in a relational database (creates one or more tables or updates existing tables)
 
+- **cache** - Cache results of a subflow in a datapackage and load it upon request
+
 ### Manipulate row-by-row
 - **delete_fields** - Removes some columns from the data
 - **add_computed_field** - Adds new fields whose values are based on existing columns
@@ -113,8 +115,40 @@ def dump_to_zip(out_file,
 - `out_file` - the path of the output zip file
 
 (rest of parameters are detailed in `dump_to_path`)
+
+
 #### dump_to_sql
 Store the results in a relational database (creates one or more tables or updates existing tables)
+
+```python
+def dump_to_sql(tables, 
+                engine='env://DATAFLOWS_DB_ENGINE',
+                updated_column=None, updated_id_column=None,
+                counters={}):
+    pass
+```
+
+- `tables` - Mapping between resources and DB tables. Keys are table names, values are objects with the following attributes:
+  - `resource-name` - name of the resource that should be dumped to the table
+  - `mode` - How data should be written to the DB.
+    Possible values:
+      - `rewrite` (the default) - rewrite the table, all previous data (if any) will be deleted.
+      - `append` - write new rows without changing already existing data.
+      - `update` - update the table based on a set of "update keys".
+        For each new row, see if there already an existing row in the DB which can be updated (that is, an existing row
+        with the same values in all of the update keys).
+        If so - update the rest of the columns in the existing row. Otherwise - insert a new row to the DB.
+  - `update_keys` - Only applicable for the `update` mode. A list of field names that should be used to check for row existence.
+        If left unspecified, will use the schema's `primaryKey` as default.
+  - `indexes` - TBD
+- `engine` - Connection string for connecting to the SQL Database (URL syntax)
+  Also supports `env://<environment-variable>`, which indicates that the connection string should be fetched from the indicated environment variable.
+  If not specified, assumes a default of `env://DATAFLOWS_DB_ENGINE`
+- `updated_column` - Optional name of a column that will be added to the output data with boolean value
+  - `true` - row was updated
+  - `false` - row was inserted
+- `updated_id_column` - Optional name of a column that will be added to the output data containing the id of the updated row in DB.
+
 
 #### cache
 Cache results from running a series of steps, if cache exists - loads from cache instead of running the steps.
