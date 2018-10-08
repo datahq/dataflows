@@ -81,6 +81,7 @@ target/
 .idea/
 dataflows.iml
 celerybeat-schedule
+.vscode/
 
 # Resources created by our tests
 .coverage.*

@@ -18,11 +18,13 @@ class load(DataStreamProcessor):
     def process_datapackage(self, dp: Package):
         if isinstance(self.load_source, tuple):
             datapackage_descriptor, _ = self.load_source
+            dp.descriptor.setdefault('resources', [])
             for resource_descriptor in datapackage_descriptor['resources']:
                 if self.resource_matcher.match(resource_descriptor['name']):
                     dp.add_resource(resource_descriptor)
         elif os.path.basename(self.load_source) == 'datapackage.json':
             self.load_dp = Package(self.load_source)
+            dp.descriptor.setdefault('resources', [])
             for resource in self.load_dp.resources:
                 if self.resource_matcher.match(resource.name):
                     dp.add_resource(resource.descriptor)
