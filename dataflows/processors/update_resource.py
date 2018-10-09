@@ -1,4 +1,4 @@
-from dataflows import Flow, PackageWrapper
+from dataflows import PackageWrapper
 from dataflows.helpers.resource_matcher import ResourceMatcher
 
 
