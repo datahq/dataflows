@@ -15,3 +15,4 @@ from .find_replace import find_replace
 from .join import join, join_self
 from .sort_rows import sort_rows
 from .unpivot import unpivot
+from .update_resource import update_resource

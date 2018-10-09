@@ -270,3 +270,17 @@ def test_rename_resource():
     )
     results, dp, stats = f.results()
     print(dp.descriptor)
+    assert dp.descriptor['resources'][0]['name'] == 'renamed'
+
+
+def test_rename_resource2():
+    from dataflows import Flow, printer, update_resource
+
+    f = Flow(
+        ({'a': x} for x in range(10)),
+        update_resource(None, name='renamed'),
+        printer()
+    )
+    results, dp, stats = f.results()
+    print(dp.descriptor)
+    assert dp.descriptor['resources'][0]['name'] == 'renamed'

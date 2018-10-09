@@ -362,3 +362,21 @@ def test_cache():
     assert stats['foo'] == 20
     for f in expected_files:
         assert os.path.exists(cache_path + '/' + f)
+
+
+def test_update_resource():
+    from dataflows import Flow, printer, update_resource
+
+    f = Flow(
+        *[
+            ({k: x} for x in range(10))
+            for k in 'abcdef'
+        ],
+        update_resource(['res_1', 'res_3', 'res_5'], source='thewild'),
+        printer()
+    )
+    results, dp, stats = f.results()
+    print(dp.descriptor)
+    assert dp.descriptor['resources'][0]['source'] == 'thewild'
+    assert dp.descriptor['resources'][2]['source'] == 'thewild'
+    assert dp.descriptor['resources'][4]['source'] == 'thewild'
