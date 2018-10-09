@@ -25,7 +25,8 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
  - **filter_rows** - Filter rows based on inclusive and exclusive value filters
 
 ### Manipulate package
-- **add_metadata** - Add high-level metadata about your package
+- **update_package** - Updates metadata of entire package
+- **update_resource** - Updates metadata of one or more resources
 - **concatenate** - Concatenate multiple streams of data to a single one, resolving differently named columns along the way
 - **duplicate** - Duplicate a single stream of data to make two streams
 
@@ -365,15 +366,37 @@ def filter_rows(equals=tuple(), not_equals=tuple(), resources=None):
 Both `in` and `out` should be a list of dicts.
 
 ### Manipulate package
-#### add_metadata.py
+#### update_package.py
 Add high-level metadata about your package
 
 ```python
-def add_metadata(**metadata):
+def update_package(**metadata):
     pass
 ```
 
 - `metadata` - Any allowed property (according to the [spec]([https://frictionlessdata.io/specs/data-package/#metadata)) can be provided here.
+
+(`add_metadata` is an alias for `update_package` kept for backward compatibility)
+
+#### update_resource.py
+Update metadata for one or more resources in the package
+
+```python
+def update_resource(resources, **metadata):
+    pass
+```
+
+- `resources`
+  - A name of a resource to operate on
+  - A regular expression matching resource names
+  - A list of resource names
+  - `None` indicates operation should be done on all resources
+- `metadata` - Any allowed property (according to the [spec]([https://frictionlessdata.io/specs/data-resource/#metadata)) can be provided here.
+
+You can use `update_resource` to rename a resource like so:
+```python
+  update_resource('current-name', name='new-name')
+```
 
 #### concatenate.py
 Concatenate multiple streams of data to a single one, resolving differently named columns along the way.
