@@ -1,7 +1,7 @@
 import copy
 
 
-def add_metadata(**metadata):
+def update_package(**metadata):
 
     metadata = copy.deepcopy(metadata)
     if 'resources' in metadata:
@@ -13,3 +13,6 @@ def add_metadata(**metadata):
         yield from package
 
     return func
+
+
+add_metadata = update_package
