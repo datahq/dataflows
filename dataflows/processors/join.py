@@ -43,6 +43,8 @@ def update_counter(curr, new):
         curr = collections.Counter()
     if isinstance(new, str):
         new = [new]
+    if not isinstance(curr, collections.Counter):
+        curr = collections.Counter(curr)
     curr.update(new)
     return curr
 
