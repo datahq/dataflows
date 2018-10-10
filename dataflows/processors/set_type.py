@@ -1,3 +1,5 @@
+import re
+
 from ..helpers.resource_matcher import ResourceMatcher
 from .. import DataStreamProcessor, schema_validator
 
@@ -6,7 +8,7 @@ class set_type(DataStreamProcessor):
 
     def __init__(self, name, resources=-1, **options):
         super(set_type, self).__init__()
-        self.name = name
+        self.name = re.compile(name)
         self.options = options
         self.resources = resources
 
@@ -24,9 +26,8 @@ class set_type(DataStreamProcessor):
         for res in dp.descriptor['resources']:
             if self.matcher.match(res['name']):
                 for field in res['schema']['fields']:
-                    if field['name'] == self.name:
+                    if self.name.match(field['name']):
                         field.update(self.options)
                         added = True
-                        break
         assert added, 'Failed to find field {} in schema'.format(self.name)
         return dp

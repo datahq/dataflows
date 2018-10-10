@@ -288,7 +288,7 @@ def set_type(name, resources=-1, **options):
     pass
 ```
 
-- `name` - the name of the field to modify
+- `name` - the name of the field to modify (or a regular expression to match multiple fields)
 - `resources`
   - A name of a resource to operate on
   - A regular expression matching resource names
