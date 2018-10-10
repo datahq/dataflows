@@ -1,6 +1,7 @@
 import logging
 import itertools
 import collections
+import copy
 
 from datapackage import Package
 from tableschema.exceptions import CastError
@@ -39,15 +40,18 @@ class DataStreamProcessor:
 
     def _process(self):
         datastream = self.source._process()
-        dp_copy = Package(descriptor=datastream.dp.descriptor)
-        self.datapackage = self.process_datapackage(datastream.dp)
+        current_dp = datastream.dp
+
+        self.datapackage = Package(descriptor=copy.deepcopy(datastream.dp.descriptor))
+        self.datapackage = self.process_datapackage(self.datapackage)
         self.datapackage.commit()
+
         res_iter = datastream.res_iter
 
         def get_res(name):
             ret = self.datapackage.get_resource(name)
             if ret is None:
-                ret = dp_copy.get_resource(name)
+                ret = current_dp.get_resource(name)
             assert ret is not None
             return ret
 
