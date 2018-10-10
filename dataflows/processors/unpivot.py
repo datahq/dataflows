@@ -22,10 +22,9 @@ def unpivot_rows(rows, fields_to_unpivot, fields_to_keep, extra_value):
 
 def unpivot(unpivot_fields, extra_keys, extra_value, resources=None):
 
-    matcher = ResourceMatcher(resources)
-
     def func(package):
 
+        matcher = ResourceMatcher(resources, package.pkg)
         unpivot_fields_without_regex = []
         for resource in package.pkg.descriptor['resources']:
             name = resource['name']

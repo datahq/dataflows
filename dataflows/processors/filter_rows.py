@@ -11,8 +11,6 @@ def process_resource(rows, conditions):
 
 def filter_rows(equals=tuple(), not_equals=tuple(), resources=None):
 
-    matcher = ResourceMatcher(resources)
-
     conditions = [
         (operator.eq, k, v)
         for o in equals
@@ -23,10 +21,13 @@ def filter_rows(equals=tuple(), not_equals=tuple(), resources=None):
         for k, v in o.items()
     ]
 
-    def func(rows):
-        if matcher.match(rows.res.name):
-            return process_resource(rows, conditions)
-        else:
-            return rows
+    def func(package):
+        matcher = ResourceMatcher(resources, package.pkg)
+        yield package.pkg
+        for r in package:
+            if matcher.match(r.res.name):
+                yield process_resource(r, conditions)
+            else:
+                yield r
 
     return func

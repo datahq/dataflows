@@ -2,19 +2,18 @@ from dataflows import PackageWrapper
 from dataflows.helpers.resource_matcher import ResourceMatcher
 
 
-def update_resource(resource, **props):
-
-    resources = ResourceMatcher(resource)
+def update_resource(resources, **props):
 
     def func(package: PackageWrapper):
+        matcher = ResourceMatcher(resources, package.pkg)
         for resource in package.pkg.descriptor['resources']:
-            if resources.match(resource['name']):
+            if matcher.match(resource['name']):
                 resource.update(props)
         yield package.pkg
 
         res_iter = iter(package)
         for r in res_iter:
-            if resources.match(r.res.name):
+            if matcher.match(r.res.name):
                 yield r.it
             else:
                 yield r

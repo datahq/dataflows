@@ -21,13 +21,15 @@ def _sorter(rows, key_calc, reverse, batch_size):
 
 
 def sort_rows(key, resources=None, reverse=False, batch_size=1000):
-    matcher = ResourceMatcher(resources)
     key_calc = KeyCalc(key)
 
-    def func(rows):
-        if matcher.match(rows.res.name):
-            yield from _sorter(rows, key_calc, reverse, batch_size)
-        else:
-            yield from rows
+    def func(package):
+        matcher = ResourceMatcher(resources, package.pkg)
+        yield package.pkg
+        for rows in package:
+            if matcher.match(rows.res.name):
+                yield _sorter(rows, key_calc, reverse, batch_size)
+            else:
+                yield rows
 
     return func
