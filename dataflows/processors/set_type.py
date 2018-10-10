@@ -1,5 +1,3 @@
-from itertools import islice
-from datapackage import Resource
 from ..helpers.resource_matcher import ResourceMatcher
 from .. import DataStreamProcessor, schema_validator
 

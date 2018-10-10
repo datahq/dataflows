@@ -22,7 +22,6 @@ def unpivot_rows(rows, fields_to_unpivot, fields_to_keep, extra_value):
 
 def unpivot(unpivot_fields, extra_keys, extra_value, resources=None):
 
-
     def func(package):
 
         matcher = ResourceMatcher(resources, package.pkg)
