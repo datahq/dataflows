@@ -387,15 +387,15 @@ def test_set_type_resources():
     f = Flow(
         [dict(a=str(i)) for i in range(10)],
         [dict(b=str(i)) for i in range(10)],
-        [dict(c=str(i)) for i in range(10)],
+        [dict(c='0_' + str(i)) for i in range(10)],
         set_type('a', resources='res_[1]', type='integer'),
         set_type('b', resources=['res_2'], type='integer'),
-        set_type('c', resources=-1, type='integer'),
+        set_type('[cd]', resources=-1, type='number', groupChar='_'),
         validate()
     )
     results, dp, stats = f.results()
     print(dp.descriptor) 
     assert results[0][1]['a'] == 1
     assert results[1][3]['b'] == 3
-    assert results[2][8]['c'] == 8
+    assert results[2][8]['c'] == 8.0
    
