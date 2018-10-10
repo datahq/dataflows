@@ -51,6 +51,7 @@ def load(source, name=None, resources=None, **options):
     - A regular expression matching resource names to load
     - A list of resource names to load
     - `None` indicates to load all resources
+    - The index of the resource in the package
 - `options` - based on the loaded file, extra options (e.g. `sheet` for Excel files etc., see the link to tabulator above)
 
 #### printer
@@ -219,6 +220,7 @@ def delete_fields(fields, resources=None):
   - A regular expression matching resource names
   - A list of resource names
   - `None` indicates operation should be done on all resources
+  - The index of the resource in the package
 
 #### add_computed_field
 Add field(s) to streamed resources
@@ -253,6 +255,7 @@ def add_computed_field(fields, resources=None):
   - A regular expression matching resource names
   - A list of resource names
   - `None` indicates operation should be done on all resources
+  - The index of the resource in the package
 
 
 #### find_replace.py
@@ -273,18 +276,25 @@ def find_replace(fields, resources=None):
   - A regular expression matching resource names
   - A list of resource names
   - `None` indicates operation should be done on all resources
+  - The index of the resource in the package
 
 #### set_type.py
 Sets a field's data type and type options and validates its data based on its new type definition.
 
-This processor modifies the last resource in the package.
+By default, this processor modifies the last resource in the package.
 
 ```python
-def set_type(name, **options):
+def set_type(name, resources=-1, **options):
     pass
 ```
 
 - `name` - the name of the field to modify
+- `resources`
+  - A name of a resource to operate on
+  - A regular expression matching resource names
+  - A list of resource names
+  - `None` indicates operation should be done on all resources
+  - The index of the resource in the package
 - `options` - options to set for the field. Most common ones would be:
   - `type` - set the data type (e.g. `string`, `integer`, `number` etc.)
   - `format` - e.g. for date fields 
@@ -318,6 +328,7 @@ def sort_rows(key, resources=None, reverse=False):
   - A regular expression matching resource names
   - A list of resource names
   - `None` indicates operation should be done on all resources
+  - The index of the resource in the package
 - `reverse` - Set to True to return results in descending order
 
 #### unpivot.py
@@ -344,6 +355,7 @@ def unpivot(unpivot_fields, extra_keys, extra_value, resources=None):
   - A regular expression matching resource names
   - A list of resource names
   - `None` indicates operation should be done on all resources
+  - The index of the resource in the package
 
 
 #### filter_rows.py
@@ -362,6 +374,7 @@ def filter_rows(equals=tuple(), not_equals=tuple(), resources=None):
   - A regular expression matching resource names
   - A list of resource names
   - `None` indicates operation should be done on all resources
+  - The index of the resource in the package
 
 Both `in` and `out` should be a list of dicts.
 
@@ -391,6 +404,7 @@ def update_resource(resources, **metadata):
   - A regular expression matching resource names
   - A list of resource names
   - `None` indicates operation should be done on all resources
+  - The index of the resource in the package
 - `metadata` - Any allowed property (according to the [spec]([https://frictionlessdata.io/specs/data-resource/#metadata)) can be provided here.
 
 You can use `update_resource` to rename a resource like so:
@@ -418,6 +432,7 @@ def concatenate(fields, target={}, resources=None):
   - A regular expression matching resource names
   - A list of resource names
   - `None` indicates operation should be done on all resources
+  - The index of the resource in the package
   Resources to concatenate must appear in consecutive order within the data-package.
 
 #### duplicate.py

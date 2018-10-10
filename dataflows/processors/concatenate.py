@@ -16,9 +16,9 @@ def concatenator(resources, all_target_fields, field_mapping):
 
 
 def concatenate(fields, target={}, resources=None):
-    matcher = ResourceMatcher(resources)
 
     def func(package):
+        matcher = ResourceMatcher(resources, package.pkg)
         # Prepare target resource
         if 'name' not in target:
             target['name'] = 'concat'
@@ -102,8 +102,7 @@ def concatenate(fields, target={}, resources=None):
         yield package.pkg
 
         it = iter(package)
-        while True:
-            resource = next(it)
+        for resource in it:
             if matcher.match(resource.res.name):
                 resource_chain = \
                     itertools.chain([resource],

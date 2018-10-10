@@ -48,9 +48,8 @@ def process_resource(fields, rows):
 
 def add_computed_field(fields, resources=None):
 
-    matcher = ResourceMatcher(resources)
-
     def func(package):
+        matcher = ResourceMatcher(resources, package.pkg)
         for resource in package.pkg.descriptor['resources']:
             if matcher.match(resource['name']):
                 descriptor = resource

@@ -10,9 +10,8 @@ def process_resource(rows, fields):
 
 def delete_fields(fields, resources=None):
 
-    matcher = ResourceMatcher(resources)
-
     def func(package):
+        matcher = ResourceMatcher(resources, package.pkg)
         dp_resources = package.pkg.descriptor.get('resources', [])
         for resource in dp_resources:
             if matcher.match(resource['name']):
