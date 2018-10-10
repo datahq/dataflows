@@ -8,7 +8,7 @@ class set_type(DataStreamProcessor):
 
     def __init__(self, name, resources=-1, **options):
         super(set_type, self).__init__()
-        self.name = re.compile(name)
+        self.name = re.compile(f'^{name}$')
         self.options = options
         self.resources = resources
 
