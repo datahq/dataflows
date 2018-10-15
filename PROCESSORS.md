@@ -209,23 +209,40 @@ f.process()
 f.process()
 ```
 
-The cache processor should always be the first step in the flow, you can nest cache processors for incremental caching.
+For consistent results, the cache processor should always be the first step in the flow, if you have multiple cache steps, use the `CacheFlow` class.
 
-In the following example, you can refresh `another_resource` by deleting it's cache path, the `very_large_resources` cache will not be refreshed.
+In the following example, you can refresh `another_resource` by deleting it's cache path, while the `very_large_resources` cache will not be refreshed.
 
 ```python
-f = Flow(
+from dataflows import CacheFlow, cache
+
+CacheFlow(
+    load('http://example.com/very_large_resource.csv'),
+    load('http://example.com/another_very_large_resource.csv'),
+    cache(cache_path='.cache/very_large_resources'),
+    load('http://example.com/another_resource.csv'),
+    cache(cache_path='.cache/another_resource')
+)
+```
+
+The above CacheFlow is equivelant to the following standard Flow:
+
+```
+from dataflows import Flow, cache
+
+Flow(
     cache(
         cache(
             load('http://example.com/very_large_resource.csv'),
             load('http://example.com/another_very_large_resource.csv'),
             cache_path='.cache/very_large_resources'
         ),
-        load('http://example.com/another_resource.csv')
-        cache_path='.cache/another_resource'
+        load('http://example.com/another_resource.csv'),
+        cache_path='.cache/another_resource')
     )
 )
 ```
+
 
 ### Manipulate row-by-row
 #### add_field

@@ -389,6 +389,31 @@ def test_cache():
         assert os.path.exists(cache_path + '/' + f)
 
 
+def test_cache_flow():
+    from collections import defaultdict
+    import shutil
+    from dataflows import CacheFlow, cache
+
+    stats = defaultdict(int)
+
+    def incr_stat(name):
+        stats[name] += 1
+        return stats[name]
+
+    cache_path = '.cache/test_cache'
+    shutil.rmtree(cache_path, ignore_errors=True)
+
+    flow = CacheFlow(
+        ({'a': incr_stat('a'), 'i': i} for i in range(2)),
+        cache(cache_path=cache_path),
+        ({'b': incr_stat('b'), 'i': i} for i in range(2)),
+        cache(cache_path=cache_path + '/b')
+    )
+    assert flow.results()[0] == [[{'a': 1, 'i': 0}, {'a': 2, 'i': 1}], [{'b': 1, 'i': 0}, {'b': 2, 'i': 1}]]
+    assert flow.results()[0] == [[{'a': 1, 'i': 0}, {'a': 2, 'i': 1}], [{'b': 1, 'i': 0}, {'b': 2, 'i': 1}]]
+    assert dict(stats) == {'a': 2, 'b': 2}
+
+
 def test_update_resource():
     from dataflows import Flow, printer, update_resource
 

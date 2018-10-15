@@ -6,7 +6,7 @@ from .dumpers import dump_to_path, dump_to_zip, dump_to_sql
 
 from .add_computed_field import add_computed_field
 from .add_field import add_field
-from .cache import cache
+from .cache import cache, CacheFlow
 from .concatenate import concatenate
 from .delete_fields import delete_fields
 from .duplicate import duplicate
