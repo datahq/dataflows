@@ -5,21 +5,21 @@ from ..helpers.resource_matcher import ResourceMatcher
 try:
     from IPython.core.display import display, HTML
     get_ipython
-    IS_IPYTHON = True
+    display_html = lambda data: display(HTML(data))
 except (NameError, ImportError):
-    IS_IPYTHON = False
+    display_html = lambda data: print(data)
 
 
 def _header_print(header, kwargs):
-    if IS_IPYTHON and kwargs.get('tablefmt') == 'html':
-        display(HTML(f'<h3>{header}</h3>'))
+    if kwargs.get('tablefmt') == 'html':
+        display_html(f'<h3>{header}</h3>')
     else:
         print(f'{header}:')
 
 
 def _table_print(data, kwargs):
-    if IS_IPYTHON and kwargs.get('tablefmt') == 'html':
-        display(HTML(data))
+    if kwargs.get('tablefmt') == 'html':
+        display_html(data)
     else:
         print(data)
 
@@ -54,7 +54,7 @@ def printer(num_rows=10, last_rows=None, fields=None, resources=None,
             index = i + 1
             row = [index] + [row[f] for f in field_names]
 
-            if index - x == num_rows:
+            if index - x == (num_rows + 1):
                 x *= num_rows
 
             if 0 <= index - x <= num_rows:
