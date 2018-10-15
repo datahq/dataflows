@@ -3,7 +3,14 @@ from kvfile import KVFile
 
 
 def saver(resource, db, batch_size):
-    db.insert((("{:08x}".format(idx), row) for idx, row in enumerate(resource)), batch_size=batch_size)
+    gen = db.insert_generator(
+        (("{:08x}".format(idx), row)
+         for idx, row
+         in enumerate(resource)),
+        batch_size=batch_size
+    )
+    for _, row in gen:
+        yield row
 
 
 def loader(db):
@@ -37,8 +44,7 @@ def duplicate(source=None, target_name=None, target_path=None, batch_size=1000):
         for resource in package:
             if resource.res.name == source_:
                 db = KVFile()
-                saver(resource, db, batch_size)
-                yield loader(db)
+                yield saver(resource, db, batch_size)
                 yield loader(db)
             else:
                 yield resource
