@@ -279,6 +279,24 @@ def test_load_from_package():
     assert [list(res) for res in ds.res_iter] == [[{'foo': 'bar'}]]
 
 
+def test_load_from_env_var():
+    import os
+    from dataflows import load, dump_to_path
+    
+    Flow(
+        [{'foo': 'bar'}],
+        dump_to_path('data/load_from_package')
+    ).process()
+
+    os.environ['MY_DATAPACKAGE'] = 'data/load_from_package/datapackage.json'
+    results, dp, _ = Flow(
+        load('env://MY_DATAPACKAGE')
+    ).results()
+
+    assert len(dp.resources) == 1
+    assert results == [[{'foo': 'bar'}]]
+
+
 def test_load_from_package_resource_matching():
     from dataflows import dump_to_path, load
 

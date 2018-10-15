@@ -23,31 +23,37 @@ class load(DataStreamProcessor):
             for resource_descriptor in datapackage_descriptor['resources']:
                 if self.resource_matcher.match(resource_descriptor['name']):
                     dp.add_resource(resource_descriptor)
-        elif os.path.basename(self.load_source) == 'datapackage.json':
-            self.load_dp = Package(self.load_source)
-            self.resource_matcher = ResourceMatcher(self.resources, self.load_dp)
-            dp.descriptor.setdefault('resources', [])
-            for resource in self.load_dp.resources:
-                if self.resource_matcher.match(resource.name):
-                    dp.add_resource(resource.descriptor)
-        else:
-            if os.path.exists(self.load_source):
-                base_path = os.path.dirname(self.load_source) or '.'
-                self.load_source = os.path.basename(self.load_source)
+        else:  # load_source is string:
+            if self.load_source.startswith('env://'):
+                env_var = self.load_source[6:]
+                self.load_source = os.environ.get(env_var)
+                if self.load_source is None:
+                    raise ValueError(f"Couldn't find value for env var '{env_var}'")
+            if os.path.basename(self.load_source) == 'datapackage.json':
+                self.load_dp = Package(self.load_source)
+                self.resource_matcher = ResourceMatcher(self.resources, self.load_dp)
+                dp.descriptor.setdefault('resources', [])
+                for resource in self.load_dp.resources:
+                    if self.resource_matcher.match(resource.name):
+                        dp.add_resource(resource.descriptor)
             else:
-                base_path = None
-            descriptor = dict(path=self.load_source,
-                              profile='tabular-data-resource')
-            if 'format' in self.options:
-                descriptor['format'] = self.options['format']
-            self.res = Resource(descriptor,
-                                base_path=base_path,
-                                **self.options)
-            self.res.infer(confidence=1, limit=1000)
-            if self.name is not None:
-                self.res.descriptor['name'] = self.name
-            self.res.descriptor['path'] = '{name}.{format}'.format(**self.res.descriptor)
-            dp.add_resource(self.res.descriptor)
+                if os.path.exists(self.load_source):
+                    base_path = os.path.dirname(self.load_source) or '.'
+                    self.load_source = os.path.basename(self.load_source)
+                else:
+                    base_path = None
+                descriptor = dict(path=self.load_source,
+                                profile='tabular-data-resource')
+                if 'format' in self.options:
+                    descriptor['format'] = self.options['format']
+                self.res = Resource(descriptor,
+                                    base_path=base_path,
+                                    **self.options)
+                self.res.infer(confidence=1, limit=1000)
+                if self.name is not None:
+                    self.res.descriptor['name'] = self.name
+                self.res.descriptor['path'] = '{name}.{format}'.format(**self.res.descriptor)
+                dp.add_resource(self.res.descriptor)
         return dp
 
     def process_resources(self, resources):
