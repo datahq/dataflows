@@ -3,7 +3,7 @@ from ..helpers.resource_matcher import ResourceMatcher
 
 
 try:
-    from IPython.core.display import display, HTML, Pretty
+    from IPython.core.display import display, HTML
     get_ipython
     IS_IPYTHON = True
 except (NameError, ImportError):
@@ -22,6 +22,7 @@ def _table_print(data, kwargs):
         display(HTML(data))
     else:
         print(data)
+
 
 def printer(num_rows=10, last_rows=None, fields=None, resources=None,
             header_print=_header_print, table_print=_table_print, **kwargs):
