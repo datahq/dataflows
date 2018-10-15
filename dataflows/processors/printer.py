@@ -5,9 +5,11 @@ from ..helpers.resource_matcher import ResourceMatcher
 try:
     from IPython.core.display import display, HTML
     get_ipython
-    display_html = lambda data: display(HTML(data))
+    def display_html(data):
+        display(HTML(data))
 except (NameError, ImportError):
-    display_html = lambda data: print(data)
+    def display_html(data):
+        print(data)
 
 
 def _header_print(header, kwargs):
