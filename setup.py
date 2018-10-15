@@ -22,7 +22,7 @@ PACKAGE = 'dataflows'
 NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
     'datapackage>=1.3.2',
-    'kvfile',
+    'kvfile>=0.0.4',
     'click',
     'jinja2',
     'awesome-slugify',
