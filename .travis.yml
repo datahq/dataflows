@@ -1,16 +1,16 @@
-dist: trusty
+dist: xenial
 sudo: required
 language: python
 python:
-- 3.6
+- 3.7
 env:
   matrix:
-  - TOXENV="py36-sqlite" DEPLOY=yes
-  - TOXENV="py36-plyvel" DEPLOY=no
+  - TOXENV="py37-sqlite" DEPLOY=yes
+  - TOXENV="py37-plyvel" DEPLOY=no
   global:
   - LANG=en_US.UTF-8
 install:
-- '[ "${TOXENV}" != "py36-plyvel" ] || sudo apt-get install libleveldb-dev libleveldb1'
+- '[ "${TOXENV}" != "py37-plyvel" ] || sudo apt-get install libleveldb-dev libleveldb1'
 - make install
 - pip install coveralls
 script:
