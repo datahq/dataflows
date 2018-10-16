@@ -10,7 +10,7 @@ env:
   global:
   - LANG=en_US.UTF-8
 install:
-- '[ "${TOXENV}" != "py37-plyvel" ] || sudo apt-get install libleveldb-dev libleveldb1'
+- '[ "${TOXENV}" != "py37-plyvel" ] || sudo apt-get install libleveldb-dev libleveldb1v5'
 - make install
 - pip install coveralls
 script:
