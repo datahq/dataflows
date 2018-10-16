@@ -59,6 +59,26 @@ def load(source, name=None, resources=None, **options):
 #### printer
 Just prints whatever it sees. Good for debugging.
 
+```python
+def printer(num_rows=10, last_rows=None, fields=None, resources=None,
+            header_print=_header_print, table_print=_table_print, **tabulate_kwargs):
+    pass
+```
+
+- `num_rows` - modify the number of rows to preview, printer will print multiple samples of this number of rows from different places in the stream
+- `last_rows` - optional, defaults to the value of `num_rows`
+- `fields` - optional, list of field names to preview
+- `resources` - optional, allows to limit the printed resources, same semantics as `load` processor `resources` argument
+- `header_print` - optional, callable used to print each resource header
+- `table_print` - optional, callable used to print the table data
+- `**tabulate_kwargs` - additional kwargs passed to [tabulate](https://bitbucket.org/astanin/python-tabulate), allows to customize the printed tables
+
+If you are running from a [Jupyter](https://jupyter.org/) notebook, add `tablefmt='html'` to render an html table:
+
+```
+printer(tablefmt='html')
+```
+
 #### dump_to_path
 Store the results to a specified path on disk, in a valid datapackage
 

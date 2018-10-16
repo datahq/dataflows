@@ -21,7 +21,7 @@ def read(*paths):
 PACKAGE = 'dataflows'
 NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
-    'datapackage>=1.3.2',
+    'datapackage>=1.5.0',
     'kvfile>=0.0.4',
     'click',
     'jinja2',
@@ -31,7 +31,7 @@ INSTALL_REQUIRES = [
     'tableschema-sql',
 ]
 SPEEDUP_REQUIRES = [
-    'plyvel<1',
+    'plyvel',
 ]
 LINT_REQUIRES = [
     'pylama',

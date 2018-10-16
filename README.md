@@ -81,5 +81,5 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 ## Learn more
 
-Dive into the [Tutorial](TUTORIAL.md) to get a deeper glimpse into everything that `dataflows` can do.
+Dive into the [Tutorial](TUTORIAL.ipynb) to get a deeper glimpse into everything that `dataflows` can do.
 Also review this list of [Built-in Processors](PROCESSORS.md), which also includes an API reference for each one of them.
