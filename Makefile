@@ -8,7 +8,6 @@ VERSION := $(shell head -n 1 $(PACKAGE)/VERSION)
 all: list
 
 install:
-	pip install --upgrade https://github.com/OriHoch/datapackage-py/archive/python-3.7-support.zip#egg=datapackage &&\
 	pip install --upgrade -e .[develop]
 
 list:
