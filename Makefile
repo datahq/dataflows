@@ -1,4 +1,4 @@
-.PHONY: all install list lint release test version
+.PHONY: all install list lint release test version notebooks
 
 
 PACKAGE := $(shell grep '^PACKAGE =' setup.py | cut -d "'" -f2)
@@ -26,3 +26,6 @@ test:
 
 version:
 	@echo $(VERSION)
+
+notebooks:
+	jupyter nbconvert *.ipynb --to markdown
