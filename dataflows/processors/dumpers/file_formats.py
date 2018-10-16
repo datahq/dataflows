@@ -8,7 +8,7 @@ from tableschema import Field
 
 
 DATE_FORMAT = '%Y-%m-%d'
-DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 TIME_FORMAT = '%H:%M:%S'
 
 
