@@ -31,7 +31,7 @@ INSTALL_REQUIRES = [
     'tableschema-sql',
 ]
 SPEEDUP_REQUIRES = [
-    'plyvel<1',
+    'plyvel',
 ]
 LINT_REQUIRES = [
     'pylama',
