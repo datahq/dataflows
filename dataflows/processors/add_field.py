@@ -24,5 +24,5 @@ def add_field(name, type, default=None, resources=None, **options):
                 yield column_adder(res, name, default)
             else:
                 yield res
-    
+
     return func
