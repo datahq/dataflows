@@ -28,4 +28,4 @@ version:
 	@echo $(VERSION)
 
 notebooks:
-	jupyter nbconvert *.ipynb --to markdown
+	jupyter nbconvert --execute *.ipynb --to markdown

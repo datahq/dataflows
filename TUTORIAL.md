@@ -155,8 +155,8 @@ Flow(
 (string)              </th></tr>
 </thead>
 <tbody>
-<tr><td>1  </td><td>China           </td><td>1,394,640,000</td></tr>
-<tr><td>2  </td><td>India           </td><td>1,338,310,000</td></tr>
+<tr><td>1  </td><td>China           </td><td>1,394,660,000</td></tr>
+<tr><td>2  </td><td>India           </td><td>1,338,350,000</td></tr>
 <tr><td>...</td><td>                </td><td>             </td></tr>
 <tr><td>240</td><td>Pitcairn Islands</td><td>50           </td></tr>
 </tbody>
@@ -166,7 +166,7 @@ Flow(
 
 
 
-    (<datapackage.package.Package at 0x7fe9c68949e8>, {})
+    (<datapackage.package.Package at 0x7f00d00287f0>, {})
 
 
 
@@ -179,7 +179,7 @@ In order to do that, let's simply define their type to be numeric and truncate t
 from dataflows import Flow, set_type
 
 Flow(
-	country_population(),
+    country_population(),
     set_type('population', type='number', groupChar=','),
     lambda row: dict(row, population=row['population']/1000000),
     printer(num_rows=1, tablefmt='html')
@@ -198,8 +198,8 @@ Flow(
 (number)</th></tr>
 </thead>
 <tbody>
-<tr><td>1  </td><td>China           </td><td style="text-align: right;">1394.64 </td></tr>
-<tr><td>2  </td><td>India           </td><td style="text-align: right;">1338.31 </td></tr>
+<tr><td>1  </td><td>China           </td><td style="text-align: right;">1394.66 </td></tr>
+<tr><td>2  </td><td>India           </td><td style="text-align: right;">1338.35 </td></tr>
 <tr><td>...</td><td>                </td><td style="text-align: right;">        </td></tr>
 <tr><td>240</td><td>Pitcairn Islands</td><td style="text-align: right;">   5e-05</td></tr>
 </tbody>
@@ -209,7 +209,7 @@ Flow(
 
 
 
-    (<datapackage.package.Package at 0x7fe9c67cd470>, {})
+    (<datapackage.package.Package at 0x7f00bfcec278>, {})
 
 
 
@@ -235,7 +235,7 @@ Flow(
 
 
 
-    (<datapackage.package.Package at 0x7fe9c72c0400>,
+    (<datapackage.package.Package at 0x7f00d083c7f0>,
      {'count_of_rows': 240,
       'bytes': 5289,
       'hash': '3bbfa40f5d22287e82da40dc6d7581a2',
@@ -267,7 +267,7 @@ it = pkg.resources[0].iter(keyed=True)
 print(next(it))
 ```
 
-    {'name': 'China', 'population': Decimal('1394640000')}
+    {'name': 'China', 'population': Decimal('1394660000')}
 
 
 Note how using the data package meta-data, data-types are restored and there's no need to 're-parse' the data. This also works with other types too, such as dates, booleans and even `list`s and `dict`s.
@@ -328,7 +328,7 @@ Flow(
 
 
 
-    (<datapackage.package.Package at 0x7fe9c67eac18>,
+    (<datapackage.package.Package at 0x7f00d097a5f8>,
      {'count_of_rows': 6,
       'bytes': 744,
       'hash': '1f0df7ed401ccff9f6c1674e98c62467',
@@ -401,7 +401,7 @@ Flow(
 
 
 
-    (<datapackage.package.Package at 0x7fe9c64d7fd0>,
+    (<datapackage.package.Package at 0x7f00bf9f60f0>,
      {'count_of_rows': 4,
       'bytes': 896,
       'hash': 'ae319bad0ad1e345a2a86d8dc9de8375',
@@ -473,7 +473,7 @@ Flow(
 
 
 
-    (<datapackage.package.Package at 0x7fe9c63ba438>,
+    (<datapackage.package.Package at 0x7f00bf95a898>,
      {'count_of_rows': 4,
       'bytes': 896,
       'hash': 'ae319bad0ad1e345a2a86d8dc9de8375',
@@ -491,7 +491,8 @@ In the next example we're removing an entire resource in a package processor - t
 
 
 ```python
-from dataflows import Flow, load, dump_to_path
+import collections
+from dataflows import Flow, load, dump_to_path, checkpoint, printer
 
 def find_double_winners(package):
 
@@ -519,17 +520,25 @@ def find_double_winners(package):
     yield filter(lambda row: (row['Winner'] and 
                               row['Name'] in emmy_winners),
                  academy)
+    
+    # important to deque generators to ensure finalization steps of previous processors are executed
+    collections.deque(resources)
 
 Flow(
     # Emmy award nominees and winners
     load('https://raw.githubusercontent.com/datahq/dataflows/master/data/emmy.csv', name='emmies'),
     # Academy award nominees and winners
     load('https://raw.githubusercontent.com/datahq/dataflows/master/data/academy.csv', encoding='utf8', name='oscars'),
+    # save a checkpoint so we won't have to re-download the source data each time
+    checkpoint('emmy-academy-nominees-winners'),
     find_double_winners,
     dump_to_path('double_winners'),
     printer(num_rows=1, tablefmt='html')
 ).process()
 ```
+
+    using checkpoint data from .checkpoints/emmy-academy-nominees-winners
+
 
 
 <h3>oscars</h3>
@@ -558,7 +567,7 @@ Flow(
 
 
 
-    (<datapackage.package.Package at 0x7fe9c6543160>,
+    (<datapackage.package.Package at 0x7f00bf6b4898>,
      {'count_of_rows': 98,
       'bytes': 6921,
       'hash': '902088336aa4aa4fbab33446a241b5de',
@@ -570,13 +579,11 @@ Previous flow was a bit complicated, but luckily we have the `join`, `concatenat
 
 
 ```python
-from dataflows import Flow, load, dump_to_path, join, concatenate, filter_rows, printer
+from dataflows import Flow, load, dump_to_path, join, concatenate, filter_rows, printer, checkpoint
 
 Flow(
-    # Emmy award nominees and winners
-    load('https://raw.githubusercontent.com/datahq/dataflows/master/data/emmy.csv', name='emmies'),
-    # Academy award nominees and winners
-    load('https://raw.githubusercontent.com/datahq/dataflows/master/data/academy.csv', encoding='utf8', name='oscars'),
+    # load from the checkpoint we saved in the previous flow
+    checkpoint('emmy-academy-nominees-winners'),
     filter_rows(equals=[dict(winner=1)], resources=['emmies']),
     concatenate(
         dict(emmy_nominee=['nominee'],),
@@ -594,6 +601,9 @@ Flow(
 ).process()
 ```
 
+    using checkpoint data from .checkpoints/emmy-academy-nominees-winners
+
+
 
 <h3>oscars</h3>
 
@@ -621,7 +631,7 @@ Flow(
 
 
 
-    (<datapackage.package.Package at 0x7fe9c5ea2860>,
+    (<datapackage.package.Package at 0x7f00bf4489b0>,
      {'count_of_rows': 98,
       'bytes': 6921,
       'hash': '902088336aa4aa4fbab33446a241b5de',
@@ -637,54 +647,53 @@ A complete list, which also includes an API reference for each one of them, can 
 
 ## Nested Flows
 
-The flow object itself can be used as a step in another flow
+The flow object itself can be used as a step in another flow, this allows for useful design patterns which promote code reusability and readibility:
 
 
 ```python
 from dataflows import Flow, printer
 
-def upper(row):
-    for k in row:
-        row[k] = row[k].upper()
+# generate a customizable, predefined flow
+def text_processing_flow(star_letter_idx):
 
-def lower_first_letter(row):
-    for k in row:
-        row[k] = f'{row[k][0].lower()}{row[k][1:]}'
+    # run upper on all cell values
+    def upper(row):
+        for k in row:
+            row[k] = row[k].upper()
+    
+    # star the letter at the index from star_letter_idx argument
+    def star_letter(row):
+        for k in row:
+            s = list(row[k])
+            s[star_letter_idx] = '*'
+            row[k] = ''.join(s)
+    
+    def print_foo(row):
+        print('  '.join(list(row['foo'])))
 
-text_processing_flow = Flow(
-    upper,
-    lower_first_letter
-)
+    return Flow(upper, star_letter, print_foo)
 
 Flow(
     [{'foo': 'bar'},
-     {'foo': 'bax'}], 
-    text_processing_flow,
-    printer(tablefmt='html')
+     {'foo': 'bax'}],
+    text_processing_flow(0),
+    text_processing_flow(1),
+    text_processing_flow(2),
 ).process()
 ```
 
-
-<h3>res_1</h3>
-
-
-
-<table>
-<thead>
-<tr><th style="text-align: right;">  #</th><th>foo
-(string)    </th></tr>
-</thead>
-<tbody>
-<tr><td style="text-align: right;">  1</td><td>bAR</td></tr>
-<tr><td style="text-align: right;">  2</td><td>bAX</td></tr>
-</tbody>
-</table>
+    *  A  R
+    *  *  R
+    *  *  *
+    *  A  X
+    *  *  X
+    *  *  *
 
 
 
 
 
-    (<datapackage.package.Package at 0x7fe9c5d96e48>, {})
+    (<datapackage.package.Package at 0x7f00bf23b048>, {})
 
 
 

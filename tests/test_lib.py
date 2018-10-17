@@ -371,6 +371,23 @@ def test_checkpoint():
     assert stats['stale'] == 2
 
 
+def test_load_from_checkpoint():
+    from dataflows import Flow, checkpoint
+    import shutil
+
+    shutil.rmtree('.checkpoints/test_load_from_checkpoint', ignore_errors=True)
+
+    assert Flow(
+        [{'foo': 'bar'}],
+        checkpoint('test_load_from_checkpoint')
+    ).process()
+
+    assert Flow(
+        checkpoint('test_load_from_checkpoint')
+    ).results()[0] == [[{'foo': 'bar'}]]
+
+
+
 def test_update_resource():
     from dataflows import Flow, printer, update_resource
 
