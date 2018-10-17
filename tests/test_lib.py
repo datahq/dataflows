@@ -434,3 +434,38 @@ def test_dump_to_path_use_titles():
         assert stream.read() == [['שלום',   'aloha'],
                                  ['world',  'mundo'],
                                  ['עולם',   'عالم']]
+
+
+def test_add_field():
+    from dataflows import Flow, add_field
+    f = Flow(
+        (dict(a=i) for i in range(3)),
+        add_field('b', 'string', 'b'),
+        add_field('c', 'number'),
+        add_field('d', 'boolean', title='mybool'),
+    )
+    results, dp, _ = f.results()
+    assert results == [[
+        {'a': 0, 'b': 'b', 'c': None, 'd': None}, 
+        {'a': 1, 'b': 'b', 'c': None, 'd': None}, 
+        {'a': 2, 'b': 'b', 'c': None, 'd': None}
+    ]]
+    assert dp.descriptor == \
+         {'profile': 'data-package',
+          'resources': [{'name': 'res_1',
+                         'path': 'res_1.csv',
+                         'profile': 'tabular-data-resource',
+                         'schema': {'fields': [{'format': 'default',
+                                                'name': 'a',
+                                                'type': 'integer'},
+                                               {'format': 'default',
+                                                'name': 'b',
+                                                'type': 'string'},
+                                               {'format': 'default',
+                                                'name': 'c',
+                                                'type': 'number'},
+                                               {'format': 'default',
+                                                'name': 'd',
+                                                'title': 'mybool',
+                                                'type': 'boolean'}],
+                                    'missingValues': ['']}}]}

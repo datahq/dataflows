@@ -13,6 +13,7 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 - **cache** - Cache results of a subflow in a datapackage and load it upon request
 
 ### Manipulate row-by-row
+- **add_field** - Adds a column to the data
 - **delete_fields** - Removes some columns from the data
 - **add_computed_field** - Adds new fields whose values are based on existing columns
 - **find_replace** - Look for specific patterns in specific fields and replace them with new data
@@ -226,6 +227,27 @@ f = Flow(
 ```
 
 ### Manipulate row-by-row
+#### add_field
+Adds a new field (column) to the streamed resources
+
+`add_field` accepts a list of resources and a fields to add
+
+```python
+def add_field(name, type, default=None, resources=None, **options):
+    pass
+```
+
+- `name` - Name of field to add 
+- `type` - Type of field to add
+- `default` - Default value to assign to the field
+- `options` - Other properties of the newly added field
+- `resources`
+  - A name of a resource to operate on
+  - A regular expression matching resource names
+  - A list of resource names
+  - `None` indicates operation should be done on all resources
+  - The index of the resource in the package
+
 #### delete_fields
 Delete fields (columns) from streamed resources
 
