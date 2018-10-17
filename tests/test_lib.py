@@ -339,79 +339,36 @@ def test_load_from_package_resources():
     assert data[0][1] == {'foo': 'baz1'}
 
 
-def test_cache():
-    import os
-    import shutil
-    from dataflows import cache
-
-    stats = {'a': 0, 'foo': 0}
-
-    def incr_stat(name):
-        stats[name] += 1
-        return stats[name]
-
-    cache_path = '.cache/test_cache'
-    expected_files = ['datapackage.json', 'res_1.csv', 'cached_resource.csv']
-
-    shutil.rmtree(cache_path, ignore_errors=True)
-
-    def load_data(resource_name):
-
-        def processor(package):
-            package.pkg.add_resource({'name': resource_name,
-                                      'path': resource_name+'.csv',
-                                      'schema': {'fields': [{'name': 'foo', 'type': 'integer'}]}})
-            yield package.pkg
-            yield from package
-            yield ({'foo': incr_stat('foo')} for _ in range(20))
-
-        return processor
-
-    f = Flow(
-        cache(
-            cache(
-                ({'a': incr_stat('a'), 'i': i} for i in range(10)),
-                cache_path=cache_path + '/first_cache'
-            ),
-            load_data('cached_resource'),
-            cache_path=cache_path
-        )
-    )
-
-    for i in range(3):
-        results, *_ = f.results()
-        assert results == [[{'a': i+1, 'i': i} for i in range(10)],
-                           [{'foo': i+1} for i in range(20)]], 'failed iteration {}'.format(i)
-
-    assert stats['a'] == 10
-    assert stats['foo'] == 20
-    for f in expected_files:
-        assert os.path.exists(cache_path + '/' + f)
-
-
-def test_cache_flow():
+def test_checkpoint():
     from collections import defaultdict
+    from dataflows import Flow, checkpoint
     import shutil
-    from dataflows import CacheFlow, cache
+
+    shutil.rmtree('.checkpoints/test_checkpoint', ignore_errors=True)
 
     stats = defaultdict(int)
 
-    def incr_stat(name):
-        stats[name] += 1
-        return stats[name]
+    def get_data_count_views():
+        stats['stale'] += 1
 
-    cache_path = '.cache/test_cache'
-    shutil.rmtree(cache_path, ignore_errors=True)
+        def data():
+            yield {'foo': 'bar'}
+            stats['fresh'] += 1
+            stats['stale'] -= 1
 
-    flow = CacheFlow(
-        ({'a': incr_stat('a'), 'i': i} for i in range(2)),
-        cache(cache_path=cache_path),
-        ({'b': incr_stat('b'), 'i': i} for i in range(2)),
-        cache(cache_path=cache_path + '/b')
-    )
-    assert flow.results()[0] == [[{'a': 1, 'i': 0}, {'a': 2, 'i': 1}], [{'b': 1, 'i': 0}, {'b': 2, 'i': 1}]]
-    assert flow.results()[0] == [[{'a': 1, 'i': 0}, {'a': 2, 'i': 1}], [{'b': 1, 'i': 0}, {'b': 2, 'i': 1}]]
-    assert dict(stats) == {'a': 2, 'b': 2}
+        return data()
+
+    def run_data_count_flow():
+        assert Flow(
+            get_data_count_views(),
+            checkpoint('test_checkpoint'),
+        ).results()[0] == [[{'foo': 'bar'}]]
+
+    run_data_count_flow()
+    run_data_count_flow()
+    run_data_count_flow()
+    assert stats['fresh'] == 1
+    assert stats['stale'] == 2
 
 
 def test_update_resource():

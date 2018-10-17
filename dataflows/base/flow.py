@@ -17,10 +17,19 @@ class Flow:
     def datastream(self, ds=None):
         return self._chain(ds)._process()
 
+    def _preprocess_chain(self):
+        checkpoint_links = []
+        for link in self.chain:
+            if hasattr(link, 'handle_flow_checkpoint'):
+                checkpoint_links = link.handle_flow_checkpoint(checkpoint_links)
+            else:
+                checkpoint_links.append(link)
+        return checkpoint_links
+
     def _chain(self, ds=None):
         from ..helpers import datapackage_processor, rows_processor, row_processor, iterable_loader
 
-        for link in self.chain:
+        for link in self._preprocess_chain():
             if isinstance(link, Flow):
                 ds = link._chain(ds)
             elif isinstance(link, DataStreamProcessor):
