@@ -2,18 +2,20 @@ import os
 
 from datapackage import Package, Resource
 from .. import DataStreamProcessor
+from ..base.schema_validator import schema_validator
 from ..helpers.resource_matcher import ResourceMatcher
 
 
 class load(DataStreamProcessor):
 
-    def __init__(self, load_source, name=None, resources=None, **options):
+    def __init__(self, load_source, name=None, resources=None, validate=False, **options):
         super(load, self).__init__()
         self.load_source = load_source
         self.options = options
         self.name = name
         self.resources = resources
         self.load_dp = None
+        self.validate = validate
 
     def process_datapackage(self, dp: Package):
         if isinstance(self.load_source, tuple):
@@ -43,9 +45,11 @@ class load(DataStreamProcessor):
                 else:
                     base_path = None
                 descriptor = dict(path=self.load_source,
-                                profile='tabular-data-resource')
+                                  profile='tabular-data-resource')
                 if 'format' in self.options:
                     descriptor['format'] = self.options['format']
+                self.options.setdefault('ignore_blank_headers', True)
+                self.options.setdefault('headers', 1)
                 self.res = Resource(descriptor,
                                     base_path=base_path,
                                     **self.options)
@@ -66,4 +70,7 @@ class load(DataStreamProcessor):
             yield from (resource.iter(keyed=True) for resource in self.load_dp.resources
                         if self.resource_matcher.match(resource.name))
         else:
-            yield self.res.iter(keyed=True)
+            it = self.res.iter(keyed=True, cast=False)
+            if self.validate:
+                it = schema_validator(self.res, it)
+            yield it

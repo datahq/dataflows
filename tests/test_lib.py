@@ -469,3 +469,32 @@ def test_add_field():
                                                 'title': 'mybool',
                                                 'type': 'boolean'}],
                                     'missingValues': ['']}}]}
+
+
+def test_load_empty_headers():
+    from dataflows import Flow, load, printer
+
+    def ensure_type(t):
+        def func(row):
+            assert isinstance(row['a'], t)
+        return func
+
+    results, dp, stats = Flow(load('data/empty_headers.csv'), 
+                              ensure_type(str)).results()
+    assert results[0] == [
+        {'a': 1, 'b': 2}, 
+        {'a': 2, 'b': 3}, 
+        {'a': 3, 'b': 4}, 
+        {'a': 5, 'b': 6}
+    ]
+    assert len(dp.resources[0].schema.fields) == 2
+
+    results, dp, stats = Flow(load('data/empty_headers.csv', validate=True), 
+                              ensure_type(int)).results()
+    assert results[0] == [
+        {'a': 1, 'b': 2}, 
+        {'a': 2, 'b': 3}, 
+        {'a': 3, 'b': 4}, 
+        {'a': 5, 'b': 6}
+    ]
+    assert len(dp.resources[0].schema.fields) == 2
