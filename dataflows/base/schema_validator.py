@@ -19,21 +19,17 @@ class ValidationError(Exception):
         self.cast_error = cast_error
 
 
-def schema_validator(resource: Resource, iterator):
+def schema_validator(resource: Resource, iterator, field_names=None):
     schema: Schema = resource.schema
-    field_names = [f.name for f in schema.fields]
-    warned_fields = set()
+    if field_names is None:
+        field_names = [f.name for f in schema.fields]
+    schema_fields = [f for f in schema.fields if f.name in field_names]
     for i, row in enumerate(iterator):
-        to_cast = [row.get(f) for f in field_names]
+
         try:
-            casted = schema.cast_row(to_cast)
-            row = dict(zip(field_names, casted))
+            for f in schema_fields:
+                row[f.name] = f.cast_value(row[f.name])
         except CastError as e:
             raise ValidationError(resource.name, row, i, e)
-
-        for k in set(row.keys()) - set(field_names):
-            if k not in warned_fields:
-                warned_fields.add(k)
-                logging.warning('Encountered field %r, not in schema', k)
 
         yield row

@@ -11,11 +11,15 @@ class set_type(DataStreamProcessor):
         self.name = re.compile(f'^{name}$')
         self.options = options
         self.resources = resources
+        self.field_names = []
 
     def process_resources(self, resources):
         for res in resources:
             if self.matcher.match(res.res.name):
-                yield schema_validator(res.res, res)
+                if len(self.field_names) > 0:
+                    yield schema_validator(res.res, res, field_names=self.field_names)
+                else:
+                    yield res
             else:
                 yield res
 
@@ -28,6 +32,7 @@ class set_type(DataStreamProcessor):
                 for field in res['schema']['fields']:
                     if self.name.match(field['name']):
                         field.update(self.options)
+                        self.field_names.append(field['name'])
                         added = True
         assert added, 'Failed to find field {} in schema'.format(self.name)
         return dp
