@@ -49,13 +49,13 @@ def load(source, name=None, resources=None, validate=False, **options):
     - a reference to an environment variable containing the source location, 
       in the form of `env://ENV_VAR`
     - a tuple containing (datapackage_descriptor, resources_iterator)
-- `resources` - optional, relevant only if source points to a datapackage.json file or datapackage / resourecs tuple. Value should be one of the following:
+- `resources` - optional, relevant only if source points to a datapackage.json file or datapackage/resource tuple. Value should be one of the following:
     - Name of a single resource to load
     - A regular expression matching resource names to load
     - A list of resource names to load
     - `None` indicates to load all resources
     - The index of the resource in the package
-- `validate` - should data be casted to the inferred data-types or not
+- `validate` - Should data be casted to the inferred data-types or not. Relevant only when _not_ loading data from datapackage.
 - `options` - based on the loaded file, extra options (e.g. `sheet` for Excel files etc., see the link to tabulator above)
 
 #### printer
