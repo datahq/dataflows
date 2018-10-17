@@ -468,6 +468,38 @@ def test_dump_to_path_use_titles():
                                  ['עולם',   'عالم']]
 
 
+def test_load_dates():
+    from dateutil.tz import tzutc
+    from dataflows import Flow, dump_to_path, load, set_type, ValidationError
+    import datetime
+
+    _today = datetime.date.today()
+    _now = datetime.datetime.now()
+
+    def run_flow(datetime_format=None):
+        Flow(
+            [{'today': str(_today), 'now': str(_now)}],
+            set_type('today', type='date'),
+            set_type('now', type='datetime', format=datetime_format),
+            dump_to_path('data/dump_dates')
+        ).process()
+
+    try:
+        run_flow()
+        assert False
+    except ValidationError:
+        assert True
+
+    # must set format='any' to parse from datetime string
+    run_flow(datetime_format='any')
+
+    out_now = datetime.datetime(_now.year, _now.month, _now.day, _now.hour, _now.minute, _now.second, tzinfo=tzutc())
+
+    assert Flow(
+        load('data/dump_dates/datapackage.json'),
+    ).results()[0] == [[{'today': _today, 'now': out_now}]]
+
+
 def test_add_field():
     from dataflows import Flow, add_field
     f = Flow(
