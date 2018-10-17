@@ -1,5 +1,3 @@
-import logging
-
 from datapackage import Resource
 from tableschema import Schema
 from tableschema.exceptions import CastError
