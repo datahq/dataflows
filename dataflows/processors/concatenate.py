@@ -101,6 +101,7 @@ def concatenate(fields, target={}, resources=None):
         package.pkg.descriptor['resources'] = new_resources
         yield package.pkg
 
+        needed_fields = sorted(fields.keys())
         it = iter(package)
         for resource in it:
             if matcher.match(resource.res.name):

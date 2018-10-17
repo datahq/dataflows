@@ -146,13 +146,20 @@ def test_concatenate():
             {'c': 6, 'd': 7},
         ],
         concatenate({
-            'f1': ['a', 'c'],
-            'f2': ['b', 'd']
+            'f1': ['a'],
+            'f2': ['b', 'c'],
+            'f3': ['d']
         })
     )
     results, _, _ = f.results()
-    d = [(r['f1'], r['f2']) for r in results[0]]
-    assert d == list(zip(range(1,7), range(2, 8)))
+    assert results[0] == [
+        {'f1': 1, 'f2': 2, 'f3': None},
+        {'f1': 2, 'f2': 3, 'f3': None},
+        {'f1': 3, 'f2': 4, 'f3': None},
+        {'f1': None, 'f2': 4, 'f3': 5},
+        {'f1': None, 'f2': 5, 'f3': 6},
+        {'f1': None, 'f2': 6, 'f3': 7}
+    ]
 
 
 def test_filter_rows():
