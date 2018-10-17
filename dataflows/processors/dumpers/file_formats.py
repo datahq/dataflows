@@ -61,6 +61,16 @@ class FileFormat():
         self.write_transformed_row(transformed_row)
 
 
+class CsvTitlesDictWriter(csv.DictWriter):
+    def __init__(self, *args, **kwargs):
+        self.fieldtitles = kwargs.pop('fieldtitles')
+        super().__init__(*args, **kwargs)
+
+    def writeheader(self):
+        header = dict(zip(self.fieldnames, self.fieldtitles))
+        self.writerow(header)
+
+
 class CSVFormat(FileFormat):
 
     SERIALIZERS = {
@@ -94,9 +104,13 @@ class CSVFormat(FileFormat):
         },
     }
 
-    def __init__(self, file, schema):
+    def __init__(self, file, schema, use_titles=False):
         headers = [f.name for f in schema.fields]
-        csv_writer = csv.DictWriter(file, headers)
+        if use_titles:
+            titles = [f.descriptor.get('title', f.name) for f in schema.fields]
+            csv_writer = CsvTitlesDictWriter(file, headers, fieldtitles=titles)
+        else:
+            csv_writer = csv.DictWriter(file, headers)
         csv_writer.writeheader()
         super(CSVFormat, self).__init__(csv_writer, schema)
 

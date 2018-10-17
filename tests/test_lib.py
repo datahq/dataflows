@@ -399,6 +399,7 @@ def test_update_resource():
     assert dp.descriptor['resources'][2]['source'] == 'thewild'
     assert dp.descriptor['resources'][4]['source'] == 'thewild'
 
+
 def test_set_type_resources():
     from dataflows import Flow, set_type, validate
 
@@ -416,4 +417,20 @@ def test_set_type_resources():
     assert results[0][1]['a'] == 1
     assert results[1][3]['b'] == 3
     assert results[2][8]['c'] == 8.0
-   
+
+
+def test_dump_to_path_use_titles():
+    from dataflows import Flow, dump_to_path, set_type
+    import tabulator
+
+    Flow(
+        [{'hello': 'world', 'hola': 'mundo'}, {'hello': 'עולם', 'hola': 'عالم'}],
+        *(set_type(name, resources=['res_1'], title=title) for name, title
+          in (('hello', 'שלום'), ('hola', 'aloha'))),
+        dump_to_path('data/dump_with_titles', use_titles=True)
+    ).process()
+
+    with tabulator.Stream('data/dump_with_titles/res_1.csv') as stream:
+        assert stream.read() == [['שלום',   'aloha'],
+                                 ['world',  'mundo'],
+                                 ['עולם',   'عالم']]

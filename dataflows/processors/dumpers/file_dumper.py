@@ -15,6 +15,7 @@ class FileDumper(DumperBase):
         super(FileDumper, self).__init__(options)
         self.force_format = options.get('force_format', True)
         self.forced_format = options.get('format', 'csv')
+        self.use_titles = options.get('use_titles', False)
 
     def process_datapackage(self, datapackage):
         datapackage = \
@@ -88,7 +89,8 @@ class FileDumper(DumperBase):
             schema = resource.res.schema
 
             temp_file = tempfile.NamedTemporaryFile(mode="w+", delete=False)
-            writer = self.file_formatters[resource.res.name](temp_file, schema)
+            writer_kwargs = {'use_titles': True} if self.use_titles else {}
+            writer = self.file_formatters[resource.res.name](temp_file, schema, **writer_kwargs)
 
             return self.rows_processor(resource,
                                        writer,
