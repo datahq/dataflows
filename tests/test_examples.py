@@ -139,7 +139,7 @@ def test_example_7():
     def add_is_guitarist_column(package):
 
         # Add a new field to the first resource
-        package.pkg.resources[0].descriptor['schema']['fields'].append(dict(
+        package.pkg.descriptor['resources'][0]['schema']['fields'].append(dict(
             name='is_guitarist',
             type='boolean'
         ))
@@ -171,7 +171,7 @@ def test_example_75():
     def add_is_guitarist_column_to_schema(package):
 
         # Add a new field to the first resource
-        package.pkg.resources[0].descriptor['schema']['fields'].append(dict(
+        package.pkg.descriptor['resources'][0]['schema']['fields'].append(dict(
             name='is_guitarist',
             type='boolean'
         ))
