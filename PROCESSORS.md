@@ -126,6 +126,8 @@ def dump_to_path(out_path='.',
 
 - `pretty_descriptor` - Should the resulting descriptor be JSON pretty-formatted with indentation for readability, or as compact as possible (default `True`)
 
+- `use_titles` - If set to True, will use the field titles for header rows rather then field names (relevant for csv format only, default `False`)
+
 #### dump_to_zip
 Store the results in a valid datapackage, all files archived in one zipped file
 
