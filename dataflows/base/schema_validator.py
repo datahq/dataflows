@@ -26,7 +26,7 @@ def schema_validator(resource: Resource, iterator, field_names=None):
 
         try:
             for f in schema_fields:
-                row[f.name] = f.cast_value(row[f.name])
+                row[f.name] = f.cast_value(row.get(f.name))
         except CastError as e:
             raise ValidationError(resource.name, row, i, e)
 
