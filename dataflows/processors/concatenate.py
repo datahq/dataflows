@@ -108,7 +108,7 @@ def concatenate(fields, target={}, resources=None):
                 resource_chain = \
                     itertools.chain([resource],
                                     itertools.islice(it,
-                                                    num_concatenated-1))
+                                                     num_concatenated-1))
                 yield concatenator(resource_chain, needed_fields, field_mapping)
             else:
                 yield resource
