@@ -80,7 +80,7 @@ george,guitar
 ringo,drums
 ```
 
-    Overwriting beatles.csv
+    Writing beatles.csv
 
 
 
@@ -140,7 +140,7 @@ def country_population():
 Flow(
       country_population(),
       printer(num_rows=1, tablefmt='html')
-).process()
+).process()[1]
 ```
 
 
@@ -155,8 +155,8 @@ Flow(
 (string)              </th></tr>
 </thead>
 <tbody>
-<tr><td>1  </td><td>China           </td><td>1,394,660,000</td></tr>
-<tr><td>2  </td><td>India           </td><td>1,338,350,000</td></tr>
+<tr><td>1  </td><td>China           </td><td>1,394,720,000</td></tr>
+<tr><td>2  </td><td>India           </td><td>1,338,480,000</td></tr>
 <tr><td>...</td><td>                </td><td>             </td></tr>
 <tr><td>240</td><td>Pitcairn Islands</td><td>50           </td></tr>
 </tbody>
@@ -166,7 +166,7 @@ Flow(
 
 
 
-    (<datapackage.package.Package at 0x7f00d00287f0>, {})
+    {}
 
 
 
@@ -183,7 +183,7 @@ Flow(
     set_type('population', type='number', groupChar=','),
     lambda row: dict(row, population=row['population']/1000000),
     printer(num_rows=1, tablefmt='html')
-).process()
+).process()[1]
 ```
 
 
@@ -198,8 +198,8 @@ Flow(
 (number)</th></tr>
 </thead>
 <tbody>
-<tr><td>1  </td><td>China           </td><td style="text-align: right;">1394.66 </td></tr>
-<tr><td>2  </td><td>India           </td><td style="text-align: right;">1338.35 </td></tr>
+<tr><td>1  </td><td>China           </td><td style="text-align: right;">1394.72 </td></tr>
+<tr><td>2  </td><td>India           </td><td style="text-align: right;">1338.48 </td></tr>
 <tr><td>...</td><td>                </td><td style="text-align: right;">        </td></tr>
 <tr><td>240</td><td>Pitcairn Islands</td><td style="text-align: right;">   5e-05</td></tr>
 </tbody>
@@ -209,7 +209,7 @@ Flow(
 
 
 
-    (<datapackage.package.Package at 0x7f00bfcec278>, {})
+    {}
 
 
 
@@ -229,17 +229,16 @@ Flow(
     country_population(),
     set_type('population', type='number', groupChar=','),
     dump_to_path('country_population')
-).process()
+).process()[1]
 ```
 
 
 
 
-    (<datapackage.package.Package at 0x7f00d083c7f0>,
-     {'count_of_rows': 240,
-      'bytes': 5289,
-      'hash': '3bbfa40f5d22287e82da40dc6d7581a2',
-      'dataset_name': None})
+    {'count_of_rows': 240,
+     'bytes': 5277,
+     'hash': 'b293685b58a33bd7b02cc275d19d3a95',
+     'dataset_name': None}
 
 
 
@@ -267,7 +266,7 @@ it = pkg.resources[0].iter(keyed=True)
 print(next(it))
 ```
 
-    {'name': 'China', 'population': Decimal('1394660000')}
+    {'name': 'China', 'population': Decimal('1394720000')}
 
 
 Note how using the data package meta-data, data-types are restored and there's no need to 're-parse' the data. This also works with other types too, such as dates, booleans and even `list`s and `dict`s.
@@ -301,7 +300,7 @@ Flow(
     filter_pythagorean_triplets,
     dump_to_path('pythagorean_triplets'),
     printer(num_rows=1, tablefmt='html')
-).process()
+).process()[1]
 ```
 
 
@@ -328,11 +327,10 @@ Flow(
 
 
 
-    (<datapackage.package.Package at 0x7f00d097a5f8>,
-     {'count_of_rows': 6,
-      'bytes': 744,
-      'hash': '1f0df7ed401ccff9f6c1674e98c62467',
-      'dataset_name': None})
+    {'count_of_rows': 6,
+     'bytes': 744,
+     'hash': '1f0df7ed401ccff9f6c1674e98c62467',
+     'dataset_name': None}
 
 
 
@@ -374,7 +372,7 @@ Flow(
     add_is_guitarist_column,
     dump_to_path('beatles_guitarists'),
     printer(num_rows=1, tablefmt='html')
-).process()
+).process()[1]
 ```
 
 
@@ -401,11 +399,10 @@ Flow(
 
 
 
-    (<datapackage.package.Package at 0x7f00bf9f60f0>,
-     {'count_of_rows': 4,
-      'bytes': 896,
-      'hash': 'ae319bad0ad1e345a2a86d8dc9de8375',
-      'dataset_name': None})
+    {'count_of_rows': 4,
+     'bytes': 896,
+     'hash': 'ae319bad0ad1e345a2a86d8dc9de8375',
+     'dataset_name': None}
 
 
 
@@ -446,7 +443,7 @@ Flow(
     add_is_guitarist_column,
     dump_to_path('beatles_guitarists'),
     printer(num_rows=1, tablefmt='html')
-).process()
+).process()[1]
 ```
 
 
@@ -473,11 +470,10 @@ Flow(
 
 
 
-    (<datapackage.package.Package at 0x7f00bf95a898>,
-     {'count_of_rows': 4,
-      'bytes': 896,
-      'hash': 'ae319bad0ad1e345a2a86d8dc9de8375',
-      'dataset_name': None})
+    {'count_of_rows': 4,
+     'bytes': 896,
+     'hash': 'ae319bad0ad1e345a2a86d8dc9de8375',
+     'dataset_name': None}
 
 
 
@@ -491,7 +487,6 @@ In the next example we're removing an entire resource in a package processor - t
 
 
 ```python
-import collections
 from dataflows import Flow, load, dump_to_path, checkpoint, printer
 
 def find_double_winners(package):
@@ -522,7 +517,7 @@ def find_double_winners(package):
                  academy)
     
     # important to deque generators to ensure finalization steps of previous processors are executed
-    collections.deque(resources)
+    yield from resources
 
 Flow(
     # Emmy award nominees and winners
@@ -534,10 +529,10 @@ Flow(
     find_double_winners,
     dump_to_path('double_winners'),
     printer(num_rows=1, tablefmt='html')
-).process()
+).process()[1]
 ```
 
-    using checkpoint data from .checkpoints/emmy-academy-nominees-winners
+    saving checkpoint to: .checkpoints/emmy-academy-nominees-winners
 
 
 
@@ -564,14 +559,16 @@ Flow(
 </table>
 
 
+    checkpoint saved: emmy-academy-nominees-winners
 
 
 
-    (<datapackage.package.Package at 0x7f00bf6b4898>,
-     {'count_of_rows': 98,
-      'bytes': 6921,
-      'hash': '902088336aa4aa4fbab33446a241b5de',
-      'dataset_name': None})
+
+
+    {'count_of_rows': 98,
+     'bytes': 6921,
+     'hash': '902088336aa4aa4fbab33446a241b5de',
+     'dataset_name': None}
 
 
 
@@ -598,7 +595,7 @@ Flow(
     filter_rows(equals=[dict(Winner='1')]),
     dump_to_path('double_winners'),
     printer(num_rows=1, tablefmt='html')
-).process()
+).process()[1]
 ```
 
     using checkpoint data from .checkpoints/emmy-academy-nominees-winners
@@ -631,11 +628,10 @@ Flow(
 
 
 
-    (<datapackage.package.Package at 0x7f00bf4489b0>,
-     {'count_of_rows': 98,
-      'bytes': 6921,
-      'hash': '902088336aa4aa4fbab33446a241b5de',
-      'dataset_name': None})
+    {'count_of_rows': 98,
+     'bytes': 6921,
+     'hash': '902088336aa4aa4fbab33446a241b5de',
+     'dataset_name': None}
 
 
 
@@ -647,7 +643,7 @@ A complete list, which also includes an API reference for each one of them, can 
 
 ## Nested Flows
 
-The flow object itself can be used as a step in another flow, this allows for useful design patterns which promote code reusability and readibility:
+The flow object itself can be used as a step in another flow, this allows for useful design patterns which promote code reusability and readability:
 
 
 ```python
@@ -679,7 +675,7 @@ Flow(
     text_processing_flow(0),
     text_processing_flow(1),
     text_processing_flow(2),
-).process()
+).process()[1]
 ```
 
     *  A  R
@@ -693,7 +689,7 @@ Flow(
 
 
 
-    (<datapackage.package.Package at 0x7f00bf23b048>, {})
+    {}
 
 
 
@@ -701,3 +697,8 @@ Flow(
 
 * [DataFlows Processors Reference](https://github.com/datahq/dataflows/blob/master/PROCESSORS.md)
 * [Datapackage Pipelines Tutorial](https://github.com/frictionlessdata/datapackage-pipelines/blob/master/TUTORIAL.ipynb) - Use the flows as building blocks for more complex pipelines processing systems.
+
+
+```python
+
+```

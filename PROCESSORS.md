@@ -183,19 +183,19 @@ def dump_to_sql(tables,
 
 Save results from running a series of steps, if checkpoint exists - loads from checkpoint instead of running the steps.
 
-Checkpoint invalidation should be handled manually - by deleting the checkpoint path (by default at `.checkpoints/checkpoint_name`)
+Checkpoint invalidation should be handled manually - by deleting the checkpoint path (by default at `.checkpoints/<checkpoint_name>`)
 
 ```python
 def checkpoint(checkpoint_name, checkpoint_path='.checkpoints', steps=None, resources=None):
     pass
 ```
 
-- `checkpoint_name` - The checkpoint is saved to a datapackage at `cache_path/checkpoint_name`
-- `cache_path` - Relative or absolute path to save checkpoints at, default to relative path `.checkpoints`
+- `checkpoint_name` - The checkpoint is saved to a datapackage at `<checkpoint_path>/<checkpoint_name>`
+- `checkpoint_path` - Relative or absolute path to save checkpoints at, default to relative path `.checkpoints`
 - `steps` - Iterable of steps to checkpoint, when not provided, uses the previous steps in the flow
 - `resources` - Limit the checkpointing only to specific resources, same semantics as `load` processor `resources` argument
 
-To improve code readiblity, the checkpoint processor can be place anywhere in the flow and it will checkpoint the previous steps:
+To improve code readability, the checkpoint processor can be placed anywhere in the flow and it will checkpoint the previous steps:
 
 ```python
 from dataflows import Flow, checkpoint, printer
