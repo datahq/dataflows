@@ -28,4 +28,4 @@ version:
 	@echo $(VERSION)
 
 notebooks:
-	jupyter nbconvert *.ipynb --to markdown
+	rm -rf .checkpoints beatles.csv && jupyter nbconvert --execute *.ipynb --to markdown --inplace

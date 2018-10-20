@@ -339,54 +339,53 @@ def test_load_from_package_resources():
     assert data[0][1] == {'foo': 'baz1'}
 
 
-def test_cache():
-    import os
+def test_checkpoint():
+    from collections import defaultdict
+    from dataflows import Flow, checkpoint
     import shutil
-    from dataflows import cache
 
-    stats = {'a': 0, 'foo': 0}
+    shutil.rmtree('.checkpoints/test_checkpoint', ignore_errors=True)
 
-    def incr_stat(name):
-        stats[name] += 1
-        return stats[name]
+    stats = defaultdict(int)
 
-    cache_path = '.cache/test_cache'
-    expected_files = ['datapackage.json', 'res_1.csv', 'cached_resource.csv']
+    def get_data_count_views():
+        stats['stale'] += 1
 
-    shutil.rmtree(cache_path, ignore_errors=True)
+        def data():
+            yield {'foo': 'bar'}
+            stats['fresh'] += 1
+            stats['stale'] -= 1
 
-    def load_data(resource_name):
+        return data()
 
-        def processor(package):
-            package.pkg.add_resource({'name': resource_name,
-                                      'path': resource_name+'.csv',
-                                      'schema': {'fields': [{'name': 'foo', 'type': 'integer'}]}})
-            yield package.pkg
-            yield from package
-            yield ({'foo': incr_stat('foo')} for _ in range(20))
+    def run_data_count_flow():
+        assert Flow(
+            get_data_count_views(),
+            checkpoint('test_checkpoint'),
+        ).results()[0] == [[{'foo': 'bar'}]]
 
-        return processor
+    run_data_count_flow()
+    run_data_count_flow()
+    run_data_count_flow()
+    assert stats['fresh'] == 1
+    assert stats['stale'] == 2
 
-    f = Flow(
-        cache(
-            cache(
-                ({'a': incr_stat('a'), 'i': i} for i in range(10)),
-                cache_path=cache_path + '/first_cache'
-            ),
-            load_data('cached_resource'),
-            cache_path=cache_path
-        )
-    )
 
-    for i in range(3):
-        results, *_ = f.results()
-        assert results == [[{'a': i+1, 'i': i} for i in range(10)],
-                           [{'foo': i+1} for i in range(20)]], 'failed iteration {}'.format(i)
+def test_load_from_checkpoint():
+    from dataflows import Flow, checkpoint
+    import shutil
 
-    assert stats['a'] == 10
-    assert stats['foo'] == 20
-    for f in expected_files:
-        assert os.path.exists(cache_path + '/' + f)
+    shutil.rmtree('.checkpoints/test_load_from_checkpoint', ignore_errors=True)
+
+    assert Flow(
+        [{'foo': 'bar'}],
+        checkpoint('test_load_from_checkpoint')
+    ).process()
+
+    assert Flow(
+        checkpoint('test_load_from_checkpoint')
+    ).results()[0] == [[{'foo': 'bar'}]]
+
 
 
 def test_update_resource():
@@ -441,6 +440,38 @@ def test_dump_to_path_use_titles():
         assert stream.read() == [['שלום',   'aloha'],
                                  ['world',  'mundo'],
                                  ['עולם',   'عالم']]
+
+
+def test_load_dates():
+    from dateutil.tz import tzutc
+    from dataflows import Flow, dump_to_path, load, set_type, ValidationError
+    import datetime
+
+    _today = datetime.date.today()
+    _now = datetime.datetime.now()
+
+    def run_flow(datetime_format=None):
+        Flow(
+            [{'today': str(_today), 'now': str(_now)}],
+            set_type('today', type='date'),
+            set_type('now', type='datetime', format=datetime_format),
+            dump_to_path('data/dump_dates')
+        ).process()
+
+    try:
+        run_flow()
+        assert False
+    except ValidationError:
+        assert True
+
+    # must set format='any' to parse from datetime string
+    run_flow(datetime_format='any')
+
+    out_now = datetime.datetime(_now.year, _now.month, _now.day, _now.hour, _now.minute, _now.second, tzinfo=tzutc())
+
+    assert Flow(
+        load('data/dump_dates/datapackage.json'),
+    ).results()[0] == [[{'today': _today, 'now': out_now}]]
 
 
 def test_add_field():

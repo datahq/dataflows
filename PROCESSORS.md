@@ -179,53 +179,43 @@ def dump_to_sql(tables,
 - `updated_id_column` - Optional name of a column that will be added to the output data containing the id of the updated row in DB.
 
 
-#### cache
-Cache results from running a series of steps, if cache exists - loads from cache instead of running the steps.
+#### checkpoint
 
-Cache invalidation should be handled manually - by deleting the cache path.
+Save results from running a series of steps, if checkpoint exists - loads from checkpoint instead of running the steps.
+
+Checkpoint invalidation should be handled manually - by deleting the checkpoint path (by default at `.checkpoints/<checkpoint_name>`)
 
 ```python
-def cache(steps*, cache_path):
+def checkpoint(checkpoint_name, checkpoint_path='.checkpoints', steps=None, resources=None):
     pass
 ```
 
-- `steps*` - step functions to run to create the cache (same as the `Flow` class arguments)
-- `cache_path` - path to a unique directory that will hold the cache for the provided series of steps
+- `checkpoint_name` - The checkpoint is saved to a datapackage at `<checkpoint_path>/<checkpoint_name>`
+- `checkpoint_path` - Relative or absolute path to save checkpoints at, default to relative path `.checkpoints`
+- `steps` - Iterable of steps to checkpoint, when not provided, uses the previous steps in the flow
+- `resources` - Limit the checkpointing only to specific resources, same semantics as `load` processor `resources` argument
+
+To improve code readability, the checkpoint processor can be placed anywhere in the flow and it will checkpoint the previous steps:
 
 ```python
+from dataflows import Flow, checkpoint, printer
+
 f = Flow(
-    cache(
-        load('http://example.com/large_resource.csv'),
-        load('http://example.com/another_large_resource.csv'),
-        cache_path='.cache/unique-cache-identifier'
-    ),
+    load('http://example.com/large_resource.csv'),
+    load('http://example.com/another_large_resource.csv'),
+    checkpoint('load_data'),
+    process(),
+    checkpoint('process_data'),
     printer()
 )
 
-# first run will load the resources and save to the cache_path
+# first run will load the resources and save the checkpoints
 f.process()
 
-# next runs will load the resources from the cache_path
+# next run will load the resources from the last checkpoint
 f.process()
 ```
 
-The cache processor should always be the first step in the flow, you can nest cache processors for incremental caching.
-
-In the following example, you can refresh `another_resource` by deleting it's cache path, the `very_large_resources` cache will not be refreshed.
-
-```python
-f = Flow(
-    cache(
-        cache(
-            load('http://example.com/very_large_resource.csv'),
-            load('http://example.com/another_very_large_resource.csv'),
-            cache_path='.cache/very_large_resources'
-        ),
-        load('http://example.com/another_resource.csv')
-        cache_path='.cache/another_resource'
-    )
-)
-```
 
 ### Manipulate row-by-row
 #### add_field
