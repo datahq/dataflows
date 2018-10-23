@@ -1,5 +1,10 @@
 # ![logo](logo-s.png) DataFlows
 
+[![Travis](https://img.shields.io/travis/datahq/dataflows/master.svg)](https://travis-ci.org/datahq/dataflows)
+[![Coveralls](http://img.shields.io/coveralls/datahq/dataflows.svg?branch=master)](https://coveralls.io/r/datahq/dataflows?branch=master)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/dataflows.svg)
+
+
 DataFlows is a novel and intuitive way of building data processing flows.
 
 - It's built for medium-data processing - data that fits on your hard drive, but is too big to load in Excel or as-is into Python, and not big enough to require spinning up a Hadoop cluster...
