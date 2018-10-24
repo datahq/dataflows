@@ -47,6 +47,8 @@ class load(DataStreamProcessor):
                 descriptor = dict(path=self.load_source,
                                   profile='tabular-data-resource')
                 descriptor['format'] = self.options.get('format')
+                if 'encoding' in self.options:
+                    descriptor['encoding'] = self.options['encoding']
                 self.options.setdefault('ignore_blank_headers', True)
                 self.options.setdefault('headers', 1)
                 self.res = Resource(descriptor,
