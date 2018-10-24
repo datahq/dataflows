@@ -1,3 +1,4 @@
+import sys
 from tabulate import tabulate
 from ..helpers.resource_matcher import ResourceMatcher
 
@@ -26,8 +27,15 @@ def _table_print(data, kwargs):
         print(data)
 
 
+def truncate_cell(value, max_size):
+    if sys.getsizeof(value) > max_size:
+        return str(value)[:max_size] + ' ...'
+    else:
+        return value
+
+
 def printer(num_rows=10, last_rows=None, fields=None, resources=None,
-            header_print=_header_print, table_print=_table_print, **kwargs):
+            header_print=_header_print, table_print=_table_print, max_cell_size=100, **kwargs):
 
     def func(rows):
         spec = rows.res
@@ -54,7 +62,7 @@ def printer(num_rows=10, last_rows=None, fields=None, resources=None,
             yield row
 
             index = i + 1
-            row = [index] + [row[f] for f in field_names]
+            row = [index] + [truncate_cell(row[f], max_cell_size) for f in field_names]
 
             if index - x == (num_rows + 1):
                 x *= num_rows
