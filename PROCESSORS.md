@@ -10,7 +10,7 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 - **dump_to_zip** - Store the results in a valid datapackage, all files archived in one zipped file
 - **dump_to_sql** - Store the results in a relational database (creates one or more tables or updates existing tables)
 
-- **cache** - Cache results of a subflow in a datapackage and load it upon request
+- **checkpoint** - Cache results of a subflow in a datapackage and load it upon request
 
 ### Manipulate row-by-row
 - **add_field** - Adds a column to the data
@@ -23,7 +23,7 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 ### Manipulate the entire resource
 - **sort_rows** - Sort incoming data based on key
 - **unpivot** - Unpivot a table - convert one row with multiple value columns to multiple rows with one value column
- - **filter_rows** - Filter rows based on inclusive and exclusive value filters
+- **filter_rows** - Filter rows based on inclusive and exclusive value filters
 
 ### Manipulate package
 - **update_package** - Updates metadata of entire package
@@ -37,7 +37,7 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 Loads data from various source types (local files, remote URLS, Google Spreadsheets, databases...)
 
 ```python
-def load(source, name=None, resources=None, validate=False, **options):
+def load(source, name=None, resources=None, validate=False, strip=True, **options):
     pass
 ```
 
@@ -56,6 +56,7 @@ def load(source, name=None, resources=None, validate=False, **options):
     - `None` indicates to load all resources
     - The index of the resource in the package
 - `validate` - Should data be casted to the inferred data-types or not. Relevant only when _not_ loading data from datapackage.
+- `strip` - Should string values be stripped from whitespace characters surrounding them. Relevant only when _not_ loading data from datapackage.
 - `options` - based on the loaded file, extra options (e.g. `sheet` for Excel files etc., see the link to tabulator above)
 
 #### printer

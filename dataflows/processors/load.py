@@ -8,7 +8,7 @@ from ..helpers.resource_matcher import ResourceMatcher
 
 class load(DataStreamProcessor):
 
-    def __init__(self, load_source, name=None, resources=None, validate=False, **options):
+    def __init__(self, load_source, name=None, resources=None, validate=False, strip=True, **options):
         super(load, self).__init__()
         self.load_source = load_source
         self.options = options
@@ -16,6 +16,7 @@ class load(DataStreamProcessor):
         self.resources = resources
         self.load_dp = None
         self.validate = validate
+        self.strip = strip
 
     def process_datapackage(self, dp: Package):
         if isinstance(self.load_source, tuple):
@@ -61,6 +62,13 @@ class load(DataStreamProcessor):
                 dp.add_resource(self.res.descriptor)
         return dp
 
+    def stripper(self, iterator):
+        for r in iterator:
+            yield dict(
+                (k, v.strip()) if isinstance(v, str) else (k, v)
+                for k, v in r.items()
+            )
+
     def process_resources(self, resources):
         yield from super(load, self).process_resources(resources)
         if isinstance(self.load_source, tuple):
@@ -74,4 +82,6 @@ class load(DataStreamProcessor):
             it = self.res.iter(keyed=True, cast=False)
             if self.validate:
                 it = schema_validator(self.res, it)
+            if self.strip:
+                it = self.stripper(it)
             yield it
