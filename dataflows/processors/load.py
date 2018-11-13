@@ -51,7 +51,7 @@ class XMLParser(Parser):
     def __iter_extended_rows(self):
         from xml.etree.ElementTree import parse
         from xmljson import parker
-        
+
         parsed = parker.data(parse(self.__chars).getroot())
         elements = list(parsed.values())
         if len(elements) > 0:
