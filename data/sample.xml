@@ -1,0 +1,14 @@
+<library>
+   <book>
+      <title>The Fellowship of the Ring</title>
+      <publication-year>1954</publication-year>
+   </book>
+   <book>
+      <title>The Two Towers</title>
+      <publication-year>1954</publication-year>
+   </book>
+   <book>
+      <title>The Return of the King</title>
+      <publication-year>1955</publication-year>
+   </book>
+</library>

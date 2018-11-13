@@ -27,7 +27,6 @@ class XMLParser(Parser):
         self.reset()
 
     def close(self):
-        print('close', self.__chars)
         if not self.closed:
             self.__chars.close()
 
@@ -37,7 +36,6 @@ class XMLParser(Parser):
 
     @property
     def closed(self):
-        print('closed?', self.__chars)
         return self.__chars is None or self.__chars.closed
 
     @property
@@ -53,7 +51,14 @@ class XMLParser(Parser):
     def __iter_extended_rows(self):
         from xml.etree.ElementTree import parse
         from xmljson import parker
-        for row_number, row in enumerate(parker.data(parse(self.__chars).getroot())['node']):
+        
+        parsed = parker.data(parse(self.__chars).getroot())
+        elements = list(parsed.values())
+        if len(elements) > 0:
+            elements = elements[0]
+        else:
+            elements = []
+        for row_number, row in enumerate(elements, start=1):
             keys, values = zip(*(row.items()))
             yield (row_number, list(keys), list(values))
 
