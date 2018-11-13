@@ -1,9 +1,61 @@
 import os
 
 from datapackage import Package, Resource
+from tabulator.parser import Parser
+from tabulator.helpers import reset_stream
 from .. import DataStreamProcessor
 from ..base.schema_validator import schema_validator
 from ..helpers.resource_matcher import ResourceMatcher
+
+
+class XMLParser(Parser):
+    options = []
+
+    def __init__(self, loader, force_parse, **options):
+        self.__loader = loader
+        self.__force_parse = force_parse
+        self.__extended_rows = None
+        self.__encoding = None
+        self.__chars = None
+
+    def open(self, source, encoding=None):
+        self.close()
+        self.__chars = self.__loader.load(source, encoding=encoding)
+        self.__encoding = getattr(self.__chars, 'encoding', encoding)
+        if self.__encoding:
+            self.__encoding.lower()
+        self.reset()
+
+    def close(self):
+        print('close', self.__chars)
+        if not self.closed:
+            self.__chars.close()
+
+    def reset(self):
+        reset_stream(self.__chars)
+        self.__extended_rows = self.__iter_extended_rows()
+
+    @property
+    def closed(self):
+        print('closed?', self.__chars)
+        return self.__chars is None or self.__chars.closed
+
+    @property
+    def encoding(self):
+        return self.__encoding
+
+    @property
+    def extended_rows(self):
+        return self.__extended_rows
+
+    # Private
+
+    def __iter_extended_rows(self):
+        from xml.etree.ElementTree import parse
+        from xmljson import parker
+        for row_number, row in enumerate(parker.data(parse(self.__chars).getroot())['node']):
+            keys, values = zip(*(row.items()))
+            yield (row_number, list(keys), list(values))
 
 
 class load(DataStreamProcessor):
@@ -50,6 +102,8 @@ class load(DataStreamProcessor):
                 descriptor['format'] = self.options.get('format')
                 if 'encoding' in self.options:
                     descriptor['encoding'] = self.options['encoding']
+                if descriptor['format'] == 'xml' or self.load_source.endswith('.xml'):
+                    self.options.setdefault('custom_parsers', {})['xml'] = XMLParser
                 self.options.setdefault('ignore_blank_headers', True)
                 self.options.setdefault('headers', 1)
                 self.res = Resource(descriptor,
