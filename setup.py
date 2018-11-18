@@ -29,6 +29,7 @@ INSTALL_REQUIRES = [
     'inquirer',
     'tabulate',
     'tableschema-sql',
+    'xmljson',
 ]
 SPEEDUP_REQUIRES = [
     'plyvel',

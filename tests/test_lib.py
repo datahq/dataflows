@@ -536,3 +536,14 @@ def test_load_empty_headers():
         {'a': 5, 'b': 6}
     ]
     assert len(dp.resources[0].schema.fields) == 2
+
+def test_load_xml():
+    from dataflows import Flow, load
+
+    results, dp, stats = Flow(load('data/sample.xml')).results()
+
+    assert results[0] == [
+        {'publication-year': 1954, 'title': 'The Fellowship of the Ring'}, 
+        {'publication-year': 1954, 'title': 'The Two Towers'}, 
+        {'publication-year': 1955, 'title': 'The Return of the King'}
+    ]
