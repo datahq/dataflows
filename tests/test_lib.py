@@ -547,3 +547,20 @@ def test_load_xml():
         {'publication-year': 1954, 'title': 'The Two Towers'}, 
         {'publication-year': 1955, 'title': 'The Return of the King'}
     ]
+
+def test_save_load_dates():
+    from dataflows import Flow, dump_to_path, load, set_type, printer
+    import datetime
+
+    Flow(
+        [{'id': 1, 'ts': datetime.datetime.now()},
+         {'id': 2, 'ts': datetime.datetime.now()}],
+        set_type('ts', type='datetime', format='%Y-%m-%d/%H:%M:%S'),
+        dump_to_path('data/test_save_load_dates')
+    ).process()
+
+    res, _, _ = Flow(
+        load('data/test_save_load_dates/datapackage.json'),
+        printer()
+    ).results()
+    
