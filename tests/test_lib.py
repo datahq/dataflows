@@ -464,10 +464,16 @@ def test_load_dates():
     except ValidationError:
         assert True
 
-    # must set format='any' to parse from datetime string
-    run_flow(datetime_format='any')
+    # Default is isoformat(), str() gives a slightly different format:
+    # >>> from datetime import datetime
+    # >>> n = datetime.now()
+    # >>> str(n)
+    # '2018-11-22 13:25:47.945209'
+    # >>> n.isoformat()
+    # '2018-11-22T13:25:47.945209'
+    run_flow(datetime_format='%Y-%m-%d %H:%M:%S.%f')
 
-    out_now = datetime.datetime(_now.year, _now.month, _now.day, _now.hour, _now.minute, _now.second, tzinfo=tzutc())
+    out_now = datetime.datetime(_now.year, _now.month, _now.day, _now.hour, _now.minute, _now.second)
 
     assert Flow(
         load('data/dump_dates/datapackage.json'),
