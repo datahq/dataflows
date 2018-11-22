@@ -464,10 +464,16 @@ def test_load_dates():
     except ValidationError:
         assert True
 
-    # must set format='any' to parse from datetime string
-    run_flow(datetime_format='any')
+    # Default is isoformat(), str() gives a slightly different format:
+    # >>> from datetime import datetime
+    # >>> n = datetime.now()
+    # >>> str(n)
+    # '2018-11-22 13:25:47.945209'
+    # >>> n.isoformat()
+    # '2018-11-22T13:25:47.945209'
+    run_flow(datetime_format='%Y-%m-%d %H:%M:%S.%f')
 
-    out_now = datetime.datetime(_now.year, _now.month, _now.day, _now.hour, _now.minute, _now.second, tzinfo=tzutc())
+    out_now = datetime.datetime(_now.year, _now.month, _now.day, _now.hour, _now.minute, _now.second)
 
     assert Flow(
         load('data/dump_dates/datapackage.json'),
@@ -547,3 +553,20 @@ def test_load_xml():
         {'publication-year': 1954, 'title': 'The Two Towers'}, 
         {'publication-year': 1955, 'title': 'The Return of the King'}
     ]
+
+def test_save_load_dates():
+    from dataflows import Flow, dump_to_path, load, set_type, printer
+    import datetime
+
+    Flow(
+        [{'id': 1, 'ts': datetime.datetime.now()},
+         {'id': 2, 'ts': datetime.datetime.now()}],
+        set_type('ts', type='datetime', format='%Y-%m-%d/%H:%M:%S'),
+        dump_to_path('data/test_save_load_dates')
+    ).process()
+
+    res, _, _ = Flow(
+        load('data/test_save_load_dates/datapackage.json'),
+        printer()
+    ).results()
+    

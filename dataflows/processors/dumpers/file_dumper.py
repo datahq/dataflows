@@ -25,7 +25,7 @@ class FileDumper(DumperBase):
 
         # Make sure all resources are proper CSVs
         resource: Resource = None
-        for resource in datapackage.resources:
+        for i, resource in enumerate(datapackage.resources):
             if self.force_format:
                 file_format = self.forced_format
             else:
@@ -39,6 +39,7 @@ class FileDumper(DumperBase):
                 self.file_formatters[resource.name] = file_formatter
                 self.file_formatters[resource.name].prepare_resource(resource)
                 resource.commit()
+                datapackage.descriptor['resources'][i] = resource.descriptor
 
         return datapackage
 

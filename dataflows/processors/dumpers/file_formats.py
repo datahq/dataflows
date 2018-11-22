@@ -4,8 +4,6 @@ import os
 import isodate
 import logging
 
-from tableschema import Field
-
 
 DATE_FORMAT = '%Y-%m-%d'
 DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
@@ -34,9 +32,8 @@ class FileFormat():
 
     @classmethod
     def prepare_resource(cls, resource):
-        field: Field = None
-        for field in resource.schema.fields:
-            field.descriptor.update(cls.PYTHON_DIALECT.get(field.type, {}))
+        for field in resource.descriptor['schema']['fields']:
+            field.update(cls.PYTHON_DIALECT.get(field['type'], {}))
 
     def __transform_row(self, row):
         try:
