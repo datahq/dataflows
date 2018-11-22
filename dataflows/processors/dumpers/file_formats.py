@@ -115,7 +115,7 @@ class CSVFormat(FileFormat):
     def prepare_resource(cls, resource):
         descriptor = resource.descriptor
         descriptor['encoding'] = 'utf-8'
-        basename, _ = os.path.splitext(resource.source)
+        basename, _ = os.path.splitext(descriptor['path'])
         descriptor['path'] = basename + '.csv'
         descriptor['format'] = 'csv'
         descriptor['dialect'] = dict(
