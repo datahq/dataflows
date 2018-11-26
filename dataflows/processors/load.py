@@ -74,6 +74,7 @@ class load(DataStreamProcessor):
         self.load_dp = None
         self.validate = validate
         self.strip = strip
+        self.force_strings = options.get('force_strings') is True
 
     def process_datapackage(self, dp: Package):
         if isinstance(self.load_source, tuple):
@@ -117,6 +118,10 @@ class load(DataStreamProcessor):
                 self.res.infer(confidence=1, limit=1000)
                 if self.name is not None:
                     self.res.descriptor['name'] = self.name
+                if self.force_strings:
+                    for f in self.res.descriptor['schema']['fields']:
+                        f['type'] = 'string'
+                self.res.commit()
                 self.res.descriptor['path'] = '{name}.{format}'.format(**self.res.descriptor)
                 dp.add_resource(self.res.descriptor)
         return dp

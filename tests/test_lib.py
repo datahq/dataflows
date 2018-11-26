@@ -541,6 +541,25 @@ def test_load_empty_headers():
         {'a': 3, 'b': 4}, 
         {'a': 5, 'b': 6}
     ]
+
+    results, dp, stats = Flow(load('data/empty_headers.csv', force_strings=True), 
+                              ensure_type(str)).results()
+    assert results[0] == [
+        {'a': '1', 'b': '2'}, 
+        {'a': '2', 'b': '3'}, 
+        {'a': '3', 'b': '4'}, 
+        {'a': '5', 'b': '6'}
+    ]
+    assert len(dp.resources[0].schema.fields) == 2
+
+    results, dp, stats = Flow(load('data/empty_headers.csv', force_strings=True, validate=True), 
+                              ensure_type(str)).results()
+    assert results[0] == [
+        {'a': '1', 'b': '2'}, 
+        {'a': '2', 'b': '3'}, 
+        {'a': '3', 'b': '4'}, 
+        {'a': '5', 'b': '6'}
+    ]
     assert len(dp.resources[0].schema.fields) == 2
 
 def test_load_xml():
