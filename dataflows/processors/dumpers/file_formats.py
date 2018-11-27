@@ -6,7 +6,7 @@ import logging
 
 
 DATE_FORMAT = '%Y-%m-%d'
-DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
 TIME_FORMAT = '%H:%M:%S'
 
 
