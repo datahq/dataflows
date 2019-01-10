@@ -1,4 +1,3 @@
-import sys
 from tabulate import tabulate
 from ..helpers.resource_matcher import ResourceMatcher
 
