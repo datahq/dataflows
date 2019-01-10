@@ -74,7 +74,7 @@ def printer(num_rows=10, last_rows=None, fields=None, resources=None,
 - `resources` - optional, allows to limit the printed resources, same semantics as `load` processor `resources` argument
 - `header_print` - optional, callable used to print each resource header
 - `table_print` - optional, callable used to print the table data
-- `max_cell_size` - optional, limit the maximum cell size to the given number of bytes, the underlying tabulate library cannot handle large data sizes
+- `max_cell_size` - optional, limit the maximum cell size to the given number of chars
 - `**tabulate_kwargs` - additional kwargs passed to [tabulate](https://bitbucket.org/astanin/python-tabulate), allows to customize the printed tables
 
 If you are running from a [Jupyter](https://jupyter.org/) notebook, add `tablefmt='html'` to render an html table:
