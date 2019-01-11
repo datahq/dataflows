@@ -68,18 +68,23 @@ class iterable_loader(DataStreamProcessor):
         super(iterable_loader, self).__init__()
         self.iterable = iterable
         self.name = name
+        self.exc = None
 
     def handle_iterable(self):
         mode = None
-        for x in self.iterable:
-            if mode is None:
-                assert isinstance(x, (dict, list))
-                mode = dict if isinstance(x, dict) else list
-            assert isinstance(x, mode)
-            if mode == dict:
-                yield x
-            else:
-                yield dict(zip(('col{}'.format(i) for i in range(len(x))), x))
+        try:
+            for x in self.iterable:
+                if mode is None:
+                    assert isinstance(x, (dict, list))
+                    mode = dict if isinstance(x, dict) else list
+                assert isinstance(x, mode)
+                if mode == dict:
+                    yield x
+                else:
+                    yield dict(zip(('col{}'.format(i) for i in range(len(x))), x))
+        except Exception as e:
+            self.exc = e
+            raise
 
     def process_datapackage(self, dp: Package):
         name = self.name
@@ -90,6 +95,8 @@ class iterable_loader(DataStreamProcessor):
             path='{}.csv'.format(name)
         ), storage=iterable_storage(self.handle_iterable()))
         self.res.infer()
+        if self.exc is not None:
+            raise self.exc
         dp.descriptor.setdefault('resources', []).append(self.res.descriptor)
         return dp
 
