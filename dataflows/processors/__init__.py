@@ -14,6 +14,8 @@ from .filter_rows import filter_rows
 from .find_replace import find_replace
 from .join import join, join_self
 from .sort_rows import sort_rows
+from .stream import stream
 from .unpivot import unpivot
+from .unstream import unstream
 from .update_package import update_package, add_metadata
 from .update_resource import update_resource

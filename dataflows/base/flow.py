@@ -1,5 +1,5 @@
 from inspect import isfunction, signature
-from collections import Iterable
+from collections.abc import Iterable
 
 from .datastream_processor import DataStreamProcessor
 

@@ -480,6 +480,33 @@ def test_load_dates():
     ).results()[0] == [[{'today': _today, 'now': out_now}]]
 
 
+def test_load_dates_timezones():
+    from dataflows import Flow, checkpoint, load
+    from datetime import datetime, timezone
+    import shutil
+
+    dates = [
+        datetime.now(),
+        datetime.now(timezone.utc).astimezone()
+    ]
+
+    shutil.rmtree('.checkpoints/test_load_dates_timezones', ignore_errors=True)
+
+    Flow(
+        [{'date': d.date(), 'datetime': d} for d in dates],
+        checkpoint('test_load_dates_timezones')
+    ).process()
+
+    results = Flow(
+        checkpoint('test_load_dates_timezones')
+    ).results()
+    
+    assert list(map(lambda x: x['date'], results[0][0])) == \
+           list(map(lambda x: x.date(), dates))
+    assert list(map(lambda x: x['datetime'], results[0][0])) == \
+           list(map(lambda x: x, dates))
+
+
 def test_add_field():
     from dataflows import Flow, add_field
     f = Flow(
@@ -573,6 +600,7 @@ def test_load_xml():
         {'publication-year': 1955, 'title': 'The Return of the King'}
     ]
 
+
 def test_save_load_dates():
     from dataflows import Flow, dump_to_path, load, set_type, printer
     import datetime
@@ -589,3 +617,28 @@ def test_save_load_dates():
         printer()
     ).results()
     
+
+def test_stream_simple():
+    from dataflows import stream, unstream
+
+    datas1 = [
+        {'a': 1, 'b': True, 'c': 'c1'},
+        {'a': 2, 'b': True, 'c': 'c2'},
+    ]
+    datas2 = [
+        {'a': 3, 'b': True, 'c': 'c3'},
+        {'a': 4, 'b': True, 'c': 'c4'},
+        {'a': 5, 'b': True, 'c': 'c5'},
+    ]
+    Flow(
+        datas1,
+        datas2,
+        stream(open('out/test_stream_simple.stream', 'w'))
+    ).process()
+
+    results, dp, _ = Flow(
+        unstream(open('out/test_stream_simple.stream'))
+    ).results()
+
+    assert results[0] == datas1
+    assert results[1] == datas2

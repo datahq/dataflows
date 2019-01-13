@@ -1,7 +1,8 @@
 import os
 import itertools
 from dataflows import Flow
-from . import dump_to_path, load
+from .stream import stream
+from .unstream import unstream
 
 
 def _notify_checkpoint_saved(checkpoint_name):
@@ -26,13 +27,13 @@ class checkpoint(Flow):
         self.resources = resources
 
     def _preprocess_chain(self):
-        checkpoint_package_json_path = os.path.join(self.checkpoint_path, 'datapackage.json')
+        checkpoint_package_json_path = os.path.join(self.checkpoint_path, 'stream.ndjson')
         if os.path.exists(checkpoint_package_json_path):
             print('using checkpoint data from {}'.format(self.checkpoint_path))
-            return load(checkpoint_package_json_path, resources=self.resources),
+            return unstream(checkpoint_package_json_path),
         else:
             print('saving checkpoint to: {}'.format(self.checkpoint_path))
-            return itertools.chain(self.chain, (dump_to_path(self.checkpoint_path, resources=self.resources),
+            return itertools.chain(self.chain, (stream(checkpoint_package_json_path),
                                                 _notify_checkpoint_saved(self.checkpoint_name)))
 
     def handle_flow_checkpoint(self, parent_chain):
