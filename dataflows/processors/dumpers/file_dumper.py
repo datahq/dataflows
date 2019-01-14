@@ -89,7 +89,7 @@ class FileDumper(DumperBase):
         if resource.res.name in self.file_formatters:
             schema = resource.res.schema
 
-            temp_file = tempfile.NamedTemporaryFile(mode="w+", delete=False)
+            temp_file = tempfile.NamedTemporaryFile(mode="w+", delete=False, newline='')
             writer_kwargs = {'use_titles': True} if self.use_titles else {}
             writer = self.file_formatters[resource.res.name](temp_file, schema, **writer_kwargs)
 
