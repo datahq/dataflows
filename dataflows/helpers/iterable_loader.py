@@ -39,6 +39,8 @@ class iterable_storage(Storage):
             return 'datetime'
         elif isinstance(value, datetime.date):
             return 'date'
+        elif value is None:
+            return 'any'
         assert 'Unknown Python type: %r' % value
 
     def describe(self, _, descriptor=None):
