@@ -511,7 +511,7 @@ def join_self(source_name, source_key, target_name, fields):
 ```
 
 - `source_name` - name of the _source_ resource
-- `source_name` - One of
+- `source_key` - One of
     - List of field names which should be used as the lookup key
     - String, which would be interpreted as a Python format string used to form the key (e.g. `{<field_name_1>}:{field_name_2}`)
 - `source_delete` - delete source from data-package after joining (`True` by default)
