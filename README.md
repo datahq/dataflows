@@ -5,10 +5,13 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/dataflows.svg)
 [![Gitter chat](https://badges.gitter.im/dataflows-chat/Lobby.png)](https://gitter.im/dataflows-chat/Lobby)
 
-DataFlows is a novel and intuitive way of building data processing flows.
+DataFlows is a simple and intuitive way of building data processing flows.
 
-- It's built for medium-data processing - data that fits on your hard drive, but is too big to load in Excel or as-is into Python, and not big enough to require spinning up a Hadoop cluster...
-- It's built upon the foundation of the Frictionless Data project - which means that all data prduced by these flows is easily reusable by others.
+- It's built for small-to-medium-data processing - data that fits on your hard drive, but is too big to load in Excel or as-is into Python, and not big enough to require spinning up a Hadoop cluster...
+- It's built upon the foundation of the Frictionless Data project - which means that all data produced by these flows is easily reusable by others.
+- It's a pattern not a heavy-weight framework: if you already have a bunch of download and extract scripts this will be a natural fit
+
+Read more in the [Features section below][#features].
 
 ## QuickStart 
 
@@ -72,7 +75,7 @@ Type "help", "copyright", "credits" or "license" for more information.
     * `dataflow init` => `flow.py`
     * `python flow.py`
 * Validate input (and esp source) quickly (non-zero length, right structure, etc.)
-* Supports cache data from source and even between steps
+* Supports caching data from source and even between steps
     * so that we can run and test quickly (retrieving is slow)
 * Immediate test is run: and look at output ...
     * Log, debug, rerun
