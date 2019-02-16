@@ -3,13 +3,18 @@ import os
 
 from ..helpers.extended_json import ejson
 
+ACTIVE_SUFFIX = '.active'
+
 
 def stream(file=sys.stdout):
 
+    filename = None
+
     if isinstance(file, str):
-        basedir = os.path.dirname(file)
+        filename = file + ACTIVE_SUFFIX
+        basedir = os.path.dirname(filename)
         os.makedirs(basedir, exist_ok=True)
-        file = open(file, 'w')
+        file = open(filename, 'w')
 
     def write(obj):
         file.write(ejson.dumps(obj, sort_keys=True, ensure_ascii=True)+'\n')
@@ -26,5 +31,7 @@ def stream(file=sys.stdout):
         for res in package:
             yield res_writer(res)
             file.write('\n')
+        if filename:
+            os.rename(filename, filename[:-len(ACTIVE_SUFFIX)])
 
     return func
