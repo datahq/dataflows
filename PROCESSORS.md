@@ -28,6 +28,7 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 ### Manipulate package
 - **update_package** - Updates metadata of entire package
 - **update_resource** - Updates metadata of one or more resources
+- **set_primary_key** - Updates the primary key of one or more resources
 - **concatenate** - Concatenate multiple streams of data to a single one, resolving differently named columns along the way
 - **duplicate** - Duplicate a single stream of data to make two streams
 
@@ -454,6 +455,23 @@ You can use `update_resource` to rename a resource like so:
 ```python
   update_resource('current-name', name='new-name')
 ```
+
+#### set_primary_key.py
+Updates the primary key for one or more resources in the package
+
+```python
+def set_primary_key(primary_key, resources=None):
+    pass
+```
+
+- `primary_key` - List of field names to be set as the resource's primary key
+- `resources`
+  - A name of a resource to operate on
+  - A regular expression matching resource names
+  - A list of resource names
+  - `None` indicates operation should be done on all resources
+  - The index of the resource in the package
+
 
 #### concatenate.py
 Concatenate multiple streams of data to a single one, resolving differently named columns along the way.

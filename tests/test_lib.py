@@ -642,3 +642,18 @@ def test_stream_simple():
 
     assert results[0] == datas1
     assert results[1] == datas2
+
+
+def test_set_primary_key():
+    from dataflows import set_primary_key
+
+    datas1 = [
+        {'a': 1, 'b': True, 'c': 'c1'},
+        {'a': 2, 'b': True, 'c': 'c2'},
+    ]
+    _, dp, _ = Flow(
+        datas1,
+        set_primary_key(['a', 'b']),
+    ).results()
+
+    assert dp.resources[0].schema.primary_key == ['a', 'b']

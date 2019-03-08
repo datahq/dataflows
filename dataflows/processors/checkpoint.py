@@ -26,14 +26,20 @@ class checkpoint(Flow):
         self.checkpoint_path = os.path.join(checkpoint_path, checkpoint_name)
         self.resources = resources
 
+    @property
+    def filename(self):
+        return os.path.join(self.checkpoint_path, 'stream.ndjson')
+
+    def exists(self):
+        return os.path.exists(self.filename)
+
     def _preprocess_chain(self):
-        checkpoint_package_json_path = os.path.join(self.checkpoint_path, 'stream.ndjson')
-        if os.path.exists(checkpoint_package_json_path):
+        if os.path.exists(self.filename):
             print('using checkpoint data from {}'.format(self.checkpoint_path))
-            return unstream(checkpoint_package_json_path),
+            return unstream(self.filename),
         else:
             print('saving checkpoint to: {}'.format(self.checkpoint_path))
-            return itertools.chain(self.chain, (stream(checkpoint_package_json_path),
+            return itertools.chain(self.chain, (stream(self.filename),
                                                 _notify_checkpoint_saved(self.checkpoint_name)))
 
     def handle_flow_checkpoint(self, parent_chain):
