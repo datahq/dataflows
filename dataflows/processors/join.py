@@ -272,11 +272,11 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
 
         resource_names = [resource['name'] for resource in datapackage['resources']]
         assert source_name in resource_names, \
-            'Source resource ({}) not found package (target={})'\
-            .format(source_name, target_name)
+            'Source resource ({}) not found package (target={}, found: {})'\
+            .format(source_name, target_name, resource_names)
         assert target_name in resource_names, \
-            'Target resource ({}) not found package (source={})'\
-            .format(target_name, source_name)
+            'Target resource ({}) not found package (source={}, found: {})'\
+            .format(target_name, source_name, resource_names)
 
         for resource in datapackage['resources']:
 
@@ -295,8 +295,8 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
 
             elif resource['name'] == target_name:
                 assert isinstance(source_spec, dict),\
-                       'Source resource ({}) must appear before target resource ({})'\
-                       .format(source_name, target_name)
+                       'Source resource ({}) must appear before target resource ({}), found: {}'\
+                       .format(source_name, target_name, resource_names)
                 resource = process_target_resource(source_spec, resource)
                 new_resources.append(resource)
 
