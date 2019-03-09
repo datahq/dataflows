@@ -38,7 +38,9 @@ def process_resource(fields, rows):
     for row in rows:
         for field in fields:
             values = [
-                row.get(c) for c in field.get('source', []) if row.get(c) is not None
+                row.get(c)
+                for c in field.get('source', [])
+                if row.get(c) is not None
             ]
             with_ = field.get('with', field.get('with_', ''))
             new_col = AGGREGATORS[field['operation']].func(values, with_, row)
@@ -57,8 +59,8 @@ def add_computed_field(fields, resources=None):
                     {
                         'name': f['target'],
                         'type': get_type(descriptor['schema']['fields'],
-                                        f.get('source', []),
-                                        f['operation'])
+                                         f.get('source', []),
+                                         f['operation'])
                     } for f in fields
                 ]
                 descriptor['schema']['fields'].extend(new_fields)

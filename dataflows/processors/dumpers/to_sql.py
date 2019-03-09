@@ -53,15 +53,19 @@ class SQLDumper(DumperBase):
                  **options):
         super(SQLDumper, self).__init__(options)
         table_to_resource = tables
-        if engine.startswith('env://'):
-            env_var = engine[6:]
-            engine = os.environ.get(env_var)
-            if engine is None:
-                raise ValueError("Couldn't connect to DB - "
-                                 "Please set your '%s' environment variable" % env_var)
 
-        self.engine = create_engine(engine)
-        self.engine.connect()
+        if isinstance(engine, str):
+            if engine.startswith('env://'):
+                env_var = engine[6:]
+                engine = os.environ.get(env_var)
+                if engine is None:
+                    raise ValueError("Couldn't connect to DB - "
+                                     "Please set your '%s' environment variable" % env_var)
+
+            self.engine = create_engine(engine)
+            self.engine.connect()
+        else:
+            self.engine = engine
 
         for k, v in table_to_resource.items():
             v['table-name'] = k
