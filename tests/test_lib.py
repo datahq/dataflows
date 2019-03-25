@@ -69,6 +69,19 @@ def test_delete_field():
         [dict(name='y', type='string', format='default')]
 
 
+def test_select_field():
+    from dataflows import select_fields
+    f = Flow(
+        data,
+        select_fields(['y'])
+    )
+    results, dp, _ = f.results()
+    for i in results[0]:
+        assert list(i.keys()) == ['y']
+    assert dp.descriptor['resources'][0]['schema']['fields'] == \
+        [dict(name='y', type='string', format='default')]
+
+
 def test_find_replace():
     from dataflows import find_replace
     f = Flow(
