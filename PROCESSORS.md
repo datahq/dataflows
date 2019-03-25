@@ -14,6 +14,7 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 
 ### Manipulate row-by-row
 - **add_field** - Adds a column to the data
+- **select_fields** - Selects and keeps some columns in the data
 - **delete_fields** - Removes some columns from the data
 - **add_computed_field** - Adds new fields whose values are based on existing columns
 - **find_replace** - Look for specific patterns in specific fields and replace them with new data
@@ -239,6 +240,26 @@ def add_field(name, type, default=None, resources=None, **options):
 - `type` - Type of field to add
 - `default` - Default value to assign to the field
 - `options` - Other properties of the newly added field
+- `resources`
+  - A name of a resource to operate on
+  - A regular expression matching resource names
+  - A list of resource names
+  - `None` indicates operation should be done on all resources
+  - The index of the resource in the package
+
+#### select_fields
+Select fields (columns) in streamed resources and remove all other fields. Can also be used to reorder schema fields.
+
+`select_fields` accepts a list of resources and list of fields to remove
+
+_Note: if multiple resources provided, all of them should contain all fields to select_
+
+```python
+def select_fields(fields, resources=None):
+    pass
+```
+
+- `fields` - List of field (column) names to keep
 - `resources`
   - A name of a resource to operate on
   - A regular expression matching resource names
