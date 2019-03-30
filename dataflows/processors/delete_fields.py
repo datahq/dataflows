@@ -3,9 +3,11 @@ from ..helpers.resource_matcher import ResourceMatcher
 
 def process_resource(rows, fields):
     for row in rows:
-        for field in fields:
-            del row[field]
-        yield row
+        yield dict(
+            (k, v)
+            for k, v in row.items()
+            if k not in fields
+        )
 
 
 def delete_fields(fields, resources=None):
