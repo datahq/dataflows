@@ -59,10 +59,10 @@ def printer(num_rows=10, last_rows=None, fields=None, resources=None,
         x = 1
 
         for i, row in enumerate(rows):
-            yield row
 
             index = i + 1
-            row = [index] + [truncate_cell(row[f], max_cell_size) for f in field_names]
+            prow = [index] + [truncate_cell(row[f], max_cell_size) for f in field_names]
+            yield row
 
             if index - x == (num_rows + 1):
                 x *= num_rows
@@ -71,9 +71,9 @@ def printer(num_rows=10, last_rows=None, fields=None, resources=None,
                 last.clear()
                 if toprint and toprint[-1][0] != index - 1:
                     toprint.append(['...'])
-                toprint.append(row)
+                toprint.append(prow)
             else:
-                last.append(row)
+                last.append(prow)
                 if len(last) > (last_rows or num_rows):
                     last = last[1:]
 

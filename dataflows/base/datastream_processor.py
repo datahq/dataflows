@@ -11,6 +11,15 @@ from .resource_wrapper import ResourceWrapper
 from .schema_validator import schema_validator
 
 
+class LazyIterator:
+
+    def __init__(self, get_iterator):
+        self.get_iterator = get_iterator
+
+    def __iter__(self):
+        return self.get_iterator()
+
+
 class DataStreamProcessor:
 
     def __init__(self):
@@ -38,31 +47,37 @@ class DataStreamProcessor:
     def process_datapackage(self, dp: Package):
         return dp
 
+    def get_res(self, current_dp, name):
+        ret = self.datapackage.get_resource(name)
+        if ret is None:
+            ret = current_dp.get_resource(name)
+        assert ret is not None
+        return ret
+
+    def get_iterator(self, datastream):
+        current_dp = datastream.dp
+        res_iter_ = datastream.res_iter
+
+        def func():
+            res_iter = (ResourceWrapper(self.get_res(current_dp, rw.res.name), rw.it)
+                        for rw in res_iter_)
+            res_iter = self.process_resources(res_iter)
+            res_iter = (it if isinstance(it, ResourceWrapper) else ResourceWrapper(res, it)
+                        for res, it
+                        in itertools.zip_longest(self.datapackage.resources, res_iter))
+            return res_iter
+        return func
+
     def _process(self):
         datastream = self.source._process()
-        current_dp = datastream.dp
 
         self.datapackage = Package(descriptor=copy.deepcopy(datastream.dp.descriptor))
         self.datapackage = self.process_datapackage(self.datapackage)
         self.datapackage.commit()
 
-        res_iter = datastream.res_iter
-
-        def get_res(name):
-            ret = self.datapackage.get_resource(name)
-            if ret is None:
-                ret = current_dp.get_resource(name)
-            assert ret is not None
-            return ret
-
-        res_iter = (ResourceWrapper(get_res(rw.res.name), rw.it)
-                    for rw in res_iter)
-        res_iter = self.process_resources(res_iter)
-        res_iter = (it if isinstance(it, ResourceWrapper) else ResourceWrapper(res, it)
-                    for res, it
-                    in itertools.zip_longest(self.datapackage.resources, res_iter))
-
-        return DataStream(self.datapackage, res_iter, datastream.stats + [self.stats])
+        return DataStream(self.datapackage,
+                          LazyIterator(self.get_iterator(datastream)),
+                          datastream.stats + [self.stats])
 
     def process(self):
         ds = self._process()
