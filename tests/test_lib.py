@@ -6,6 +6,7 @@ data = [
     dict(x=3, y='c'),
 ]
 
+
 def test_dump_to_sql():
     from dataflows import Flow, printer, dump_to_sql
     from sqlalchemy import create_engine
@@ -26,6 +27,7 @@ def test_dump_to_sql():
     engine = create_engine('sqlite:///test.db')
     result = list(dict(x) for x in engine.execute('select * from output_table'))
     assert result == data
+
 
 def test_add_computed_field():
     from dataflows import add_computed_field
@@ -144,6 +146,92 @@ def test_unpivot():
     ]
 
 
+def test_unpivot_any_resources():
+    from dataflows import unpivot, validate
+    data1 = [
+        dict(
+            [('name', 'ike{}'.format(i))] +
+            [(str(year), year + i) for year in range(1990, 2020, 10)]
+        )
+        for i in range(5)
+    ]
+    data2 = [
+        dict(
+            [('city', 'mike{}'.format(i))] +
+            [(str(year), year + i) for year in range(2050, 2080, 10)]
+        )
+        for i in range(5)
+    ]
+    f = Flow(
+        data1,
+        data2,
+        unpivot(
+            [
+                dict(
+                    name='([0-9]+)',
+                    keys=dict(
+                        year='\\1'
+                    )
+                )
+            ],
+            [
+                dict(
+                    name='year',
+                    type='integer'
+                )
+            ],
+            dict(
+                name='amount',
+                type='integer'
+            )
+        ),
+        validate()
+    )
+    results, _, _ = f.results()
+    assert results[0] == [
+        dict(zip(['name', 'year', 'amount'], r))
+        for r in
+        [
+            ['ike0', 1990, 1990],
+            ['ike0', 2000, 2000],
+            ['ike0', 2010, 2010],
+            ['ike1', 1990, 1991],
+            ['ike1', 2000, 2001],
+            ['ike1', 2010, 2011],
+            ['ike2', 1990, 1992],
+            ['ike2', 2000, 2002],
+            ['ike2', 2010, 2012],
+            ['ike3', 1990, 1993],
+            ['ike3', 2000, 2003],
+            ['ike3', 2010, 2013],
+            ['ike4', 1990, 1994],
+            ['ike4', 2000, 2004],
+            ['ike4', 2010, 2014],
+        ]
+    ]
+    assert results[1] == [
+        dict(zip(['city', 'year', 'amount'], r))
+        for r in
+        [
+            ['mike0', 2050, 2050],
+            ['mike0', 2060, 2060],
+            ['mike0', 2070, 2070],
+            ['mike1', 2050, 2051],
+            ['mike1', 2060, 2061],
+            ['mike1', 2070, 2071],
+            ['mike2', 2050, 2052],
+            ['mike2', 2060, 2062],
+            ['mike2', 2070, 2072],
+            ['mike3', 2050, 2053],
+            ['mike3', 2060, 2063],
+            ['mike3', 2070, 2073],
+            ['mike4', 2050, 2054],
+            ['mike4', 2060, 2064],
+            ['mike4', 2070, 2074],
+        ]
+    ]
+
+
 def test_concatenate():
     from dataflows import concatenate
     
@@ -177,7 +265,7 @@ def test_concatenate():
 
 def test_filter_rows():
     from dataflows import filter_rows
-    
+
     f = Flow(
         [
             {'a': 1, 'b': 3},
@@ -438,6 +526,52 @@ def test_set_type_resources():
     assert results[2][8]['c'] == 8.0
 
 
+def test_set_type_errors():
+    from dataflows import Flow, set_type, ValidationError
+    from dataflows.base.schema_validator import ignore, drop, raise_exception
+
+    data = [
+        {'a': 1, 'b': 1},
+        {'a': 2, 'b': 2},
+        {'a': 3, 'b': 3},
+        {'a': 4, 'b': 'a'},
+    ]
+
+    f = Flow(
+        data,
+        set_type('b', type='integer', on_error=drop),
+    )
+    results, *_ = f.results()
+    assert results[0] == data[:3]
+
+    f = Flow(
+        data,
+        set_type('b', type='integer', on_error=ignore),
+    )
+    results, *_ = f.results(on_error=ignore)
+    assert results[0] == data[:4]
+
+    f = Flow(
+        data,
+        set_type('b', type='integer', on_error=raise_exception),
+    )
+    try:
+        results, *_ = f.results()
+        assert False
+    except ValidationError:
+        pass
+
+    f = Flow(
+        data,
+        set_type('b', type='integer'),
+    )
+    try:
+        results, *_ = f.results()
+        assert False
+    except ValidationError:
+        pass
+
+
 def test_dump_to_path_use_titles():
     from dataflows import Flow, dump_to_path, set_type
     import tabulator
@@ -494,7 +628,7 @@ def test_load_dates():
 
 
 def test_load_dates_timezones():
-    from dataflows import Flow, checkpoint, load
+    from dataflows import Flow, checkpoint
     from datetime import datetime, timezone
     import shutil
 
@@ -670,3 +804,55 @@ def test_set_primary_key():
     ).results()
 
     assert dp.resources[0].schema.primary_key == ['a', 'b']
+
+
+def test_validate():
+    from dataflows import Flow, validate, set_type
+    from dataflows.base.schema_validator import ignore
+    data = [
+        {'a': 1, 'b': 1},
+        {'a': 2, 'b': 2},
+        {'a': 3, 'b': 3},
+        {'a': 4, 'b': 'a'},
+    ]
+
+    class on_error():
+        def __init__(self):
+            self.bad_row, self.bad_index = None, None
+
+        def __call__(self, name, row, i, e):
+            self.bad_row, self.bad_index = row, i
+            return False
+
+    # Schema validator
+    handler = on_error()
+    res, *_ = Flow(
+        data,
+        set_type('b', type='integer', on_error=ignore),
+        validate(on_error=handler)
+    ).results()
+    assert len(res[0]) == 3
+    assert handler.bad_row == {'a': 4, 'b': 'a'}
+    assert handler.bad_index == 3
+
+    # Field validator
+    handler = on_error()
+    res, *_ = Flow(
+        data,
+        set_type('b', type='integer', on_error=ignore),
+        validate('a', lambda v: v < 4, on_error=handler)
+    ).results()
+    assert len(res[0]) == 3
+    assert handler.bad_row == {'a': 4, 'b': 'a'}
+    assert handler.bad_index == 3
+
+    # Row validator
+    handler = on_error()
+    res, *_ = Flow(
+        data,
+        set_type('b', type='integer', on_error=ignore),
+        validate(lambda v: v['a'] < 4, on_error=handler)
+    ).results()
+    assert len(res[0]) == 3
+    assert handler.bad_row == {'a': 4, 'b': 'a'}
+    assert handler.bad_index == 3

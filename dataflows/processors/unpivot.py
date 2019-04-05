@@ -25,8 +25,9 @@ def unpivot(unpivot_fields, extra_keys, extra_value, resources=None):
     def func(package):
 
         matcher = ResourceMatcher(resources, package.pkg)
-        unpivot_fields_without_regex = []
+        all_res_config = {}
         for resource in package.pkg.descriptor['resources']:
+            config = all_res_config.setdefault(resource['name'], {})
             name = resource['name']
             if not matcher.match(name):
                 continue
@@ -38,14 +39,15 @@ def unpivot(unpivot_fields, extra_keys, extra_value, resources=None):
 
             for u_field in unpivot_fields:
                 field_name_re = re.compile(u_field['name'])
-                fields_to_pivot = (list(
+                fields_to_pivot = list(
                     filter(match_fields(field_name_re, True), fields)
-                ))
+                )
                 fields = list(
                     filter(match_fields(field_name_re, False), fields)
                 )
 
                 # handle with regex
+                config.setdefault('unpivot_fields_without_regex', [])
                 for field_to_pivot in fields_to_pivot:
                     original_key_values = u_field['keys']  # With regex
                     new_key_values = {}
@@ -56,9 +58,9 @@ def unpivot(unpivot_fields, extra_keys, extra_value, resources=None):
                                 u_field['name'], new_val, field_to_pivot['name'])
                         new_key_values[key] = new_val
                         field_to_pivot['keys'] = new_key_values
-                    unpivot_fields_without_regex.append(field_to_pivot)
+                    config['unpivot_fields_without_regex'].append(field_to_pivot)
 
-            fields_to_keep = [f['name'] for f in fields]
+            config['fields_to_keep'] = [f['name'] for f in fields]
             fields.extend(extra_keys)
             fields.append(extra_value)
             schema['fields'] = fields
@@ -70,8 +72,8 @@ def unpivot(unpivot_fields, extra_keys, extra_value, resources=None):
                 yield resource
             else:
                 yield unpivot_rows(resource,
-                                   unpivot_fields_without_regex,
-                                   fields_to_keep,
+                                   all_res_config[resource.res.name]['unpivot_fields_without_regex'],
+                                   all_res_config[resource.res.name]['fields_to_keep'],
                                    extra_value)
 
     return func

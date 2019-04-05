@@ -8,8 +8,8 @@ class Flow:
     def __init__(self, *args):
         self.chain = args
 
-    def results(self):
-        return self._chain().results()
+    def results(self, on_error=None):
+        return self._chain().results(on_error=on_error)
 
     def process(self):
         return self._chain().process()

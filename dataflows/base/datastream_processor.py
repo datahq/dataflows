@@ -89,10 +89,10 @@ class DataStreamProcessor:
                 logging.error('%s', err)
         return ds.dp, ds.merge_stats()
 
-    def results(self):
+    def results(self, on_error=None):
         ds = self._process()
         results = [
-            list(schema_validator(res.res, res))
+            list(schema_validator(res.res, res, on_error=on_error))
             for res in ds.res_iter
         ]
         return results, ds.dp, ds.merge_stats()
