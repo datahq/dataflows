@@ -6,18 +6,21 @@ from .. import DataStreamProcessor, schema_validator
 
 class set_type(DataStreamProcessor):
 
-    def __init__(self, name, resources=-1, **options):
+    def __init__(self, name, resources=-1, on_error=None, **options):
         super(set_type, self).__init__()
         self.name = re.compile(f'^{name}$')
         self.options = options
         self.resources = resources
         self.field_names = []
+        self.on_error = on_error
 
     def process_resources(self, resources):
         for res in resources:
             if self.matcher.match(res.res.name):
                 if len(self.field_names) > 0:
-                    yield schema_validator(res.res, res, field_names=self.field_names)
+                    yield schema_validator(res.res, res,
+                                           field_names=self.field_names,
+                                           on_error=self.on_error)
                 else:
                     yield res
             else:

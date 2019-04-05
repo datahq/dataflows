@@ -10,6 +10,8 @@ from .. import DataStreamProcessor
 
 class iterable_storage(Storage):
 
+    SAMPLE_SIZE = 100
+
     def __init__(self, iterable):
         super(iterable_storage, self).__init__()
         self.iterable = iterable
@@ -22,38 +24,47 @@ class iterable_storage(Storage):
     def read(self): pass
     def write(self): pass
 
-    def field_type(self, value):
-        if isinstance(value, str):
-            return 'string'
-        elif isinstance(value, int):
-            return 'integer'
-        elif isinstance(value, (float, decimal.Decimal)):
-            return 'number'
-        elif isinstance(value, bool):
-            return 'boolean'
-        elif isinstance(value, list):
-            return 'array'
-        elif isinstance(value, dict):
-            return 'object'
-        elif isinstance(value, datetime.datetime):
-            return 'datetime'
-        elif isinstance(value, datetime.date):
-            return 'date'
-        elif value is None:
+    def field_type(self, values):
+        types = set()
+        for value in values:
+            if isinstance(value, str):
+                types.add('string')
+            elif isinstance(value, int):
+                types.add('integer')
+            elif isinstance(value, (float, decimal.Decimal)):
+                types.add('number')
+            elif isinstance(value, bool):
+                types.add('boolean')
+            elif isinstance(value, list):
+                types.add('array')
+            elif isinstance(value, dict):
+                types.add('object')
+            elif isinstance(value, datetime.datetime):
+                types.add('datetime')
+            elif isinstance(value, datetime.date):
+                types.add('date')
+            elif value is None:
+                pass
+            else:
+                assert 'Unknown Python type: %r' % value
+        if len(types) > 1:
             return 'any'
-        assert 'Unknown Python type: %r' % value
+        else:
+            return types.pop()
 
     def describe(self, _, descriptor=None):
         if descriptor is not None:
             return descriptor
         if self.schema is None:
             try:
-                rec = next(self.iterable)
-                self.iterable = itertools.chain([rec], self.iterable)
+                sample = list(itertools.islice(self.iterable, self.SAMPLE_SIZE))
+                rec = sample[0]
+                self.iterable = itertools.chain(sample, self.iterable)
                 self.schema = dict(
                     fields=[
-                        dict(name=name, type=self.field_type(value))
-                        for name, value in rec.items()
+                        dict(name=name,
+                             type=self.field_type([s.get(name) for s in sample]))
+                        for name in rec.keys()
                     ]
                 )
             except Exception:

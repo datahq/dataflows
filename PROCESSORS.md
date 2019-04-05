@@ -349,7 +349,7 @@ Sets a field's data type and type options and validates its data based on its ne
 By default, this processor modifies the last resource in the package.
 
 ```python
-def set_type(name, resources=-1, **options):
+def set_type(name, resources=-1, on_error=None, **options):
     pass
 ```
 
@@ -360,19 +360,40 @@ def set_type(name, resources=-1, **options):
   - A list of resource names
   - `None` indicates operation should be done on all resources
   - The index of the resource in the package
+- `on_error` - callback function to be called when a validation error occurs.
+  Function has the signature `callback(resource_name, row, row_index, exception)`.
+  It could raise an exception, or return `True` (for keeping the row anyway) or `False` (for dropping it).
+  A few predefined options are:
+  - `dataflows.base.schema_validator.raise_exception` - the default behaviour, will raise a `dataflows.ValidationError` exception.
+  - `dataflows.base.schema_validator.ignore` - drop invalid rows
+  - `dataflows.base.schema_validator.ignore` - ignore all errors
 - `options` - options to set for the field. Most common ones would be:
   - `type` - set the data type (e.g. `string`, `integer`, `number` etc.)
-  - `format` - e.g. for date fields 
+  - `format` - e.g. for date fields
   etc.
  (more info on possible options can be found in the [tableschema spec](https://frictionlessdata.io/specs/table-schema/))
 
+
 #### validate.py
-Validate incoming data based on existing type definitions.
+Validate incoming data based on existing type definitions or custom
 
 ```python
-def validate():
+def validate(*args, resources=None, on_error=None):
     pass
 ```
+
+- `args` - validation parameters, could be one of the above
+  - No arguments - will validate the data based on the json table schema specification
+  - One argument - will be treated as a row validation function, returns `True` when row is valid
+  - Two arguments - will be treated as a `(field_name, validator)` tuple, validator being a function receiving the value of `field_name` in each row and returns `True` if the value is valid.
+- `resources` - which resources to validate
+  - A name of a resource to operate on
+  - A regular expression matching resource names
+  - A list of resource names
+  - `None` indicates operation should be done on all resources
+  - The index of the resource in the package
+- `on_error` - callback function to be called when a validation error occurs.
+  See `set_type` for details.
 
 ### Manipulate the entire resource
 #### sort_rows.py
