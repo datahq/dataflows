@@ -48,6 +48,31 @@ def test_add_computed_field():
     assert f == ['a - 1', 'b - 2', 'c - 3']
 
 
+def test_add_computed_field_func():
+    from dataflows import add_computed_field
+
+    data = [
+        dict(x=i) for i in range(10)
+    ]
+
+    f = Flow(
+        data,
+        add_computed_field([
+            dict(target=dict(name='square', type='integer'),
+                 operation=lambda ),
+            dict(target='f', operation='format', with_='{y} - {x}')
+        ])
+    )
+    results, dp, stats = f.results()
+    results = list(results[0])
+
+    xx = [x['xx'] for x in results]
+    f = [x['f'] for x in results]
+
+    assert xx == [1, 4, 9]
+    assert f == ['a - 1', 'b - 2', 'c - 3']
+
+
 def test_add_metadata():
     from dataflows import add_metadata
     f = Flow(

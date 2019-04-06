@@ -288,19 +288,22 @@ def delete_fields(fields, resources=None):
   - The index of the resource in the package
 
 #### add_computed_field
-Add field(s) to streamed resources
+Adds new fields whose values are based on existing columns.
 
-`add_computed_field` accepts a list of resources and fields to add to existing resource. It will output the rows for each resource with new field(s) (columns) in it. `add_computed_field` allows to perform various operations before inserting value into targeted field.
-
-Adds new fields whose values are based on existing columns
+`add_computed_field` accepts one or more fields to add to existing resources. It will modify the schemas and add the new fields to processed resources. The content of the new fields can be a constant, based on other columns with some predefined operations or be dynamically calculated using a user-specified function.
 
 ```python
-def add_computed_field(fields, resources=None):
+def add_computed_field(*args, **kw, resources=None):
     pass
 ```
 
-- `fields` - List of actions to be performed on the targeted fields. Each list item is an object with the following keys:
-  - `operation`: operation to perform on values of pre-defined columns of the same row. available operations:
+This function accepts a single field specification as keyword parameters, or a list of field specifications as a list of dicts in the first positional argument.
+
+A new field specification has the following keys:
+  - `target` - can be the name of the new field, or a full field specification (dict with `name`, `type` and other fields)
+  - `operation`: operation to perform on values of pre-defined columns of the same row.
+    Can be a function that accepts a row and returns the value of the new field, or a string containing the name of a predefined operation.
+    Available operations:
     - `constant` - add a constant value
     - `sum` - summed value for given columns in a row.
     - `avg` - average value from given columns in a row.
@@ -309,12 +312,12 @@ def add_computed_field(fields, resources=None):
     - `multiply` - product of given columns in a row.
     - `join` - joins two or more column values in a row.
     - `format` - Python format string used to form the value Eg:  `my name is {first_name}`.
-  - `target` - name of the new field.
   - `source` - list of columns the operations should be performed on (Not required in case of `format` and `constant`).
-  - `with` - String passed to `constant`, `format` or `join` operations
+  - `with` (also accepts `with_`) - String passed to `constant`, `format` or `join` operations
     - in `constant` - used as constant value
     - in `format` - used as Python format string with existing column values Eg: `{first_name} {last_name}`
     - in `join` - used as delimiter
+
 - `resources`
   - A name of a resource to operate on
   - A regular expression matching resource names
@@ -322,6 +325,23 @@ def add_computed_field(fields, resources=None):
   - `None` indicates operation should be done on all resources
   - The index of the resource in the package
 
+Examples:
+```python
+Flow(
+    # ... adding single fields with built-in operations
+    add_computed_field(target='the-avg', operation='avg', source=['col-a', 'col-b']),
+    add_computed_field(target='the-sum', operation='sum', source=['col-a', 'col-b']),
+    # ... adding two fields in a single operation
+    add_computed_field([
+        dict(target='formatted', operation='format', with_='{col-a}-{col-b}'),
+        dict(target=dict(name='created', type='date'), operation='constant', with_=datetime.today()),
+    ]),
+    # ... and with a custom function
+    add_computed_field(target=dict(name='power', type='integer'),
+                       operation=lambda row: row['col-a'] ** row['col-b'],
+                       resources='my-resource-name'),
+)
+```
 
 #### find_replace.py
 Look for specific patterns in specific fields and replace them with new data
