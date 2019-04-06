@@ -238,7 +238,9 @@ def add_field(name, type, default=None, resources=None, **options):
 
 - `name` - Name of field to add 
 - `type` - Type of field to add
-- `default` - Default value to assign to the field
+- `default` - Value to assign to the field
+    - can be a literal value to be added to all rows
+    - can be a callable which gets a row and returns a value for the newly added field
 - `options` - Other properties of the newly added field
 - `resources`
   - A name of a resource to operate on
