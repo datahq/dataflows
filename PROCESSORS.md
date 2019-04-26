@@ -498,6 +498,21 @@ Flow(data, unpivot(unpivoting_fields, extra_keys, extra_value)).results()[0]
 # [[ {'year': 2000, 'value': 'a1'}, {'year': 2001, 'value': 'b1'}, ... ]]
 ```
 
+As a result, I have a normalized data table:
+
+```
+year,value
+2000,a1
+2000,a2
+2000,a3
+2001,b1
+2001,b2
+2001,b3
+2002,c1
+2002,c2
+2002,c3
+```
+
 #### filter_rows
 Filter rows based on inclusive and exclusive value filters.
 `filter_rows` accepts equality and inequality conditions and tests each row in the selected resources. If none of the conditions validate, the row will be discarded.
