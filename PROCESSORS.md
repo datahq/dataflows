@@ -465,6 +465,53 @@ def unpivot(unpivot_fields, extra_keys, extra_value, resources=None):
   - `None` indicates operation should be done on all resources
   - The index of the resource in the package
 
+Examples:
+```
+2000,2001,2002
+a1,b1,c1,d1
+a2,b2,c2,d2
+```
+
+Let's unpivot the above table so that it has normalized form:
+```python
+from dataflows import Flow, unpivot
+
+data = [
+    {'2000': 'a1', '2001': 'b1', '2002': 'c1'},
+    {'2000': 'a2', '2001': 'b2', '2002': 'c2'}, 
+    {'2000': 'a3', '2001': 'b3', '2002': 'c3'}
+]
+
+# Using regex, we can select all headers that can be a year:
+unpivoting_fields = [
+    { 'name': '([0-9]{4})', 'keys': {'year': r'\1'} }
+]
+
+# A newly created column header would be 'year' with type 'year':
+extra_keys = [ {'name': 'year', 'type': 'year'} ]
+# And values will be placed in the 'value' column with type 'string':
+extra_value = {'name': 'value', 'type': 'string'}
+
+
+Flow(data, unpivot(unpivoting_fields, extra_keys, extra_value)).results()[0]
+# The last statement would print unpivoted data into stdout:
+# [[ {'year': 2000, 'value': 'a1'}, {'year': 2001, 'value': 'b1'}, ... ]]
+```
+
+As a result, I have a normalized data table:
+
+```
+year,value
+2000,a1
+2000,a2
+2000,a3
+2001,b1
+2001,b2
+2001,b3
+2002,c1
+2002,c2
+2002,c3
+```
 
 #### filter_rows
 Filter rows based on inclusive and exclusive value filters.
