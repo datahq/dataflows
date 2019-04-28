@@ -133,15 +133,17 @@ def test_unpivot():
         data,
         unpivot(
             [
-                dict(name='x',
-                     keys=dict(
-                         field='x-value'
-                     )
+                dict(
+                    name='x',
+                    keys=dict(
+                        field='x-value'
+                    )
                 ),
-                dict(name='y',
-                     keys=dict(
-                         field='y-value'
-                     )
+                dict(
+                    name='y',
+                    keys=dict(
+                        field='y-value'
+                    )
                 ),
             ],
             [
@@ -158,7 +160,7 @@ def test_unpivot():
     )
     results, _, _ = f.results()
     assert results[0] == [
-        dict(zip(['field', 'the-value'], r)) 
+        dict(zip(['field', 'the-value'], r))
         for r in
         [
             ['x-value', 1],
@@ -259,7 +261,7 @@ def test_unpivot_any_resources():
 
 def test_concatenate():
     from dataflows import concatenate
-    
+
     f = Flow(
         [
             {'a': 1, 'b': 2},
@@ -302,14 +304,14 @@ def test_filter_rows():
         filter_rows(not_equals=[dict(b=3)]),
     )
     results, _, _ = f.results()
-    assert results[0][0] == dict(a = 1, b = 4)
+    assert results[0][0] == dict(a=1, b=4)
     assert len(results[0]) == 1
     assert len(results) == 1
 
 
 def test_sort_rows():
     from dataflows import sort_rows
-    
+
     f = Flow(
         [
             {'a': 1, 'b': 3},
@@ -332,7 +334,7 @@ def test_sort_reverse_many_rows():
     from dataflows import sort_rows
 
     f = Flow(
-        ({'a': i, 'b': i%5} for i in range(1000)),
+        ({'a': i, 'b': i % 5} for i in range(1000)),
         sort_rows(key='{b}{a}', reverse=True, batch_size=0),
     )
     results, _, _ = f.results()
@@ -343,7 +345,7 @@ def test_sort_reverse_many_rows():
 
 def test_duplicate():
     from dataflows import duplicate
-    
+
     a = [
             {'a': 1, 'b': 3},
             {'a': 2, 'b': 3},
@@ -415,7 +417,7 @@ def test_load_from_package():
 def test_load_from_env_var():
     import os
     from dataflows import load, dump_to_path
-    
+
     Flow(
         [{'foo': 'bar'}],
         dump_to_path('data/load_from_package')
@@ -445,7 +447,6 @@ def test_load_from_package_resource_matching():
 
     assert len(ds.dp.resources) == 1
     assert [list(res) for res in ds.res_iter] == [[{'foo': 'baz'}]]
-
 
 
 def test_load_from_package_resources():
@@ -513,7 +514,6 @@ def test_load_from_checkpoint():
     ).results()[0] == [[{'foo': 'bar'}]]
 
 
-
 def test_update_resource():
     from dataflows import Flow, printer, update_resource
 
@@ -545,7 +545,7 @@ def test_set_type_resources():
         validate()
     )
     results, dp, stats = f.results()
-    print(dp.descriptor) 
+    print(dp.descriptor)
     assert results[0][1]['a'] == 1
     assert results[1][3]['b'] == 3
     assert results[2][8]['c'] == 8.0
@@ -615,7 +615,7 @@ def test_dump_to_path_use_titles():
 
 
 def test_load_dates():
-    from dateutil.tz import tzutc
+    # from dateutil.tz import tzutc
     from dataflows import Flow, dump_to_path, load, set_type, ValidationError
     import datetime
 
@@ -672,11 +672,11 @@ def test_load_dates_timezones():
     results = Flow(
         checkpoint('test_load_dates_timezones')
     ).results()
-    
+
     assert list(map(lambda x: x['date'], results[0][0])) == \
-           list(map(lambda x: x.date(), dates))
+        list(map(lambda x: x.date(), dates))
     assert list(map(lambda x: x['datetime'], results[0][0])) == \
-           list(map(lambda x: x, dates))
+        list(map(lambda x: x, dates))
 
 
 def test_add_field():
@@ -689,77 +689,96 @@ def test_add_field():
     )
     results, dp, _ = f.results()
     assert results == [[
-        {'a': 0, 'b': 'b', 'c': None, 'd': None}, 
-        {'a': 1, 'b': 'b', 'c': None, 'd': None}, 
+        {'a': 0, 'b': 'b', 'c': None, 'd': None},
+        {'a': 1, 'b': 'b', 'c': None, 'd': None},
         {'a': 2, 'b': 'b', 'c': None, 'd': None}
     ]]
     assert dp.descriptor == \
-         {'profile': 'data-package',
-          'resources': [{'name': 'res_1',
-                         'path': 'res_1.csv',
-                         'profile': 'tabular-data-resource',
-                         'schema': {'fields': [{'format': 'default',
-                                                'name': 'a',
-                                                'type': 'integer'},
-                                               {'format': 'default',
-                                                'name': 'b',
-                                                'type': 'string'},
-                                               {'format': 'default',
-                                                'name': 'c',
-                                                'type': 'number'},
-                                               {'format': 'default',
-                                                'name': 'd',
-                                                'title': 'mybool',
-                                                'type': 'boolean'}],
-                                    'missingValues': ['']}}]}
+        {
+            'profile': 'data-package',
+            'resources': [
+                {
+                    'name': 'res_1',
+                    'path': 'res_1.csv',
+                    'profile': 'tabular-data-resource',
+                    'schema': {
+                        'fields': [
+                            {
+                                'format': 'default',
+                                'name': 'a',
+                                'type': 'integer'
+                            },
+                            {
+                                'format': 'default',
+                                'name': 'b',
+                                'type': 'string'
+                            },
+                            {
+                                'format': 'default',
+                                'name': 'c',
+                                'type': 'number'
+                            },
+                            {
+                                'format': 'default',
+                                'name': 'd',
+                                'title': 'mybool',
+                                'type': 'boolean'
+                            }
+                        ],
+                        'missingValues': ['']
+                    }
+                }
+            ]
+        }
 
 
 def test_load_empty_headers():
-    from dataflows import Flow, load, printer
+    from dataflows import Flow, load
 
     def ensure_type(t):
         def func(row):
             assert isinstance(row['a'], t)
         return func
 
-    results, dp, stats = Flow(load('data/empty_headers.csv'), 
+    results, dp, stats = Flow(load('data/empty_headers.csv'),
                               ensure_type(str)).results()
     assert results[0] == [
-        {'a': 1, 'b': 2}, 
-        {'a': 2, 'b': 3}, 
-        {'a': 3, 'b': 4}, 
+        {'a': 1, 'b': 2},
+        {'a': 2, 'b': 3},
+        {'a': 3, 'b': 4},
         {'a': 5, 'b': 6}
     ]
     assert len(dp.resources[0].schema.fields) == 2
 
-    results, dp, stats = Flow(load('data/empty_headers.csv', validate=True), 
+    results, dp, stats = Flow(load('data/empty_headers.csv', validate=True),
                               ensure_type(int)).results()
     assert results[0] == [
-        {'a': 1, 'b': 2}, 
-        {'a': 2, 'b': 3}, 
-        {'a': 3, 'b': 4}, 
+        {'a': 1, 'b': 2},
+        {'a': 2, 'b': 3},
+        {'a': 3, 'b': 4},
         {'a': 5, 'b': 6}
     ]
 
-    results, dp, stats = Flow(load('data/empty_headers.csv', force_strings=True), 
+    results, dp, stats = Flow(load('data/empty_headers.csv', force_strings=True),
                               ensure_type(str)).results()
     assert results[0] == [
-        {'a': '1', 'b': '2'}, 
-        {'a': '2', 'b': '3'}, 
-        {'a': '3', 'b': '4'}, 
+        {'a': '1', 'b': '2'},
+        {'a': '2', 'b': '3'},
+        {'a': '3', 'b': '4'},
         {'a': '5', 'b': '6'}
     ]
     assert len(dp.resources[0].schema.fields) == 2
 
-    results, dp, stats = Flow(load('data/empty_headers.csv', force_strings=True, validate=True), 
+    results, dp, stats = Flow(load('data/empty_headers.csv', force_strings=True, validate=True),
                               ensure_type(str)).results()
     assert results[0] == [
-        {'a': '1', 'b': '2'}, 
-        {'a': '2', 'b': '3'}, 
-        {'a': '3', 'b': '4'}, 
+        {'a': '1', 'b': '2'},
+        {'a': '2', 'b': '3'},
+        {'a': '3', 'b': '4'},
         {'a': '5', 'b': '6'}
     ]
     assert len(dp.resources[0].schema.fields) == 2
+
 
 def test_load_xml():
     from dataflows import Flow, load
@@ -767,8 +786,8 @@ def test_load_xml():
     results, dp, stats = Flow(load('data/sample.xml')).results()
 
     assert results[0] == [
-        {'publication-year': 1954, 'title': 'The Fellowship of the Ring'}, 
-        {'publication-year': 1954, 'title': 'The Two Towers'}, 
+        {'publication-year': 1954, 'title': 'The Fellowship of the Ring'},
+        {'publication-year': 1954, 'title': 'The Two Towers'},
         {'publication-year': 1955, 'title': 'The Return of the King'}
     ]
 
@@ -788,7 +807,7 @@ def test_save_load_dates():
         load('data/test_save_load_dates/datapackage.json'),
         printer()
     ).results()
-    
+
 
 def test_stream_simple():
     from dataflows import stream, unstream
@@ -881,3 +900,136 @@ def test_validate():
     assert len(res[0]) == 3
     assert handler.bad_row == {'a': 4, 'b': 'a'}
     assert handler.bad_index == 3
+
+
+def test_join():
+    from dataflows import Flow, join, join_with_self, set_type, sort_rows
+    from decimal import Decimal
+
+    characters = [
+        {'first_name': 'Jaime', 'house': 'Lannister', 'last_name': 'Lannister', 'age': 34},
+        {'first_name': 'Tyrion', 'house': 'Lannister', 'last_name': 'Lannister', 'age': 27},
+        {'first_name': 'Cersei', 'house': 'Lannister', 'last_name': 'Lannister', 'age': 34},
+        {'first_name': 'Jon', 'house': 'Stark', 'last_name': 'Snow', 'age': 17},
+        {'first_name': 'Sansa', 'house': 'Stark', 'last_name': 'Stark', 'age': 14},
+        {'first_name': 'Rickon', 'house': 'Stark', 'last_name': 'Stark', 'age': 5},
+        {'first_name': 'Arya', 'house': 'Stark', 'last_name': 'Stark', 'age': 11},
+        {'first_name': 'Bran', 'house': 'Stark', 'last_name': 'Stark', 'age': 10},
+        {'first_name': 'Daenerys', 'house': 'Targaryen', 'last_name': 'Targaryen', 'age': 16},
+    ]
+
+    houses = [
+        {'house': 'House of Lannister'},
+        {'house': 'House of Greyjoy'},
+        {'house': 'House of Stark'},
+        {'house': 'House of Targaryen'},
+        {'house': 'House of Martell'},
+        {'house': 'House of Tyrell'},
+    ]
+
+    res, _, _ = Flow(
+        characters,
+        set_type('age', type='number'),
+        houses,
+        join(
+            'res_1',
+            'House of {house}',
+            'res_2',
+            '{house}',
+            dict(
+                max_age={
+                    'name': 'age',
+                    'aggregate': 'max'
+                },
+                avg_age={
+                    'name': 'age',
+                    'aggregate': 'avg'
+                },
+                representative={
+                    'name': 'first_name',
+                    'aggregate': 'last'
+                },
+                representative_age={
+                    'name': 'age'
+                },
+                number_of_characters={
+                    'aggregate': 'count'
+                },
+                last_names={
+                    'name': 'last_name',
+                    'aggregate': 'counters'
+                }
+            ), False, True
+        )
+    ).results()
+
+    assert res[0] == [
+        {
+            'avg_age': Decimal('31.66666666666666666666666667'),
+            'house': 'House of Lannister',
+            'max_age': Decimal(34),
+            'number_of_characters': 3,
+            'representative': 'Cersei',
+            'representative_age': Decimal(34),
+            'last_names': [('Lannister', 3)]
+        },
+        {
+            'avg_age': Decimal('11.4'),
+            'house': 'House of Stark',
+            'max_age': Decimal(17),
+            'number_of_characters': 5,
+            'representative': 'Bran',
+            'representative_age': Decimal(10),
+            'last_names': [('Stark', 4), ('Snow', 1)]
+        },
+        {
+            'avg_age': Decimal(16),
+            'house': 'House of Targaryen',
+            'max_age': Decimal(16),
+            'number_of_characters': 1,
+            'representative': 'Daenerys',
+            'representative_age': Decimal(16),
+            'last_names': [('Targaryen', 1)]
+        },
+    ]
+
+    # Find youngest of each house
+    res, _, _ = Flow(
+        characters,
+        set_type('age', type='number'),
+        sort_rows('{age:02}'),
+        join_with_self(
+            'res_1',
+            '{house}',
+            {
+                'the_house': {
+                    'name': 'house'
+                },
+                '*': {
+                    'aggregate': 'first'
+                },
+            }
+        ),
+        sort_rows('{the_house}')
+    ).results()
+
+    assert res[0] == [
+        {
+            'the_house': 'Lannister',
+            'first_name': 'Tyrion',
+            'last_name': 'Lannister',
+            'age': Decimal('27')
+        },
+        {
+            'the_house': 'Stark',
+            'first_name': 'Rickon',
+            'last_name': 'Stark',
+            'age': Decimal('5')
+        },
+        {
+            'the_house': 'Targaryen',
+            'first_name': 'Daenerys',
+            'last_name': 'Targaryen',
+            'age': Decimal('16')
+        }
+    ]

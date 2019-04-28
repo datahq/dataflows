@@ -130,6 +130,17 @@ def fix_fields(fields):
     return fields
 
 
+def expand_fields(fields, schema_fields):
+    if '*' in fields:
+        existing_names = set(f['name'] for f in fields.values())
+        spec = fields.pop('*')
+        for sf in schema_fields:
+            sf_name = sf['name']
+            if sf_name not in existing_names:
+                fields[sf_name] = copy.deepcopy(spec)
+                fields[sf_name]['name'] = sf_name
+
+
 def concatenator(resources, all_target_fields, field_mapping):
     for resource_ in resources:
         for row in resource_:
@@ -241,8 +252,7 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
             if data_type is None:
                 try:
                     source_field = \
-                        next(filter(lambda f, spec_=spec:
-                                    f['name'] == spec_['name'],
+                        next(filter(lambda f: f['name'] == spec['name'],
                                     source_spec['schema']['fields']))
                 except StopIteration:
                     raise KeyError('Failed to find field with name %s in resource %s' %
@@ -282,6 +292,7 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
 
             if resource['name'] == source_name:
                 source_spec = resource
+                expand_fields(fields, source_spec.get('schema', {}).get('fields', []))
                 if not source_delete:
                     new_resources.append(resource)
                 if deduplication:
@@ -317,5 +328,10 @@ def join(source_name, source_key, target_name, target_key, fields={}, full=True,
     return join_aux(source_name, source_key, source_delete, target_name, target_key, fields, full)
 
 
+def join_with_self(resource_name, join_key, fields):
+    return join_aux(resource_name, join_key, True, resource_name, None, fields, True)
+
+
 def join_self(source_name, source_key, target_name, fields):
+    raise DeprecationWarning('join_self is being deprecated, use join_with_self instead')
     return join_aux(source_name, source_key, True, target_name, None, fields, True)

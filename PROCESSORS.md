@@ -635,7 +635,7 @@ This mode is called _deduplication_ mode - The target resource will be created a
 def join(source_name, source_key, target_name, target_key, fields={}, full=True, source_delete=True):
     pass
 
-def join_self(source_name, source_key, target_name, fields):
+def join_with_self(resource_name, join_key, fields):
     pass
 ```
 
@@ -646,10 +646,12 @@ def join_self(source_name, source_key, target_name, fields):
 - `source_delete` - delete source from data-package after joining (`True` by default)
 
 - `target_name` - name of the _target_ resource to hold the joined data. 
-- `target_key` - as in `source_key`
+- `target_key`, `join_key` - as in `source_key`
 
 - `fields` - mapping of fields from the source resource to the target resource.
-  Keys should be field names in the target resource.
+  Keys should be field names in the target resource. 
+  You can use the special catchall key `*` which will apply for all fields in the source which were not specifically mentioned.
+
   Values can define two attributes:
   - `name` - field name in the source (by default is the same as the target field name)
 
@@ -693,3 +695,101 @@ def join_self(source_name, source_key, target_name, fields):
   - if `False`, failed lookups in the source will result in dropping the row from the target.
 
 _Important: the "source" resource **must** appear before the "target" resource in the data-package._
+
+**Examples:**
+
+With these two sources:
+
+`characters`:
+first_name  |  house     |last_name         |age
+------------|----------|-----------|----------
+Jaime       |Lannister |Lannister          |34
+Tyrion      |Lannister |Lannister          |27
+Cersei      |Lannister |Lannister          |34
+Jon         |Stark     |Snow               |17
+Sansa       |Stark     |Stark              |14
+Rickon      |Stark     |Stark               |5
+Arya        |Stark     |Stark              |11
+Bran        |Stark     |Stark              |10
+Daenerys    |Targaryen |Targaryen          |16
+
+`houses`:
+|house
+|------------------
+|House of Lannister
+|House of Greyjoy
+|House of Stark
+|House of Targaryen
+|House of Martell
+|House of Tyrell
+
+*Joining two resources*:
+```python
+Flow(#...
+    join(
+        'characters',
+        'House of {house}', # Note we need to format the join keys so they match
+        'houses',
+        '{house}',
+        dict(
+            max_age={
+                'name': 'age',
+                'aggregate': 'max'
+            },
+            avg_age={
+                'name': 'age',
+                'aggregate': 'avg'
+            },
+            representative={
+                'name': 'first_name',
+                'aggregate': 'last'
+            },
+            representative_age={
+                'name': 'age'
+            },
+            number_of_characters={
+                'aggregate': 'count'
+            },
+            last_names={
+                'name': 'last_name',
+                'aggregate': 'counters'
+            }
+        ), 
+        False, # Don't do a full join (i.e. discard houses which have no characters)
+        True   # Remove the source=characters resource from the output
+    )
+)
+```
+
+Output:
+house               | avg_age  | last_names                | max_age  | number_of_characters | representative | representative_age 
+--------------------|----------|---------------------------|----------|----------------------|----------------|--------------------
+House of Lannister  |  31.6667 | [('Lannister', 3)]        |    34    |         3            | Cersei         |        34
+House of Stark      |   11.4   | [('Stark', 4), ('Snow', 1)] |   17   |         5            | Bran           |        10
+House of Targaryen  |   16     | [('Targaryen', 1)]        |    16    |         1            | Daenerys       |        16
+
+*Self-Joining a resource (find the youngest member of each house)*:
+```python
+Flow(#...
+    sort_rows('{age:02}'),
+    join_with_self(
+        'characters',
+        '{house}',
+        {
+            'the_house': {
+                'name': 'house'
+            },
+            '*': {
+                'aggregate': 'first'
+            },
+        }
+    ),
+)
+```
+
+Output:
+age|first_name  |last_name  |the_house
+----------|------------|-----------|-----------
+27|Tyrion      |Lannister  |Lannister
+5|Rickon      |Stark      |Stark
+16|Daenerys    |Targaryen  |Targaryen
