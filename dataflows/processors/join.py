@@ -333,5 +333,7 @@ def join_with_self(resource_name, join_key, fields):
 
 
 def join_self(source_name, source_key, target_name, fields):
-    raise DeprecationWarning('join_self is being deprecated, use join_with_self instead')
+    import warnings
+    warnings.warn('join_self is being deprecated, use join_with_self instead',
+                  DeprecationWarning)
     return join_aux(source_name, source_key, True, target_name, None, fields, True)
