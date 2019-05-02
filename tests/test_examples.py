@@ -20,6 +20,7 @@ def test_example_1():
 
     # [[{'data': 'hello'}, {'data': 'world'}]]
 
+
 def test_example_2():
     from dataflows import Flow, load
 
@@ -33,6 +34,7 @@ def test_example_2():
     data, *_ = f.results()
 
     print(data)
+
 
 def country_population():
     from xml.etree import ElementTree

@@ -30,11 +30,15 @@ def drop(res_name, row, i, e):
     return False
 
 
-def schema_validator(resource: Resource, iterator,
+def schema_validator(resource, iterator,
                      field_names=None, on_error=None):
     if on_error is None:
         on_error = raise_exception
-    schema: Schema = resource.schema
+    if isinstance(resource, Resource):
+        schema: Schema = resource.schema
+        assert schema is not None
+    else:
+        schema: Schema = Schema(resource.get('schema', {}))
     if field_names is None:
         field_names = [f.name for f in schema.fields]
     schema_fields = [f for f in schema.fields if f.name in field_names]
