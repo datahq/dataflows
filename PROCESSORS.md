@@ -281,7 +281,7 @@ def delete_fields(fields, resources=None):
     pass
 ```
 
-- `fields` - List of field (column) names to be removed
+- `fields` - List of field (column) names to be removed (exact names or regular expressions for matching field names)
 - `resources`
   - A name of a resource to operate on
   - A regular expression matching resource names

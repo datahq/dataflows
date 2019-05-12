@@ -85,6 +85,11 @@ def test_add_metadata():
 
 def test_delete_field():
     from dataflows import delete_fields
+    data2 = [
+        dict(x=1, y='a', xx=True),
+        dict(x=2, y='b', xx=True),
+        dict(x=3, y='c', xx=True),
+    ]
     f = Flow(
         data,
         delete_fields(['x'])
@@ -92,6 +97,18 @@ def test_delete_field():
     results, dp, _ = f.results()
     for i in results[0]:
         assert list(i.keys()) == ['y']
+    assert dp.descriptor['resources'][0]['schema']['fields'] == \
+        [dict(name='y', type='string', format='default')]
+
+    f = Flow(
+        data,
+        data2,
+        delete_fields(['x+'])
+    )
+    results, dp, _ = f.results()
+    for res in results:
+        for i in res:
+            assert list(i.keys()) == ['y']
     assert dp.descriptor['resources'][0]['schema']['fields'] == \
         [dict(name='y', type='string', format='default')]
 
