@@ -1,32 +1,37 @@
-import operator
-
 from ..helpers.resource_matcher import ResourceMatcher
 
 
-def process_resource(rows, conditions):
+def old_style_conditions(equals, not_equals):
+    def func(row):
+        return any(
+                    (row[k] == v)
+                    for o in equals
+                    for k, v in o.items()
+                ) or any(
+                    (row[k] != v)
+                    for o in not_equals
+                    for k, v in o.items()
+                )
+    return func
+
+
+def process_resource(rows, condition):
     for row in rows:
-        if any(func(row[k], v) for func, k, v in conditions):
+        if condition(row):
             yield row
 
 
-def filter_rows(equals=tuple(), not_equals=tuple(), resources=None):
+def filter_rows(condition=None, equals=tuple(), not_equals=tuple(), resources=None):
 
-    conditions = [
-        (operator.eq, k, v)
-        for o in equals
-        for k, v in o.items()
-    ] + [
-        (operator.ne, k, v)
-        for o in not_equals
-        for k, v in o.items()
-    ]
+    if not condition:
+        condition = old_style_conditions(equals, not_equals)
 
     def func(package):
         matcher = ResourceMatcher(resources, package.pkg)
         yield package.pkg
         for r in package:
             if matcher.match(r.res.name):
-                yield process_resource(r, conditions)
+                yield process_resource(r, condition)
             else:
                 yield r
 

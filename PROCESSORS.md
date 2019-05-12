@@ -518,12 +518,18 @@ Filter rows based on inclusive and exclusive value filters.
 `filter_rows` accepts equality and inequality conditions and tests each row in the selected resources. If none of the conditions validate, the row will be discarded.
 
 ```python
-def filter_rows(equals=tuple(), not_equals=tuple(), resources=None):
+def filter_rows(condition=None, equals=tuple(), not_equals=tuple(), resources=None):
     pass
 ```
 
-- `equals` - Mapping of keys to values which translate to `row[key] == value` conditions
-- `not_equals` - Mapping of keys to values which translate to `row[key] != value` conditions
+- `condition` - Callable, receiving a row and returning True/False (if True then will pass row, otherwise will drop it)
+  
+  If `condition` is not provided:
+  - `equals` - Mapping of keys to values which translate to `row[key] == value` conditions
+  - `not_equals` - Mapping of keys to values which translate to `row[key] != value` conditions
+
+  Both `equals` and `not_equals` should be a list of dicts.
+
 - `resources`
   - A name of a resource to operate on
   - A regular expression matching resource names
@@ -531,7 +537,6 @@ def filter_rows(equals=tuple(), not_equals=tuple(), resources=None):
   - `None` indicates operation should be done on all resources
   - The index of the resource in the package
 
-Both `equals` and `not_equals` should be a list of dicts.
 
 ### Manipulate package
 #### update_package.py

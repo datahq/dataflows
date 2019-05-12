@@ -326,6 +326,24 @@ def test_filter_rows():
     assert len(results) == 1
 
 
+def test_filter_rows_callable():
+    from dataflows import filter_rows
+
+    f = Flow(
+        [
+            {'a': 1, 'b': 3},
+            {'a': 2, 'b': 3},
+            {'a': 1, 'b': 4},
+            {'a': 2, 'b': 4},
+        ],
+        filter_rows(condition=lambda row: row['a'] > 1 and row['b'] < 4),
+    )
+    results, _, _ = f.results()
+    assert results[0][0] == dict(a=2, b=3)
+    assert len(results[0]) == 1
+    assert len(results) == 1
+
+
 def test_sort_rows():
     from dataflows import sort_rows
 
