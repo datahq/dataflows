@@ -112,7 +112,7 @@ class load(DataStreamProcessor):
                 for resource in self.load_dp.resources:
                     if resource_matcher.match(resource.name):
                         self.resource_descriptors.append(resource.descriptor)
-                        self.iterators.append(resource.iter(keyed=True, cast=False))
+                        self.iterators.append(resource.iter(keyed=True, cast=True))
 
             # Loading for any other source
             else:

@@ -58,6 +58,7 @@ setup(
     },
     zip_safe=False,
     long_description=README,
+    long_description_content_type='text/markdown',
     description='A nifty data processing framework, based on data packages',
     author='Adam Kariv',
     author_email='adam.kariv@gmail.com',

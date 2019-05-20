@@ -437,7 +437,7 @@ def test_load_from_package():
     from dataflows import dump_to_path, load
 
     Flow(
-        [{'foo': 'bar'}],
+        [{'foo': 'bar', 'moo': 12}],
         dump_to_path('data/load_from_package')
     ).process()
 
@@ -446,7 +446,7 @@ def test_load_from_package():
     ).datastream()
 
     assert len(ds.dp.resources) == 1
-    assert [list(res) for res in ds.res_iter] == [[{'foo': 'bar'}]]
+    assert [list(res) for res in ds.res_iter] == [[{'foo': 'bar', 'moo': 12}]]
 
 
 def test_load_from_env_var():
@@ -455,10 +455,10 @@ def test_load_from_env_var():
 
     Flow(
         [{'foo': 'bar'}],
-        dump_to_path('data/load_from_package')
+        dump_to_path('data/load_from_env_var')
     ).process()
 
-    os.environ['MY_DATAPACKAGE'] = 'data/load_from_package/datapackage.json'
+    os.environ['MY_DATAPACKAGE'] = 'data/load_from_env_var/datapackage.json'
     results, dp, _ = Flow(
         load('env://MY_DATAPACKAGE')
     ).results()
@@ -473,11 +473,11 @@ def test_load_from_package_resource_matching():
     Flow(
         [{'foo': 'bar'}],
         [{'foo': 'baz'}],
-        dump_to_path('data/load_from_package')
+        dump_to_path('data/load_from_package_resource_matching(')
     ).process()
 
     ds = Flow(
-        load('data/load_from_package/datapackage.json', resources=['res_2'])
+        load('data/load_from_package_resource_matching(/datapackage.json', resources=['res_2'])
     ).datastream()
 
     assert len(ds.dp.resources) == 1
