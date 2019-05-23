@@ -18,6 +18,7 @@ class DumperBase(DataStreamProcessor):
         self.resource_hash = counters.get('resource-hash', 'hash')
         self.add_filehash_to_path = options.get('add_filehash_to_path', False)
         self.pretty_descriptor = options.get('pretty_descriptor', True)
+        self.schema_validator_options = options.get('validator_options', {})
 
     @staticmethod
     def get_attr(obj, prop, default=None):
@@ -81,7 +82,8 @@ class DumperBase(DataStreamProcessor):
             ret = self.process_resource(
                         ResourceWrapper(
                             resource.res,
-                            schema_validator(resource.res, resource)
+                            schema_validator(resource.res, resource,
+                                             **self.schema_validator_options)
                         )
             )
             ret = self.row_counter(resource, ret)
