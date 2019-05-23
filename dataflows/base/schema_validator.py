@@ -37,6 +37,7 @@ def schema_validator(resource, iterator,
     if isinstance(resource, Resource):
         schema: Schema = resource.schema
         assert schema is not None
+        resource = resource.descriptor
     else:
         schema: Schema = Schema(resource.get('schema', {}))
     if field_names is None:
@@ -47,7 +48,7 @@ def schema_validator(resource, iterator,
             for f in schema_fields:
                 row[f.name] = f.cast_value(row.get(f.name))
         except CastError as e:
-            if not on_error(resource.name, row, i, e):
+            if not on_error(resource['name'], row, i, e):
                 continue
 
         yield row

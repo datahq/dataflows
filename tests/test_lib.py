@@ -484,6 +484,52 @@ def test_load_from_package_resource_matching():
     assert [list(res) for res in ds.res_iter] == [[{'foo': 'baz'}]]
 
 
+def test_load_strategies():
+    from dataflows import load
+
+    i_strategies = [
+        load.INFER_FULL,
+        load.INFER_PYTHON_TYPES,
+        load.INFER_STRINGS,
+    ]
+
+    c_strategies = [
+        load.CAST_DO_NOTHING,
+        load.CAST_TO_STRINGS,
+        load.CAST_WITH_SCHEMA
+    ]
+
+    res = {}
+    for i_s in i_strategies:
+        for c_s in c_strategies:
+            ret = res.setdefault(i_s + ' ' + c_s, [])
+            Flow(
+                load('data/beatles_age.json', infer_strategy=i_s, cast_strategy=c_s, on_error=load.ERRORS_DROP),
+                load('data/beatles_age.csv', infer_strategy=i_s, cast_strategy=c_s, on_error=load.ERRORS_DROP),
+                lambda row: ret.append(row) or row
+            ).process()
+    out_t = [{'age': 18, 'name': 'john'},
+             {'age': 16, 'name': 'paul'},
+             {'age': 17, 'name': 'george'},
+             {'age': 22, 'name': 'ringo'}]
+    out_s = [{'age': '18', 'name': 'john'},
+             {'age': '16', 'name': 'paul'},
+             {'age': '17', 'name': 'george'},
+             {'age': '22', 'name': 'ringo'}]
+
+    assert res == {
+        'full nothing': out_t + out_s,
+        'full schema': out_t + out_t,
+        'full strings': out_s + out_s,
+        'pytypes nothing': out_t + out_s,
+        'pytypes schema': out_t + out_s,
+        'pytypes strings': out_s + out_s,
+        'strings nothing': out_t + out_s,
+        'strings schema': [] + out_s,
+        'strings strings': out_s + out_s
+    }
+
+
 def test_load_from_package_resources():
     from dataflows import load
 
