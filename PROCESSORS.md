@@ -39,7 +39,9 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 Loads data from various source types (local files, remote URLS, Google Spreadsheets, databases...)
 
 ```python
-def load(source, name=None, resources=None, validate=False, strip=True, force_strings=False, limit_rows=None, **options):
+def load(source, name=None, resources=None, strip=True, limit_rows=None,
+         infer_strategy=None, cast_strategy=None, on_error=raise_exception,
+         **options)
     pass
 ```
 
@@ -60,10 +62,26 @@ def load(source, name=None, resources=None, validate=False, strip=True, force_st
 - `options` - based on the loaded file, extra options (e.g. `sheet` for Excel files etc., see the link to tabulator above)
 
 Relevant only when _not_ loading data from a datapackage:
-- `force_strings` - Don't infer data types, assume everything is a string.
-- `validate` - Attempt to cast data to the inferred data-types.
 - `strip` - Should string values be stripped from whitespace characters surrounding them.
 - `limit_rows` - If provided, will limit the number of rows fetched from the source. Takes an integer value which specifies how many rows of the source to stream.
+- `infer_strategy` - Dictates if and how `load` will try to guess the datatypes in the source data:
+    - `load.INFER_STRINGS` - All columns will get a `string` datatype
+    - `load.INFER_PYTHON_TYPES` - All columns will get a datatype matching their python type
+    - `load.INFER_FULL` - All columns will get a datatype matching their python type, except strings which will be attempted to be parsed (e.g `"1" -> 1` etc.) (default)
+- `cast_strategy` - Dictates if and how `load` will parse and validate the data against the datatypes in the inferred schema:
+    - `load.CAST_TO_STRINGS` - All data will be casted to strings (regardless of how it's stored in the source file) and won't be validated using the schema.
+    - `load.CAST_DO_NOTHING` - Data will be passed as-is without modifications or validation
+    - `load.CAST_WITH_SCHEMA` - Data will be parsed and casted using the schema and will error in case of faulty data
+- `on_error` - Dictates how `load` will behave in case of a validation error.
+    Options are identical to `on_error` in `set_type` and `validate`
+
+
+Some deprecated options:
+- `force_strings` - Don't infer data types, assume everything is a string.
+    (equivalent to `infer_strategy = INFER_STRINGS, cast_strategy = CAST_TO_STRINGS`)
+- `validate` - Attempt to cast data to the inferred data-types.
+    (equivalent to `cast_strategy = CAST_WITH_SCHEMA, on_error = raise_exception`)
+
 
 #### printer
 Just prints whatever it sees. Good for debugging.

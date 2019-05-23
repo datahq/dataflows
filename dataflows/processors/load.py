@@ -1,4 +1,6 @@
 import os
+import warnings
+import datetime
 
 from datapackage import Package
 from tabulator import Stream
@@ -6,7 +8,7 @@ from tabulator.parser import Parser
 from tabulator.helpers import reset_stream
 from tableschema.schema import Schema
 from .. import DataStreamProcessor
-from ..base.schema_validator import schema_validator
+from ..base.schema_validator import schema_validator, ignore, drop, raise_exception
 from ..helpers.resource_matcher import ResourceMatcher
 
 
@@ -65,14 +67,51 @@ class XMLParser(Parser):
             yield (row_number, list(keys), list(values))
 
 
+class StringsGuesser():
+    def cast(self, value):
+        return [('string', 'default', 0)]
+
+
+class TypesGuesser():
+    def cast(self, value):
+        jts_type = {
+            str: 'string',
+            int: 'integer',
+            float: 'number',
+            list: 'array',
+            dict: 'object',
+            tuple: 'array',
+            bool: 'boolean',
+            datetime.datetime: 'datetime',
+            datetime.date: 'date',
+        }.get(type(value))
+        ret = [('any', 'default', 0)]
+        if jts_type is not None:
+            ret.append(('jts_type', 'default', 1))
+        return ret
+
+
 class load(DataStreamProcessor):
 
-    def __init__(self, load_source, name=None, resources=None, validate=False, strip=True, limit_rows=None, **options):
+    INFER_STRINGS = 'strings'
+    INFER_PYTHON_TYPES = 'pytypes'
+    INFER_FULL = 'full'
+
+    CAST_TO_STRINGS = 'strings'
+    CAST_DO_NOTHING = 'nothing'
+    CAST_WITH_SCHEMA = 'schema'
+
+    ERRORS_IGNORE = ignore
+    ERRORS_DROP = drop
+    ERRORS_RAISE = raise_exception
+
+    def __init__(self, load_source, name=None, resources=None, strip=True, limit_rows=None,
+                 infer_strategy=None, cast_strategy=None, on_error=raise_exception,
+                 **options):
         super(load, self).__init__()
         self.load_source = load_source
 
         self.name = name
-        self.validate = validate
         self.strip = strip
         self.limit_rows = limit_rows
         self.options = options
@@ -80,9 +119,33 @@ class load(DataStreamProcessor):
         self.resources = resources
 
         self.load_dp = None
-        self.force_strings = options.get('force_strings') is True
         self.resource_descriptors = []
         self.iterators = []
+
+        if 'force_strings' in options:
+            warnings.warn('force_strings is being deprecated, use infer_strategy & cast_strategy instead',
+                          DeprecationWarning)
+            if options['force_strings']:
+                infer_strategy = self.INFER_STRINGS
+                cast_strategy = self.CAST_TO_STRINGS
+
+        if 'validate' in options:
+            warnings.warn('validate is being deprecated, use cast_strategy & on_error instead',
+                          DeprecationWarning)
+            if options['validate']:
+                cast_strategy = self.CAST_WITH_SCHEMA
+
+        self.guesser = {
+            self.INFER_FULL: None,
+            self.INFER_PYTHON_TYPES: TypesGuesser,
+            self.INFER_STRINGS: StringsGuesser,
+        }[infer_strategy or self.INFER_FULL]
+
+        self.caster = {
+            self.CAST_DO_NOTHING: lambda res, it: it,
+            self.CAST_WITH_SCHEMA: lambda res, it: schema_validator(res, it, on_error=on_error),
+            self.CAST_TO_STRINGS: lambda res, it: self.stringer(it)
+        }[cast_strategy or self.CAST_DO_NOTHING]
 
     def process_datapackage(self, dp: Package):
 
@@ -129,10 +192,9 @@ class load(DataStreamProcessor):
                 self.options.setdefault('ignore_blank_headers', True)
                 self.options.setdefault('headers', 1)
                 stream: Stream = Stream(self.load_source, **self.options).open()
-                descriptor['schema'] = Schema().infer(stream.sample, headers=stream.headers, confidence=1)
-                if self.force_strings:
-                    for f in descriptor['schema']['fields']:
-                        f['type'] = 'string'
+                descriptor['schema'] = \
+                    Schema().infer(stream.sample, headers=stream.headers, confidence=1,
+                                   guesser_cls=self.guesser)
                 descriptor['format'] = self.options.get('format', stream.format)
                 descriptor['path'] += '.{}'.format(stream.format)
                 self.iterators.append(stream.iter(keyed=True))
@@ -154,11 +216,17 @@ class load(DataStreamProcessor):
             if count >= self.limit_rows:
                 break
 
+    def stringer(self, iterator):
+        for r in iterator:
+            yield dict(
+                (k, str(v)) if not isinstance(v, str) else (k, v)
+                for k, v in r.items()
+            )
+
     def process_resources(self, resources):
         yield from super(load, self).process_resources(resources)
         for descriptor, it in zip(self.resource_descriptors, self.iterators):
-            if self.validate:
-                it = schema_validator(descriptor, it)
+            it = self.caster(descriptor, it)
             if self.strip:
                 it = self.stripper(it)
             if self.limit_rows:
