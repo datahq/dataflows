@@ -39,7 +39,7 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 Loads data from various source types (local files, remote URLS, Google Spreadsheets, databases...)
 
 ```python
-def load(source, name=None, resources=None, validate=False, strip=True, force_strings=False, **options):
+def load(source, name=None, resources=None, validate=False, strip=True, force_strings=False, limit_rows=None, **options):
     pass
 ```
 
@@ -48,7 +48,7 @@ def load(source, name=None, resources=None, validate=False, strip=True, force_st
     - a remote URL (e.g. `https://path.to/the/data.csv`)
     - Other supported links, based on the current support of schemes and formats in [tabulator](https://github.com/frictionlessdata/tabulator-py#schemes)
     - a local path or remote URL to a datapackage.json file (e.g. `https://path.to/data_package/datapackage.json`)
-    - a reference to an environment variable containing the source location, 
+    - a reference to an environment variable containing the source location,
       in the form of `env://ENV_VAR`
     - a tuple containing (datapackage_descriptor, resources_iterator)
 - `resources` - optional, relevant only if source points to a datapackage.json file or datapackage/resource tuple. Value should be one of the following:
@@ -62,7 +62,8 @@ def load(source, name=None, resources=None, validate=False, strip=True, force_st
 Relevant only when _not_ loading data from a datapackage:
 - `force_strings` - Don't infer data types, assume everything is a string.
 - `validate` - Attempt to cast data to the inferred data-types.
-- `strip` - Should string values be stripped from whitespace characters surrounding them. 
+- `strip` - Should string values be stripped from whitespace characters surrounding them.
+- `limit_rows` - If provided, will limit the number of rows fetched from the source. Takes an integer value which specifies how many rows of the source to stream.
 
 #### printer
 Just prints whatever it sees. Good for debugging.
@@ -93,10 +94,10 @@ printer(tablefmt='html')
 Store the results to a specified path on disk, in a valid datapackage
 
 ```python
-def dump_to_path(out_path='.', 
-                 force_format=True, format='csv', 
-                 counters={}, 
-                 add_filehash_to_path=False, 	
+def dump_to_path(out_path='.',
+                 force_format=True, format='csv',
+                 counters={},
+                 add_filehash_to_path=False,
                  pretty_Descriptor=True):
     pass
 ```
@@ -142,9 +143,9 @@ def dump_to_path(out_path='.',
 Store the results in a valid datapackage, all files archived in one zipped file
 
 ```python
-def dump_to_zip(out_file, 
-                force_format=True, format='csv', 
-                counters={}, 
+def dump_to_zip(out_file,
+                force_format=True, format='csv',
+                counters={},
                 add_filehash_to_path=False, pretty_Descriptor=True):
     pass
 ```
@@ -158,7 +159,7 @@ def dump_to_zip(out_file,
 Store the results in a relational database (creates one or more tables or updates existing tables)
 
 ```python
-def dump_to_sql(tables, 
+def dump_to_sql(tables,
                 engine='env://DATAFLOWS_DB_ENGINE',
                 updated_column=None, updated_id_column=None,
                 counters={}):
@@ -236,7 +237,7 @@ def add_field(name, type, default=None, resources=None, **options):
     pass
 ```
 
-- `name` - Name of field to add 
+- `name` - Name of field to add
 - `type` - Type of field to add
 - `default` - Value to assign to the field
     - can be a literal value to be added to all rows
@@ -478,7 +479,7 @@ from dataflows import Flow, unpivot
 
 data = [
     {'2000': 'a1', '2001': 'b1', '2002': 'c1'},
-    {'2000': 'a2', '2001': 'b2', '2002': 'c2'}, 
+    {'2000': 'a2', '2001': 'b2', '2002': 'c2'},
     {'2000': 'a3', '2001': 'b3', '2002': 'c3'}
 ]
 
@@ -523,7 +524,7 @@ def filter_rows(condition=None, equals=tuple(), not_equals=tuple(), resources=No
 ```
 
 - `condition` - Callable, receiving a row and returning True/False (if True then will pass row, otherwise will drop it)
-  
+
   If `condition` is not provided:
   - `equals` - Mapping of keys to values which translate to `row[key] == value` conditions
   - `not_equals` - Mapping of keys to values which translate to `row[key] != value` conditions
@@ -615,7 +616,7 @@ def concatenate(fields, target={}, resources=None):
 #### duplicate.py
 Duplicate a single stream of data to make two streams
 
-`duplicate` accepts the name of a single resource in the datapackage. 
+`duplicate` accepts the name of a single resource in the datapackage.
 It will then duplicate it in the output datapackage, with a different name and path.
 The duplicated resource will appear immediately after its original.
 
@@ -624,7 +625,7 @@ def duplicate(source=None, target_name=None, target_path=None):
     pass
 ```
 
-- `source` - The name of the resource to duplicate. 
+- `source` - The name of the resource to duplicate.
 - `target_name` - Name of the new, duplicated resource.
 - `target_path` - Path for the new, duplicated resource.
 
@@ -650,11 +651,11 @@ def join_with_self(resource_name, join_key, fields):
     - String, which would be interpreted as a Python format string used to form the key (e.g. `{<field_name_1>}:{field_name_2}`)
 - `source_delete` - delete source from data-package after joining (`True` by default)
 
-- `target_name` - name of the _target_ resource to hold the joined data. 
+- `target_name` - name of the _target_ resource to hold the joined data.
 - `target_key`, `join_key` - as in `source_key`
 
 - `fields` - mapping of fields from the source resource to the target resource.
-  Keys should be field names in the target resource. 
+  Keys should be field names in the target resource.
   You can use the special catchall key `*` which will apply for all fields in the source which were not specifically mentioned.
 
   Values can define two attributes:
@@ -682,7 +683,7 @@ def join_with_self(resource_name, join_key, fields):
 
     - `count` - count the number of occurrences of a specific key
       For this method, specifying `name` is not required. In case it is specified, `count` will count the number of non-null values for that source field.
-    
+
     - `counters` - count the number of occurrences of distinct values
       Will return an array of 2-tuples of the form `[value, count-of-value]`.
 
@@ -759,7 +760,7 @@ Flow(#...
                 'name': 'last_name',
                 'aggregate': 'counters'
             }
-        ), 
+        ),
         False, # Don't do a full join (i.e. discard houses which have no characters)
         True   # Remove the source=characters resource from the output
     )
@@ -767,7 +768,7 @@ Flow(#...
 ```
 
 Output:
-house               | avg_age  | last_names                | max_age  | number_of_characters | representative | representative_age 
+house               | avg_age  | last_names                | max_age  | number_of_characters | representative | representative_age
 --------------------|----------|---------------------------|----------|----------------------|----------------|--------------------
 House of Lannister  |  31.6667 | [('Lannister', 3)]        |    34    |         3            | Cersei         |        34
 House of Stark      |   11.4   | [('Stark', 4), ('Snow', 1)] |   17   |         5            | Bran           |        10
