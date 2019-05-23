@@ -1068,3 +1068,16 @@ def test_join():
             'age': Decimal('16')
         }
     ]
+
+
+def test_load_limit_rows():
+    from dataflows import load
+    flow = Flow(
+        load('data/beatles.csv', limit_rows=3)
+    )
+    data = flow.results()[0]
+    assert data == [[
+        {'name': 'john', 'instrument': 'guitar'},
+        {'name': 'paul', 'instrument': 'bass'},
+        {'name': 'george', 'instrument': 'guitar'},
+    ]]

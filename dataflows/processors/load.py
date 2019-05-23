@@ -67,13 +67,14 @@ class XMLParser(Parser):
 
 class load(DataStreamProcessor):
 
-    def __init__(self, load_source, name=None, resources=None, validate=False, strip=True, **options):
+    def __init__(self, load_source, name=None, resources=None, validate=False, strip=True, limit_rows=None, **options):
         super(load, self).__init__()
         self.load_source = load_source
 
         self.name = name
         self.validate = validate
         self.strip = strip
+        self.limit_rows = limit_rows
         self.options = options
 
         self.resources = resources
@@ -145,6 +146,14 @@ class load(DataStreamProcessor):
                 for k, v in r.items()
             )
 
+    def limiter(self, iterator):
+        count = 0
+        for row in iterator:
+            yield row
+            count += 1
+            if count >= self.limit_rows:
+                break
+
     def process_resources(self, resources):
         yield from super(load, self).process_resources(resources)
         for descriptor, it in zip(self.resource_descriptors, self.iterators):
@@ -152,4 +161,6 @@ class load(DataStreamProcessor):
                 it = schema_validator(descriptor, it)
             if self.strip:
                 it = self.stripper(it)
+            if self.limit_rows:
+                it = self.limiter(it)
             yield it
