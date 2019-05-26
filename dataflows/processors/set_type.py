@@ -6,8 +6,10 @@ from .. import DataStreamProcessor, schema_validator
 
 class set_type(DataStreamProcessor):
 
-    def __init__(self, name, resources=-1, on_error=None, **options):
+    def __init__(self, name, resources=-1, regex=True, on_error=None, **options):
         super(set_type, self).__init__()
+        if not regex:
+            name = re.escape(name)
         self.name = re.compile(f'^{name}$')
         self.options = options
         self.resources = resources

@@ -1127,3 +1127,18 @@ def test_load_limit_rows():
         {'name': 'paul', 'instrument': 'bass'},
         {'name': 'george', 'instrument': 'guitar'},
     ]]
+
+
+def test_set_type_regex():
+    from dataflows import load, set_type
+    flow = Flow(
+        load('data/regex.csv'),
+        set_type('city', type='string'),
+        set_type('temperature (24h)', type='integer', regex=False),
+    )
+    data = flow.results()[0]
+    assert data == [[
+        {'city': 'london', 'temperature (24h)': 23},
+        {'city': 'paris', 'temperature (24h)': 26},
+        {'city': 'rome', 'temperature (24h)': 21},
+    ]]
