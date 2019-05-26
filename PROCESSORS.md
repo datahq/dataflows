@@ -390,7 +390,7 @@ Sets a field's data type and type options and validates its data based on its ne
 By default, this processor modifies the last resource in the package.
 
 ```python
-def set_type(name, resources=-1, on_error=None, **options):
+def set_type(name, resources=-1, regex=True, on_error=None, **options):
     pass
 ```
 
@@ -401,6 +401,7 @@ def set_type(name, resources=-1, on_error=None, **options):
   - A list of resource names
   - `None` indicates operation should be done on all resources
   - The index of the resource in the package
+- `regex` - if set to `False` field names will be interpreted as strings not as regular expressions (`True` by default)
 - `on_error` - callback function to be called when a validation error occurs.
   Function has the signature `callback(resource_name, row, row_index, exception)`.
   It could raise an exception, or return `True` (for keeping the row anyway) or `False` (for dropping it).
