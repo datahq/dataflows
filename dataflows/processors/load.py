@@ -182,7 +182,7 @@ class load(DataStreamProcessor):
             else:
                 path = os.path.basename(self.load_source)
                 path = os.path.splitext(path)[0]
-                descriptor = dict(path=path,
+                descriptor = dict(path=self.name or path,
                                   profile='tabular-data-resource')
                 self.resource_descriptors.append(descriptor)
                 descriptor['name'] = self.name or path

@@ -530,6 +530,25 @@ def test_load_strategies():
     }
 
 
+def test_load_name_path():
+    from dataflows import load
+
+    dp, *_ = Flow(
+        load('data/beatles_age.json', name='foo'),
+        load('data/beatles_age.csv')
+    ).process()
+
+    print(dp.descriptor['resources'])
+
+    res0 = dp.resources[0]
+    res1 = dp.resources[1]
+
+    assert res0.name == 'foo'
+    assert res0.descriptor['path'] == 'foo.json'
+    assert res1.name == 'beatles_age'
+    assert res1.descriptor['path'] == 'beatles_age.csv'
+
+
 def test_load_from_package_resources():
     from dataflows import load
 
