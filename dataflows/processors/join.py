@@ -1,6 +1,8 @@
+import re
 import copy
 import os
 import collections
+import logging
 
 from kvfile import KVFile
 
@@ -12,8 +14,12 @@ class KeyCalc(object):
 
     def __init__(self, key_spec):
         if isinstance(key_spec, list):
+            key_list = key_spec
             key_spec = ':'.join('{%s}' % key for key in key_spec)
+        else:
+            key_list = re.findall(r'\{(.*?)\}', key_spec)
         self.key_spec = key_spec
+        self.key_list = key_list
 
     def __call__(self, row):
         return self.key_spec.format(**row)
@@ -154,13 +160,19 @@ def concatenator(resources, all_target_fields, field_mapping):
 
 
 def join_aux(source_name, source_key, source_delete,  # noqa: C901
-             target_name, target_key, fields, full):
+             target_name, target_key, fields, full, mode):
 
     deduplication = target_key is None
     fields = fix_fields(fields)
     source_key = KeyCalc(source_key)
     target_key = KeyCalc(target_key) if target_key is not None else target_key
+    db_keys = collections.OrderedDict()
     db = KVFile()
+
+    # Joining mode
+    if mode is None:
+        mode = 'half-outer' if full else 'inner'
+    assert mode in ['inner', 'half-outer', 'full-outer']
 
     # Indexes the source data
     def indexer(resource):
@@ -182,7 +194,11 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
                     current[field] = AGGREGATORS[agg].func(curr, new)
                 elif field not in current:
                     current[field] = None
+            if mode == 'full-outer':
+                for field in source_key.key_list:
+                    current[field] = row.get(field)
             db.set(key, current)
+            db_keys[key] = True
             yield row
 
     # Generates the joined data
@@ -207,16 +223,27 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
                     extra = dict(
                         (k, AGGREGATORS[fields[k]['aggregate']].finaliser(v))
                         for k, v in extra.items()
+                        if k in fields
                     )
+                    del db_keys[key]
                 except KeyError:
-                    if not full:
-                        continue
-                    extra = dict(
-                        (k, row.get(k))
-                        for k in fields.keys()
-                    )
+                    if mode != 'inner':
+                        extra = dict(
+                            (k, row.get(k))
+                            for k in fields.keys()
+                        )
                 row.update(extra)
                 yield row
+            if mode == 'full-outer':
+                for key in db_keys:
+                    extra = db.get(key)
+                    extra.update(dict(
+                        (k, AGGREGATORS[fields[k]['aggregate']].finaliser(v))
+                        for k, v in extra.items()
+                        if k in fields
+                    ))
+                    yield extra
+
 
     # Yields the new resources
     def new_resource_iterator(resource_iterator):
@@ -324,8 +351,8 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
     return func
 
 
-def join(source_name, source_key, target_name, target_key, fields={}, full=True, source_delete=True):
-    return join_aux(source_name, source_key, source_delete, target_name, target_key, fields, full)
+def join(source_name, source_key, target_name, target_key, fields={}, full=True, mode=None, source_delete=True):
+    return join_aux(source_name, source_key, source_delete, target_name, target_key, fields, full, mode)
 
 
 def join_with_self(resource_name, join_key, fields):
