@@ -2,7 +2,6 @@ import re
 import copy
 import os
 import collections
-import logging
 
 from kvfile import KVFile
 
@@ -243,7 +242,6 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
                         if k in fields
                     ))
                     yield extra
-
 
     # Yields the new resources
     def new_resource_iterator(resource_iterator):
