@@ -226,11 +226,12 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
                     )
                     del db_keys[key]
                 except KeyError:
-                    if mode != 'inner':
-                        extra = dict(
-                            (k, row.get(k))
-                            for k in fields.keys()
-                        )
+                    if mode == 'inner':
+                        continue
+                    extra = dict(
+                        (k, row.get(k))
+                        for k in fields.keys()
+                    )
                 row.update(extra)
                 yield row
             if mode == 'full-outer':
