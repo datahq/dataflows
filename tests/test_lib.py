@@ -1059,7 +1059,7 @@ def test_join():
                     'name': 'last_name',
                     'aggregate': 'counters'
                 }
-            ), False, True
+            ), full=False, source_delete=True
         )
     ).results()
 
