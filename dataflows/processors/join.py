@@ -355,11 +355,11 @@ def join(source_name, source_key, target_name, target_key, fields={}, full=True,
 
 
 def join_with_self(resource_name, join_key, fields):
-    return join_aux(resource_name, join_key, True, resource_name, None, fields, True)
+    return join_aux(resource_name, join_key, True, resource_name, None, fields, True, None)
 
 
 def join_self(source_name, source_key, target_name, fields):
     import warnings
     warnings.warn('join_self is being deprecated, use join_with_self instead',
                   DeprecationWarning)
-    return join_aux(source_name, source_key, True, target_name, None, fields, True)
+    return join_aux(source_name, source_key, True, target_name, None, fields, True, None)
