@@ -11,7 +11,7 @@ DataFlows is a simple and intuitive way of building data processing flows.
 - It's built upon the foundation of the Frictionless Data project - which means that all data produced by these flows is easily reusable by others.
 - It's a pattern not a heavy-weight framework: if you already have a bunch of download and extract scripts this will be a natural fit
 
-Read more in the [Features section below][#features].
+Read more in the [Features section below](#features).
 
 ## QuickStart 
 
