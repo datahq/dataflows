@@ -47,7 +47,7 @@ class iterable_storage(Storage):
                 pass
             else:
                 assert 'Unknown Python type: %r' % value
-        if len(types) > 1:
+        if len(types) != 1:
             return 'any'
         else:
             return types.pop()
