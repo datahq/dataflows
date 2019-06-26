@@ -165,7 +165,10 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
     fields = fix_fields(fields)
     source_key = KeyCalc(source_key)
     target_key = KeyCalc(target_key) if target_key is not None else target_key
-    db_keys = collections.OrderedDict()
+    # We will store db keys as boolean flags:
+    # - False -> inserted/not used
+    # - True -> inserted/used
+    db_keys_usage = KVFile()
     db = KVFile()
 
     # Joining mode
@@ -197,7 +200,7 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
                 for field in source_key.key_list:
                     current[field] = row.get(field)
             db.set(key, current)
-            db_keys[key] = True
+            db_keys_usage.set(key, False)
             yield row
 
     # Generates the joined data
@@ -219,7 +222,7 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
                 key = target_key(row)
                 try:
                     extra = create_extra_by_key(key)
-                    del db_keys[key]
+                    db_keys_usage.set(key, True)
                 except KeyError:
                     if mode == 'inner':
                         continue
@@ -230,9 +233,10 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
                 row.update(extra)
                 yield row
             if mode == 'full-outer':
-                for key in db_keys:
-                    extra = create_extra_by_key(key)
-                    yield extra
+                for key, value in db_keys_usage.items():
+                    if value is False:
+                        extra = create_extra_by_key(key)
+                        yield extra
 
     # Creates extra by key
     def create_extra_by_key(key):
