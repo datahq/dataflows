@@ -218,12 +218,7 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
             for row in resource:
                 key = target_key(row)
                 try:
-                    extra = db.get(key)
-                    extra = dict(
-                        (k, AGGREGATORS[fields[k]['aggregate']].finaliser(v))
-                        for k, v in extra.items()
-                        if k in fields
-                    )
+                    extra = create_extra_by_key(key)
                     del db_keys[key]
                 except KeyError:
                     if mode == 'inner':
@@ -236,13 +231,18 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
                 yield row
             if mode == 'full-outer':
                 for key in db_keys:
-                    extra = db.get(key)
-                    extra.update(dict(
-                        (k, AGGREGATORS[fields[k]['aggregate']].finaliser(v))
-                        for k, v in extra.items()
-                        if k in fields
-                    ))
+                    extra = create_extra_by_key(key)
                     yield extra
+
+    # Creates extra by key
+    def create_extra_by_key(key):
+        extra = db.get(key)
+        extra.update(dict(
+            (k, AGGREGATORS[fields[k]['aggregate']].finaliser(v))
+            for k, v in extra.items()
+            if k in fields
+        ))
+        return extra
 
     # Yields the new resources
     def new_resource_iterator(resource_iterator):
