@@ -1,6 +1,7 @@
 import re
 import copy
 import os
+import warnings
 import collections
 
 from kvfile import KVFile
@@ -171,8 +172,12 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
     db_keys_usage = KVFile()
     db = KVFile()
 
-    # Joining mode
-    if mode is None:
+    # Mode of join operation
+    if full is not None:
+        warnings.warn(
+            'For the `join` processor the `full=True` flag is deprecated. '
+            'Please use the "mode" parameter instead.',
+            UserWarning)
         mode = 'half-outer' if full else 'inner'
     assert mode in ['inner', 'half-outer', 'full-outer']
 
@@ -354,7 +359,7 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
     return func
 
 
-def join(source_name, source_key, target_name, target_key, fields={}, full=True, mode=None, source_delete=True):
+def join(source_name, source_key, target_name, target_key, fields={}, full=None, mode='half-outer', source_delete=True):
     return join_aux(source_name, source_key, source_delete, target_name, target_key, fields, full, mode)
 
 
