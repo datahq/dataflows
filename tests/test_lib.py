@@ -1161,3 +1161,17 @@ def test_set_type_regex():
         {'city': 'paris', 'temperature (24h)': 26},
         {'city': 'rome', 'temperature (24h)': 21},
     ]]
+
+
+def test_delete_fields_regex():
+    from dataflows import load, delete_fields
+    flow = Flow(
+        load('data/regex.csv'),
+        delete_fields(['temperature (24h)'], regex=False),
+    )
+    data = flow.results()[0]
+    assert data == [[
+        {'city': 'london'},
+        {'city': 'paris'},
+        {'city': 'rome'},
+    ]]

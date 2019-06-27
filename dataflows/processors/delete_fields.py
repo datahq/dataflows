@@ -12,13 +12,13 @@ def process_resource(rows, fields):
         )
 
 
-def delete_fields(fields, resources=None):
+def delete_fields(fields, resources=None, regex=True):
 
     def func(package):
         matcher = ResourceMatcher(resources, package.pkg)
         dp_resources = package.pkg.descriptor.get('resources', [])
         field_res = [
-            re.compile('^{}$'.format(f)) for f in fields
+            re.compile('^{}$'.format(f if regex else re.escape(f))) for f in fields
         ]
         matched = set()
         new_field_names = {}
