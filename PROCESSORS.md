@@ -139,7 +139,7 @@ def dump_to_path(out_path='.',
 - `format` - Specifies the type of output files to be generated (if `force-format` is true): `csv` (the default) or `json`
 - `force-temporal-format` - Specifies whether to force all output datetime/date/time values to be stringified with the default formats
     - if `True` (the default), all temporal values will use the default formats
-    - if `False`, formats will be used based on fields' metadata if present otherwise the default formats will be used
+    - if `False`, formats will be used based on the fields' `outputFormat` property if present otherwise the default formats will be used
 - `add-filehash-to-path`: Specifies whether to include file md5 hash into the resource path. Defaults to `False`. If `True` Embeds hash in path like so:
     - If original path is `path/to/the/file.ext`
     - Modified path will be `path/to/the/HASH/file.ext`
