@@ -107,6 +107,7 @@ class load(DataStreamProcessor):
 
     def __init__(self, load_source, name=None, resources=None, strip=True, limit_rows=None,
                  infer_strategy=None, cast_strategy=None, on_error=raise_exception,
+                 override_schema=None, override_fields=None,
                  **options):
         super(load, self).__init__()
         self.load_source = load_source
@@ -115,8 +116,9 @@ class load(DataStreamProcessor):
         self.strip = strip
         self.limit_rows = limit_rows
         self.options = options
-
         self.resources = resources
+        self.override_schema = override_schema
+        self.override_fields = override_fields
 
         self.load_dp = None
         self.resource_descriptors = []
@@ -192,9 +194,16 @@ class load(DataStreamProcessor):
                 self.options.setdefault('ignore_blank_headers', True)
                 self.options.setdefault('headers', 1)
                 stream: Stream = Stream(self.load_source, **self.options).open()
-                descriptor['schema'] = \
-                    Schema().infer(stream.sample, headers=stream.headers, confidence=1,
-                                   guesser_cls=self.guesser)
+                schema = Schema().infer(
+                    stream.sample, headers=stream.headers,
+                    confidence=1, guesser_cls=self.guesser)
+                if self.override_schema:
+                    schema.update(self.override_schema)
+                if self.override_fields:
+                    fields = schema.get('fields', [])
+                    for field in fields:
+                        field.update(self.override_fields.get(field['name'], {}))
+                descriptor['schema'] = schema
                 descriptor['format'] = self.options.get('format', stream.format)
                 descriptor['path'] += '.{}'.format(stream.format)
                 self.iterators.append(stream.iter(keyed=True))

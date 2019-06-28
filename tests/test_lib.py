@@ -1161,3 +1161,78 @@ def test_set_type_regex():
         {'city': 'paris', 'temperature (24h)': 26},
         {'city': 'rome', 'temperature (24h)': 21},
     ]]
+
+
+def test_load_override_schema():
+    from dataflows import load
+    flow = Flow(
+        load('data/beatles_age.csv',
+            override_schema={
+                'title': 'title',
+                'missingValues': ['ringo'],
+            }
+        ),
+    )
+    data, package, stats = flow.results()
+    assert package.descriptor == {
+        'profile': 'data-package',
+        'resources': [{
+            'format': 'csv',
+            'name': 'beatles_age',
+            'path': 'beatles_age.csv',
+            'profile': 'tabular-data-resource',
+            'schema': {
+                'fields': [
+                    {'format': 'default', 'name': 'name', 'type': 'string'},
+                    {'format': 'default', 'name': 'age', 'type': 'integer'}
+                ],
+                'missingValues': ['ringo'],
+                'title': 'title'
+            }
+        }]
+    }
+    assert data == [[
+        {'name': 'john', 'age': 18},
+        {'name': 'paul', 'age': 16},
+        {'name': 'george', 'age': 17},
+        {'name': None, 'age': 22},
+    ]]
+
+
+def test_load_override_schema_and_fields():
+    from dataflows import load
+    flow = Flow(
+        load('data/beatles_age.csv',
+            override_schema={
+                'title': 'title',
+                'missingValues': ['ringo'],
+            },
+            override_fields={
+                'age': {'type': 'string'},
+            }
+        ),
+    )
+    data, package, stats = flow.results()
+    assert package.descriptor == {
+        'profile': 'data-package',
+        'resources': [{
+            'format': 'csv',
+            'name': 'beatles_age',
+            'path': 'beatles_age.csv',
+            'profile': 'tabular-data-resource',
+            'schema': {
+                'fields': [
+                    {'format': 'default', 'name': 'name', 'type': 'string'},
+                    {'format': 'default', 'name': 'age', 'type': 'string'}
+                ],
+                'missingValues': ['ringo'],
+                'title': 'title',
+            }
+        }]
+    }
+    assert data == [[
+        {'name': 'john', 'age': '18'},
+        {'name': 'paul', 'age': '16'},
+        {'name': 'george', 'age': '17'},
+        {'name': None, 'age': '22'},
+    ]]
