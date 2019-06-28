@@ -25,10 +25,11 @@ class FileFormat():
     SERIALIZERS = {}
     DEFAULT_SERIALIZER = str
 
-    def __init__(self, writer, schema):
+    def __init__(self, writer, schema, force_temporal_format=True):
         self.writer = writer
         self.headers = [f.name for f in schema.fields]
         self.fields = dict((f.name, f) for f in schema.fields)
+        self.force_temporal_format = force_temporal_format
 
     @classmethod
     def prepare_resource(cls, resource):
@@ -37,17 +38,20 @@ class FileFormat():
 
     def __transform_row(self, row):
         try:
-            return dict((k, self.__transform_value(v, self.fields[k].type))
+            return dict((k, self.__transform_value(v, self.fields[k]))
                         for k, v in row.items())
         except Exception:
             logging.exception('Failed to transform row %r', row)
             raise
 
-    @classmethod
-    def __transform_value(cls, value, field_type):
+    def __transform_value(self, value, field):
         if value is None:
-            return cls.NULL_VALUE
-        serializer = cls.SERIALIZERS.get(field_type, cls.DEFAULT_SERIALIZER)
+            return self.NULL_VALUE
+        serializer = self.SERIALIZERS.get(field.type, self.DEFAULT_SERIALIZER)
+        if field.type in ['datetime', 'date', 'time'] and not self.force_temporal_format:
+            output_format = field.descriptor.get('outputFormat')
+            if output_format:
+                serializer = lambda d: d.strftime(output_format)
         return serializer(value)
 
     def write_transformed_row(self, *_):
@@ -101,7 +105,7 @@ class CSVFormat(FileFormat):
         },
     }
 
-    def __init__(self, file, schema, use_titles=False):
+    def __init__(self, file, schema, use_titles=False, force_temporal_format=True):
         headers = [f.name for f in schema.fields]
         if use_titles:
             titles = [f.descriptor.get('title', f.name) for f in schema.fields]
@@ -109,7 +113,8 @@ class CSVFormat(FileFormat):
         else:
             csv_writer = csv.DictWriter(file, headers)
         csv_writer.writeheader()
-        super(CSVFormat, self).__init__(csv_writer, schema)
+        super(CSVFormat, self).__init__(
+            csv_writer, schema, force_temporal_format=force_temporal_format)
 
     @classmethod
     def prepare_resource(cls, resource):
@@ -160,11 +165,12 @@ class JSONFormat(FileFormat):
         },
     }
 
-    def __init__(self, file, schema):
+    def __init__(self, file, schema, force_temporal_format=True):
         writer = file
         writer.write('[')
         writer.__first = True
-        super(JSONFormat, self).__init__(writer, schema)
+        super(JSONFormat, self).__init__(
+            writer, schema, force_temporal_format=force_temporal_format)
 
     @classmethod
     def prepare_resource(cls, resource):

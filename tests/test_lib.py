@@ -1297,4 +1297,60 @@ def test_load_duplicate_headers_with_deduplicate_headers_flag():
     ]
     assert data == [[
         {'header1': 'value1', 'header2 (1)': 'value2', 'header2 (2)': 'value3'},
+
+
+def test_force_temporal_format():
+    import datetime
+    from dataflows import load, update_resource, dump_to_path
+
+    # Dump
+    Flow(
+        load('data/temporal.csv', name='temporal'),
+        update_resource(['temporal'], **{
+            'schema': {
+                'fields': [
+                    {'name': 'date', 'type': 'date', 'format': '%Y-%m-%d', 'outputFormat': '%d/%m/%y'},
+                    {'name': 'event', 'type': 'string'},
+                ]
+            }
+        }),
+        dump_to_path('data/force_temporal_format', force_temporal_format=False)
+    ).process()
+
+    # Load
+    flow = Flow(
+        load('data/force_temporal_format/datapackage.json')
+    )
+    data, dp, stats = flow.results()
+
+    # Assert
+    assert dp.descriptor == {
+        'profile': 'data-package',
+        'resources': [{
+            'dialect': {
+                'caseSensitiveHeader': False,
+                'delimiter': ',',
+                'doubleQuote': True,
+                'header': True,
+                'lineTerminator': '\r\n',
+                'quoteChar': '"',
+                'skipInitialSpace': False
+            },
+            'encoding': 'utf-8',
+            'format': 'csv',
+            'name': 'temporal',
+            'path': 'temporal.csv',
+            'profile': 'tabular-data-resource',
+            'schema': {
+                'fields': [
+                    {'format': '%d/%m/%y', 'name': 'date', 'type': 'date'},
+                    {'format': 'default', 'name': 'event', 'type': 'string'}
+                ],
+                'missingValues': ['']
+            }
+        }]
+    }
+    assert data == [[
+        {'date': datetime.date(2015, 1, 2), 'event': 'start'},
+        {'date': datetime.date(2016, 6, 25), 'event': 'finish'}
     ]]
