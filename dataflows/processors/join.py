@@ -1,5 +1,7 @@
+import re
 import copy
 import os
+import warnings
 import collections
 
 from kvfile import KVFile
@@ -12,8 +14,12 @@ class KeyCalc(object):
 
     def __init__(self, key_spec):
         if isinstance(key_spec, list):
+            key_list = key_spec
             key_spec = ':'.join('{%s}' % key for key in key_spec)
+        else:
+            key_list = re.findall(r'\{(.*?)\}', key_spec)
         self.key_spec = key_spec
+        self.key_list = key_list
 
     def __call__(self, row):
         return self.key_spec.format(**row)
@@ -154,13 +160,26 @@ def concatenator(resources, all_target_fields, field_mapping):
 
 
 def join_aux(source_name, source_key, source_delete,  # noqa: C901
-             target_name, target_key, fields, full):
+             target_name, target_key, fields, full, mode):
 
     deduplication = target_key is None
     fields = fix_fields(fields)
     source_key = KeyCalc(source_key)
     target_key = KeyCalc(target_key) if target_key is not None else target_key
+    # We will store db keys as boolean flags:
+    # - False -> inserted/not used
+    # - True -> inserted/used
+    db_keys_usage = KVFile()
     db = KVFile()
+
+    # Mode of join operation
+    if full is not None:
+        warnings.warn(
+            'For the `join` processor the `full=True` flag is deprecated. '
+            'Please use the "mode" parameter instead.',
+            UserWarning)
+        mode = 'half-outer' if full else 'inner'
+    assert mode in ['inner', 'half-outer', 'full-outer']
 
     # Indexes the source data
     def indexer(resource):
@@ -182,7 +201,11 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
                     current[field] = AGGREGATORS[agg].func(curr, new)
                 elif field not in current:
                     current[field] = None
+            if mode == 'full-outer':
+                for field in source_key.key_list:
+                    current[field] = row.get(field)
             db.set(key, current)
+            db_keys_usage.set(key, False)
             yield row
 
     # Generates the joined data
@@ -203,13 +226,10 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
             for row in resource:
                 key = target_key(row)
                 try:
-                    extra = db.get(key)
-                    extra = dict(
-                        (k, AGGREGATORS[fields[k]['aggregate']].finaliser(v))
-                        for k, v in extra.items()
-                    )
+                    extra = create_extra_by_key(key)
+                    db_keys_usage.set(key, True)
                 except KeyError:
-                    if not full:
+                    if mode == 'inner':
                         continue
                     extra = dict(
                         (k, row.get(k))
@@ -217,6 +237,21 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
                     )
                 row.update(extra)
                 yield row
+            if mode == 'full-outer':
+                for key, value in db_keys_usage.items():
+                    if value is False:
+                        extra = create_extra_by_key(key)
+                        yield extra
+
+    # Creates extra by key
+    def create_extra_by_key(key):
+        extra = db.get(key)
+        extra.update(dict(
+            (k, AGGREGATORS[fields[k]['aggregate']].finaliser(v))
+            for k, v in extra.items()
+            if k in fields
+        ))
+        return extra
 
     # Yields the new resources
     def new_resource_iterator(resource_iterator):
@@ -324,16 +359,16 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
     return func
 
 
-def join(source_name, source_key, target_name, target_key, fields={}, full=True, source_delete=True):
-    return join_aux(source_name, source_key, source_delete, target_name, target_key, fields, full)
+def join(source_name, source_key, target_name, target_key, fields={}, full=None, mode='half-outer', source_delete=True):
+    return join_aux(source_name, source_key, source_delete, target_name, target_key, fields, full, mode)
 
 
 def join_with_self(resource_name, join_key, fields):
-    return join_aux(resource_name, join_key, True, resource_name, None, fields, True)
+    return join_aux(resource_name, join_key, True, resource_name, None, fields, True, None)
 
 
 def join_self(source_name, source_key, target_name, fields):
     import warnings
     warnings.warn('join_self is being deprecated, use join_with_self instead',
                   DeprecationWarning)
-    return join_aux(source_name, source_key, True, target_name, None, fields, True)
+    return join_aux(source_name, source_key, True, target_name, None, fields, True, None)
