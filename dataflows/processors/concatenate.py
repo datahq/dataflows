@@ -12,7 +12,7 @@ def concatenator(resources, all_target_fields, field_mapping):
                       if k in field_mapping]
             if len(values) == 0:
                 message = 'Got an empty row after concatenation' +\
-                    '(resource=%s, source=%r)'.format(resource_.res.name, row)
+                    '(resource=%s, source=%r)' % (resource_.res.name, row)
                 assert len(values) > 0, message
 
             processed.update(dict(values))
