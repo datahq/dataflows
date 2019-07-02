@@ -296,7 +296,7 @@ Delete fields (columns) from streamed resources
 _Note: if multiple resources provided, all of them should contain all fields to delete_
 
 ```python
-def delete_fields(fields, resources=None):
+def delete_fields(fields, resources=None, regex=True):
     pass
 ```
 
@@ -307,6 +307,7 @@ def delete_fields(fields, resources=None):
   - A list of resource names
   - `None` indicates operation should be done on all resources
   - The index of the resource in the package
+- `regex` - if set to `False` field names will be interpreted as strings not as regular expressions (`True` by default)
 
 #### add_computed_field
 Adds new fields whose values are based on existing columns.
