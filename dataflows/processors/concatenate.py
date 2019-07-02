@@ -8,9 +8,13 @@ def concatenator(resources, all_target_fields, field_mapping):
         for row in resource_:
             processed = dict((k, '') for k in all_target_fields)
             values = [(field_mapping[k], v) for (k, v)
-                    in row.items()
-                    if k in field_mapping]
-            assert len(values) > 0
+                      in row.items()
+                      if k in field_mapping]
+            if len(values) == 0:
+                message = 'Got an empty row after concatenation' +\
+                    '(resource=%s, source=%r)'.format(resource_.res.name, row)
+                assert len(values) > 0, message
+
             processed.update(dict(values))
             yield processed
 
@@ -44,7 +48,7 @@ def concatenate(fields, target={}, resources=None):
             field_mapping[target_field] = target_field
 
         # Create the schema for the target resource
-        needed_fields = sorted(fields.keys())
+        needed_fields = list(fields.keys())
         for resource in package.pkg.descriptor['resources']:
             if not matcher.match(resource['name']):
                 continue
@@ -101,7 +105,7 @@ def concatenate(fields, target={}, resources=None):
         package.pkg.descriptor['resources'] = new_resources
         yield package.pkg
 
-        needed_fields = sorted(fields.keys())
+        needed_fields = list(fields.keys())
         it = iter(package)
         for resource in it:
             if matcher.match(resource.res.name):
