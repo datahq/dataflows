@@ -300,7 +300,7 @@ Delete fields (columns) from streamed resources
 _Note: if multiple resources provided, all of them should contain all fields to delete_
 
 ```python
-def delete_fields(fields, resources=None):
+def delete_fields(fields, resources=None, regex=True):
     pass
 ```
 
@@ -311,6 +311,7 @@ def delete_fields(fields, resources=None):
   - A list of resource names
   - `None` indicates operation should be done on all resources
   - The index of the resource in the package
+- `regex` - if set to `False` field names will be interpreted as strings not as regular expressions (`True` by default)
 
 #### add_computed_field
 Adds new fields whose values are based on existing columns.
@@ -661,7 +662,7 @@ A special case for the join operation is when there is no target stream, and all
 This mode is called _deduplication_ mode - The target resource will be created and de-duplicated rows from the source will be added to it.
 
 ```python
-def join(source_name, source_key, target_name, target_key, fields={}, full=True, source_delete=True):
+def join(source_name, source_key, target_name, target_key, fields={}, mode='half-outer', source_delete=True):
     pass
 
 def join_with_self(resource_name, join_key, fields):
@@ -719,7 +720,11 @@ def join_with_self(resource_name, join_key, fields):
     By default, `aggregate` takes the `any` value.
 
   If neither `name` or `aggregate` need to be specified, the mapping can map to the empty object `{}` or to `null`.
-- `full` - Boolean,
+- `mode` - Enum,
+  - if `inner`, failed lookups in the source will result in dropping the row from the target. It uses the same principle as the SQL's inner join.
+  - If `half-outer` (the default), failed lookups in the source will result in "null" values at the source. It uses the same principle as the SQL's left/right outer join.
+  - if `full-outer`, failed lookups in the source will result in "null" values at the source. All not used values from the target will result in "null" values at the source. It uses the same principle as the SQL's full outer join.
+- `full` - Boolean [DEPRECATED - use `mode`],
   - If `True` (the default), failed lookups in the source will result in "null" values at the source.
   - if `False`, failed lookups in the source will result in dropping the row from the target.
 

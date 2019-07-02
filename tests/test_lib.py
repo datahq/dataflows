@@ -1059,7 +1059,7 @@ def test_join():
                     'name': 'last_name',
                     'aggregate': 'counters'
                 }
-            ), False, True
+            ), full=False, source_delete=True
         )
     ).results()
 
@@ -1235,4 +1235,39 @@ def test_load_override_schema_and_fields():
         {'name': 'paul', 'age': '16'},
         {'name': 'george', 'age': '17'},
         {'name': None, 'age': '22'},
+    ]]
+      
+def test_delete_fields_regex():
+    from dataflows import load, delete_fields
+    flow = Flow(
+        load('data/regex.csv'),
+        delete_fields(['temperature (24h)'], regex=False),
+    )
+    data = flow.results()[0]
+    assert data == [[
+        {'city': 'london'},
+        {'city': 'paris'},
+        {'city': 'rome'},
+    ]]
+
+def test_join_full_outer():
+    from dataflows import load, set_type, join
+    flow = Flow(
+        load('data/population.csv'),
+        load('data/cities.csv'),
+        join(
+            source_name='population',
+            source_key=['id'],
+            target_name='cities',
+            target_key=['id'],
+            fields={'population': {'name': 'population'}},
+            mode='full-outer',
+        ),
+    )
+    data = flow.results()[0]
+    assert data == [[
+        {'id': 1, 'city': 'london', 'population': 8},
+        {'id': 2, 'city': 'paris', 'population': 2},
+        {'id': 3, 'city': 'rome', 'population': None},
+        {'id': 4, 'city': None, 'population': 3},
     ]]

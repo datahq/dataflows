@@ -73,7 +73,7 @@ We can load data from a file instead:
 
 ```python
 %%writefile beatles.csv
-name,instrument 
+name,instrument
 john,guitar
 paul,bass
 george,guitar
@@ -215,7 +215,7 @@ Flow(
 
 Data is automatically converted to the correct native Python type.
 
-Apart from data-types, it's also possible to set other constraints to the data. If the data fails validation (or does not fit the assigned data-type) an exception will be thrown - making this method highly effective for validating data and ensuring data quality. 
+Apart from data-types, it's also possible to set other constraints to the data. If the data fails validation (or does not fit the assigned data-type) an exception will be thrown - making this method highly effective for validating data and ensuring data quality.
 
 What about large data files? In the above examples, the results are loaded into memory, which is not always preferrable or acceptable. In many cases, we'd like to store the results directly onto a hard drive - without having the machine's RAM limit in any way the amount of data we can process.
 
@@ -334,9 +334,9 @@ Flow(
 
 
 
-The `filter_pythagorean_triplets` function takes an iterator of rows, and yields only the ones that pass its condition. 
+The `filter_pythagorean_triplets` function takes an iterator of rows, and yields only the ones that pass its condition.
 
-The flow framework knows whether a function is meant to hande a single row or a row iterator based on its parameters: 
+The flow framework knows whether a function is meant to hande a single row or a row iterator based on its parameters:
 
 - if it accepts a single `row` parameter, then it's a row processor.
 - if it accepts a single `rows` parameter, then it's a rows processor.
@@ -491,7 +491,7 @@ from dataflows import Flow, load, dump_to_path, checkpoint, printer
 
 def find_double_winners(package):
 
-    # Remove the emmies resource - 
+    # Remove the emmies resource -
     #    we're going to consume it now
     package.pkg.remove_resource('emmies')
     # Must yield the modified datapackage
@@ -500,22 +500,22 @@ def find_double_winners(package):
     # Now iterate on all resources
     resources = iter(package)
 
-    # Emmies is the first - 
+    # Emmies is the first -
     # read all its data and create a set of winner names
     emmy = next(resources)
     emmy_winners = set(
-        map(lambda x: x['nominee'], 
+        map(lambda x: x['nominee'],
             filter(lambda x: x['winner'],
                    emmy))
     )
 
-    # Oscars are next - 
+    # Oscars are next -
     # filter rows based on the emmy winner set
     academy = next(resources)
-    yield filter(lambda row: (row['Winner'] and 
+    yield filter(lambda row: (row['Winner'] and
                               row['Name'] in emmy_winners),
                  academy)
-    
+
     # important to deque generators to ensure finalization steps of previous processors are executed
     yield from resources
 
@@ -590,7 +590,7 @@ Flow(
     join(
         'emmies_filtered', ['emmy_nominee'],  # Source resource
         'oscars', ['Name'],                   # Target resource
-        full=False   # Don't add new fields, remove unmatched rows
+        mode='inner'   # Don't add new fields, remove unmatched rows
     ),
     filter_rows(equals=[dict(Winner='1')]),
     dump_to_path('double_winners'),
@@ -656,14 +656,14 @@ def text_processing_flow(star_letter_idx):
     def upper(row):
         for k in row:
             row[k] = row[k].upper()
-    
+
     # star the letter at the index from star_letter_idx argument
     def star_letter(row):
         for k in row:
             s = list(row[k])
             s[star_letter_idx] = '*'
             row[k] = ''.join(s)
-    
+
     def print_foo(row):
         print('  '.join(list(row['foo'])))
 
