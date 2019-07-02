@@ -40,7 +40,9 @@ Loads data from various source types (local files, remote URLS, Google Spreadshe
 
 ```python
 def load(source, name=None, resources=None, strip=True, limit_rows=None,
-         infer_strategy=None, cast_strategy=None, on_error=raise_exception,
+         infer_strategy=None, cast_strategy=None,
+         override_schema=None, override_fields=None,
+         on_error=raise_exception,
          **options)
     pass
 ```
@@ -72,6 +74,8 @@ Relevant only when _not_ loading data from a datapackage:
     - `load.CAST_TO_STRINGS` - All data will be casted to strings (regardless of how it's stored in the source file) and won't be validated using the schema.
     - `load.CAST_DO_NOTHING` - Data will be passed as-is without modifications or validation
     - `load.CAST_WITH_SCHEMA` - Data will be parsed and casted using the schema and will error in case of faulty data
+- `override_schema` - Provided dictionary will be merged into the inferred schema. If `fields` key is set its contents will fully replace the inferred fields array. The same behavior will be applied for all other nested structures.
+- `override_fields` - Provided mapping will patch the inferred `schema.fields` array. In the mapping keys must be field names and values must be dictionaries intended to be merged into the corresponding field's metadata.
 - `on_error` - Dictates how `load` will behave in case of a validation error.
     Options are identical to `on_error` in `set_type` and `validate`
 
