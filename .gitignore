@@ -88,12 +88,3 @@ celerybeat-schedule
 todo/
 out/
 .checkpoints/
-academy_csv.py
-academy_csv/
-data/dump_dates/
-data/dump_with_titles/
-data/load_from_env_var/
-data/load_from_package/
-data/load_from_package_resource_matching(/
-data/test_save_load_dates/
-test.db
