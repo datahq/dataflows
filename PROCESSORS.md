@@ -42,6 +42,7 @@ Loads data from various source types (local files, remote URLS, Google Spreadshe
 def load(source, name=None, resources=None, strip=True, limit_rows=None,
          infer_strategy=None, cast_strategy=None,
          override_schema=None, override_fields=None,
+         deduplicate_headers=False,
          on_error=raise_exception,
          **options)
     pass
@@ -76,6 +77,7 @@ Relevant only when _not_ loading data from a datapackage:
     - `load.CAST_WITH_SCHEMA` - Data will be parsed and casted using the schema and will error in case of faulty data
 - `override_schema` - Provided dictionary will be merged into the inferred schema. If `fields` key is set its contents will fully replace the inferred fields array. The same behavior will be applied for all other nested structures.
 - `override_fields` - Provided mapping will patch the inferred `schema.fields` array. In the mapping keys must be field names and values must be dictionaries intended to be merged into the corresponding field's metadata.
+- `deduplicate_headers` - (default `False`) If there are duplicate headers and the flag is set to `True` it will rename them using a `header (1), header (2), etc` approach. If there are duplicate headers and the flag is set to `False` it will raise an error.
 - `on_error` - Dictates how `load` will behave in case of a validation error.
     Options are identical to `on_error` in `set_type` and `validate`
 
