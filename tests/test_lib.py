@@ -1279,9 +1279,9 @@ def test_load_duplicate_headers():
     flow = Flow(
         load('data/duplicate_headers.csv'),
     )
-    with pytest.raises(ValueError) as exception:
+    with pytest.raises(ValueError) as excinfo:
         flow.results()
-    assert 'duplicate headers' in str(exception)
+    assert 'duplicate headers' in str(excinfo.value)
 
 
 def test_load_duplicate_headers_with_deduplicate_headers_flag():
