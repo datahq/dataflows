@@ -106,8 +106,10 @@ class load(DataStreamProcessor):
     ERRORS_RAISE = raise_exception
 
     def __init__(self, load_source, name=None, resources=None, strip=True, limit_rows=None,
-                 infer_strategy=None, cast_strategy=None, on_error=raise_exception,
+                 infer_strategy=None, cast_strategy=None,
                  override_schema=None, override_fields=None,
+                 deduplicate_headers=False,
+                 on_error=raise_exception,
                  **options):
         super(load, self).__init__()
         self.load_source = load_source
@@ -119,6 +121,7 @@ class load(DataStreamProcessor):
         self.resources = resources
         self.override_schema = override_schema
         self.override_fields = override_fields
+        self.deduplicate_headers = deduplicate_headers
 
         self.load_dp = None
         self.resource_descriptors = []
@@ -194,6 +197,11 @@ class load(DataStreamProcessor):
                 self.options.setdefault('ignore_blank_headers', True)
                 self.options.setdefault('headers', 1)
                 stream: Stream = Stream(self.load_source, **self.options).open()
+                if len(stream.headers) != len(set(stream.headers)):
+                    if not self.deduplicate_headers:
+                        raise ValueError(
+                            'Found duplicate headers. Use the `deduplicate_headers` flag')
+                    stream.headers = self.rename_duplicate_headers(stream.headers)
                 schema = Schema().infer(
                     stream.sample, headers=stream.headers,
                     confidence=1, guesser_cls=self.guesser)
@@ -241,3 +249,16 @@ class load(DataStreamProcessor):
             if self.limit_rows:
                 it = self.limiter(it)
             yield it
+
+    def rename_duplicate_headers(self, duplicate_headers):
+        counter = {}
+        headers = []
+        for header in duplicate_headers:
+            counter.setdefault(header, 0)
+            counter[header] += 1
+            if counter[header] > 1:
+                if counter[header] == 2:
+                    headers[headers.index(header)] = '%s (%s)' % (header, 1)
+                header = '%s (%s)' % (header, counter[header])
+            headers.append(header)
+        return headers

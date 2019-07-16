@@ -1,3 +1,4 @@
+import pytest
 from dataflows import Flow
 
 data = [
@@ -1236,7 +1237,7 @@ def test_load_override_schema_and_fields():
         {'name': 'george', 'age': '17'},
         {'name': None, 'age': '22'},
     ]]
-      
+
 def test_delete_fields_regex():
     from dataflows import load, delete_fields
     flow = Flow(
@@ -1270,4 +1271,30 @@ def test_join_full_outer():
         {'id': 2, 'city': 'paris', 'population': 2},
         {'id': 3, 'city': 'rome', 'population': None},
         {'id': 4, 'city': None, 'population': 3},
+    ]]
+
+
+def test_load_duplicate_headers():
+    from dataflows import load
+    flow = Flow(
+        load('data/duplicate_headers.csv'),
+    )
+    with pytest.raises(ValueError) as excinfo:
+        flow.results()
+    assert 'duplicate headers' in str(excinfo.value)
+
+
+def test_load_duplicate_headers_with_deduplicate_headers_flag():
+    from dataflows import load
+    flow = Flow(
+        load('data/duplicate_headers.csv', deduplicate_headers=True),
+    )
+    data, package, stats = flow.results()
+    assert package.descriptor['resources'][0]['schema']['fields'] == [
+        {'name': 'header1', 'type': 'string', 'format': 'default'},
+        {'name': 'header2 (1)', 'type': 'string', 'format': 'default'},
+        {'name': 'header2 (2)', 'type': 'string', 'format': 'default'},
+    ]
+    assert data == [[
+        {'header1': 'value1', 'header2 (1)': 'value2', 'header2 (2)': 'value3'},
     ]]
