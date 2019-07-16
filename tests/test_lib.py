@@ -20,12 +20,12 @@ def test_dump_to_sql():
                     'resource-name': 'res_1'
                 }
             ),
-            engine='sqlite:///test.db')
+            engine='sqlite:///out/test.db')
     )
     f.process()
 
     # Check validity
-    engine = create_engine('sqlite:///test.db')
+    engine = create_engine('sqlite:///out/test.db')
     result = list(dict(x) for x in engine.execute('select * from output_table'))
     assert result == data
 
@@ -439,11 +439,11 @@ def test_load_from_package():
 
     Flow(
         [{'foo': 'bar', 'moo': 12}],
-        dump_to_path('data/load_from_package')
+        dump_to_path('out/load_from_package')
     ).process()
 
     ds = Flow(
-        load('data/load_from_package/datapackage.json')
+        load('out/load_from_package/datapackage.json')
     ).datastream()
 
     assert len(ds.dp.resources) == 1
@@ -456,10 +456,10 @@ def test_load_from_env_var():
 
     Flow(
         [{'foo': 'bar'}],
-        dump_to_path('data/load_from_env_var')
+        dump_to_path('out/load_from_env_var')
     ).process()
 
-    os.environ['MY_DATAPACKAGE'] = 'data/load_from_env_var/datapackage.json'
+    os.environ['MY_DATAPACKAGE'] = 'out/load_from_env_var/datapackage.json'
     results, dp, _ = Flow(
         load('env://MY_DATAPACKAGE')
     ).results()
@@ -474,11 +474,11 @@ def test_load_from_package_resource_matching():
     Flow(
         [{'foo': 'bar'}],
         [{'foo': 'baz'}],
-        dump_to_path('data/load_from_package_resource_matching(')
+        dump_to_path('out/load_from_package_resource_matching(')
     ).process()
 
     ds = Flow(
-        load('data/load_from_package_resource_matching(/datapackage.json', resources=['res_2'])
+        load('out/load_from_package_resource_matching(/datapackage.json', resources=['res_2'])
     ).datastream()
 
     assert len(ds.dp.resources) == 1
@@ -706,10 +706,10 @@ def test_dump_to_path_use_titles():
         [{'hello': 'world', 'hola': 'mundo'}, {'hello': 'עולם', 'hola': 'عالم'}],
         *(set_type(name, resources=['res_1'], title=title) for name, title
           in (('hello', 'שלום'), ('hola', 'aloha'))),
-        dump_to_path('data/dump_with_titles', use_titles=True)
+        dump_to_path('out/dump_with_titles', use_titles=True)
     ).process()
 
-    with tabulator.Stream('data/dump_with_titles/res_1.csv') as stream:
+    with tabulator.Stream('out/dump_with_titles/res_1.csv') as stream:
         assert stream.read() == [['שלום',   'aloha'],
                                  ['world',  'mundo'],
                                  ['עולם',   'عالم']]
@@ -728,7 +728,7 @@ def test_load_dates():
             [{'today': str(_today), 'now': str(_now)}],
             set_type('today', type='date'),
             set_type('now', type='datetime', format=datetime_format),
-            dump_to_path('data/dump_dates')
+            dump_to_path('out/dump_dates')
         ).process()
 
     try:
@@ -749,7 +749,7 @@ def test_load_dates():
     out_now = datetime.datetime(_now.year, _now.month, _now.day, _now.hour, _now.minute, _now.second)
 
     assert Flow(
-        load('data/dump_dates/datapackage.json'),
+        load('out/dump_dates/datapackage.json'),
     ).results()[0] == [[{'today': _today, 'now': out_now}]]
 
 
@@ -901,11 +901,11 @@ def test_save_load_dates():
         [{'id': 1, 'ts': datetime.datetime.now()},
          {'id': 2, 'ts': datetime.datetime.now()}],
         set_type('ts', type='datetime', format='%Y-%m-%d/%H:%M:%S'),
-        dump_to_path('data/test_save_load_dates')
+        dump_to_path('out/test_save_load_dates')
     ).process()
 
     res, _, _ = Flow(
-        load('data/test_save_load_dates/datapackage.json'),
+        load('out/test_save_load_dates/datapackage.json'),
         printer()
     ).results()
 

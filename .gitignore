@@ -85,6 +85,5 @@ celerybeat-schedule
 
 # Resources created by our tests
 .coverage.*
-
 todo/
-out/
+.checkpoints/
