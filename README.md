@@ -72,7 +72,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 * Trivial to get started and easy to scale up
 * Set up and run from command line in seconds ...
-    * `dataflow init` => `flow.py`
+    * `dataflows init` => `flow.py`
     * `python flow.py`
 * Validate input (and esp source) quickly (non-zero length, right structure, etc.)
 * Supports caching data from source and even between steps
