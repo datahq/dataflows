@@ -2,6 +2,7 @@ import os
 import warnings
 import datetime
 
+from copy import deepcopy
 from datapackage import Package
 from tabulator import Stream
 from tabulator.parser import Parser
@@ -185,36 +186,9 @@ class load(DataStreamProcessor):
 
             # Loading for any other source
             else:
-                path = os.path.basename(self.load_source)
-                path = os.path.splitext(path)[0]
-                descriptor = dict(path=self.name or path,
-                                  profile='tabular-data-resource')
-                self.resource_descriptors.append(descriptor)
-                descriptor['name'] = self.name or path
-                if 'encoding' in self.options:
-                    descriptor['encoding'] = self.options['encoding']
-                self.options.setdefault('custom_parsers', {}).setdefault('xml', XMLParser)
-                self.options.setdefault('ignore_blank_headers', True)
-                self.options.setdefault('headers', 1)
-                stream: Stream = Stream(self.load_source, **self.options).open()
-                if len(stream.headers) != len(set(stream.headers)):
-                    if not self.deduplicate_headers:
-                        raise ValueError(
-                            'Found duplicate headers. Use the `deduplicate_headers` flag')
-                    stream.headers = self.rename_duplicate_headers(stream.headers)
-                schema = Schema().infer(
-                    stream.sample, headers=stream.headers,
-                    confidence=1, guesser_cls=self.guesser)
-                if self.override_schema:
-                    schema.update(self.override_schema)
-                if self.override_fields:
-                    fields = schema.get('fields', [])
-                    for field in fields:
-                        field.update(self.override_fields.get(field['name'], {}))
-                descriptor['schema'] = schema
-                descriptor['format'] = self.options.get('format', stream.format)
-                descriptor['path'] += '.{}'.format(stream.format)
-                self.iterators.append(stream.iter(keyed=True))
+                resource_descriptor, iterator = self.get_resource_descriptor_and_iterator()
+                self.resource_descriptors.append(resource_descriptor)
+                self.iterators.append(iterator)
         dp.descriptor.setdefault('resources', []).extend(self.resource_descriptors)
         return dp
 
@@ -262,3 +236,36 @@ class load(DataStreamProcessor):
                 header = '%s (%s)' % (header, counter[header])
             headers.append(header)
         return headers
+
+    def get_resource_descriptor_and_iterator(self):
+        options = deepcopy(self.options)
+        path = os.path.basename(self.load_source)
+        path = os.path.splitext(path)[0]
+        descriptor = dict(path=self.name or path,
+                          profile='tabular-data-resource')
+        descriptor['name'] = self.name or path
+        if 'encoding' in options:
+            descriptor['encoding'] = options['encoding']
+        options.setdefault('custom_parsers', {}).setdefault('xml', XMLParser)
+        options.setdefault('ignore_blank_headers', True)
+        options.setdefault('headers', 1)
+        stream: Stream = Stream(self.load_source, **options).open()
+        if len(stream.headers) != len(set(stream.headers)):
+            if not self.deduplicate_headers:
+                raise ValueError(
+                    'Found duplicate headers. Use the `deduplicate_headers` flag')
+            stream.headers = self.rename_duplicate_headers(stream.headers)
+        schema = Schema().infer(
+            stream.sample, headers=stream.headers,
+            confidence=1, guesser_cls=self.guesser)
+        if self.override_schema:
+            schema.update(self.override_schema)
+        if self.override_fields:
+            fields = schema.get('fields', [])
+            for field in fields:
+                field.update(self.override_fields.get(field['name'], {}))
+        descriptor['schema'] = schema
+        descriptor['format'] = options.get('format', stream.format)
+        descriptor['path'] += '.{}'.format(stream.format)
+        iterator = stream.iter(keyed=True)
+        return (descriptor, iterator)
