@@ -1308,13 +1308,10 @@ def test_load_excel_sheet_default():
         load('data/sheets.xlsx'),
     )
     data, package, stats = flow.results()
-    assert package.descriptor['resources'][0]['schema']['fields'] == [
-        {'name': 'id', 'type': 'integer', 'format': 'default'},
-        {'name': 'name', 'type': 'string', 'format': 'default'},
+    assert len(package.descriptor['resources']) == 1
+    assert data == [
+        [{'id': 1, 'name': 'london'}],
     ]
-    assert data == [[
-        {'id': 1, 'name': 'london'},
-    ]]
 
 
 def test_load_excel_sheet_by_number():
@@ -1323,13 +1320,10 @@ def test_load_excel_sheet_by_number():
         load('data/sheets.xlsx', sheet=2),
     )
     data, package, stats = flow.results()
-    assert package.descriptor['resources'][0]['schema']['fields'] == [
-        {'name': 'id', 'type': 'integer', 'format': 'default'},
-        {'name': 'name', 'type': 'string', 'format': 'default'},
+    assert len(package.descriptor['resources']) == 1
+    assert data == [
+        [{'id': 2, 'name': 'paris'}],
     ]
-    assert data == [[
-        {'id': 2, 'name': 'paris'},
-    ]]
 
 
 def test_load_excel_sheet_by_name():
@@ -1338,14 +1332,21 @@ def test_load_excel_sheet_by_name():
         load('data/sheets.xlsx', sheet='Sheet3'),
     )
     data, package, stats = flow.results()
-    assert package.descriptor['resources'][0]['schema']['fields'] == [
-        {'name': 'id', 'type': 'integer', 'format': 'default'},
-        {'name': 'name', 'type': 'string', 'format': 'default'},
+    assert len(package.descriptor['resources']) == 1
+    assert data == [
+        [{'id': 3, 'name': 'rome'}],
     ]
-    assert data == [[
-        {'id': 3, 'name': 'rome'},
-    ]]
 
 
 def test_load_excel_sheets():
-    assert True
+    from dataflows import load
+    flow = Flow(
+        load('data/sheets.xlsx', sheets='*'),
+    )
+    data, package, stats = flow.results()
+    assert len(package.descriptor['resources']) == 3
+    assert data == [
+        [{'id': 1, 'name': 'london'}],
+        [{'id': 2, 'name': 'paris'}],
+        [{'id': 3, 'name': 'rome'}],
+    ]

@@ -2,6 +2,7 @@ import os
 import warnings
 import datetime
 
+import tabulator
 from copy import deepcopy
 from datapackage import Package
 from tabulator import Stream
@@ -186,9 +187,26 @@ class load(DataStreamProcessor):
 
             # Loading for any other source
             else:
-                resource_descriptor, iterator = self.get_resource_descriptor_and_iterator()
-                self.resource_descriptors.append(resource_descriptor)
-                self.iterators.append(iterator)
+
+                # Excel multiple sheets mode
+                if self.options.get('sheets'):
+                    try:
+                        options = deepcopy(self.options)
+                        while True:
+                            options['sheet'] = options.get('sheet', 0) + 1
+                            descriptor, iterator = self.get_resource(options)
+                            self.resource_descriptors.append(descriptor)
+                            self.iterators.append(iterator)
+                    except tabulator.exceptions.SourceError:
+                        if not self.resource_descriptors:
+                            raise
+
+                # Standard mode
+                else:
+                    descriptor, iterator = self.get_resource(self.options)
+                    self.resource_descriptors.append(descriptor)
+                    self.iterators.append(iterator)
+
         dp.descriptor.setdefault('resources', []).extend(self.resource_descriptors)
         return dp
 
@@ -237,8 +255,8 @@ class load(DataStreamProcessor):
             headers.append(header)
         return headers
 
-    def get_resource_descriptor_and_iterator(self):
-        options = deepcopy(self.options)
+    def get_resource(self, options):
+        options = deepcopy(options)
         path = os.path.basename(self.load_source)
         path = os.path.splitext(path)[0]
         descriptor = dict(path=self.name or path,
