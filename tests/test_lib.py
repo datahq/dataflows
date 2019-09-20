@@ -1300,11 +1300,12 @@ def test_load_duplicate_headers_with_deduplicate_headers_flag():
     ]]
 
 
-# TODO: update to user multiple sheets
-def test_load_multiple_sheets():
+# Excel sheets loading
+
+def test_load_excel_sheet_default():
     from dataflows import load
     flow = Flow(
-        load('data/sheets.xlsx', sheet=1),
+        load('data/sheets.xlsx'),
     )
     data, package, stats = flow.results()
     assert package.descriptor['resources'][0]['schema']['fields'] == [
@@ -1314,3 +1315,37 @@ def test_load_multiple_sheets():
     assert data == [[
         {'id': 1, 'name': 'london'},
     ]]
+
+
+def test_load_excel_sheet_by_number():
+    from dataflows import load
+    flow = Flow(
+        load('data/sheets.xlsx', sheet=2),
+    )
+    data, package, stats = flow.results()
+    assert package.descriptor['resources'][0]['schema']['fields'] == [
+        {'name': 'id', 'type': 'integer', 'format': 'default'},
+        {'name': 'name', 'type': 'string', 'format': 'default'},
+    ]
+    assert data == [[
+        {'id': 2, 'name': 'paris'},
+    ]]
+
+
+def test_load_excel_sheet_by_name():
+    from dataflows import load
+    flow = Flow(
+        load('data/sheets.xlsx', sheet='Sheet3'),
+    )
+    data, package, stats = flow.results()
+    assert package.descriptor['resources'][0]['schema']['fields'] == [
+        {'name': 'id', 'type': 'integer', 'format': 'default'},
+        {'name': 'name', 'type': 'string', 'format': 'default'},
+    ]
+    assert data == [[
+        {'id': 3, 'name': 'rome'},
+    ]]
+
+
+def test_load_excel_sheets():
+    assert True
