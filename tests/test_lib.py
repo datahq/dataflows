@@ -1298,3 +1298,19 @@ def test_load_duplicate_headers_with_deduplicate_headers_flag():
     assert data == [[
         {'header1': 'value1', 'header2 (1)': 'value2', 'header2 (2)': 'value3'},
     ]]
+
+
+# TODO: update to user multiple sheets
+def test_load_multiple_sheets():
+    from dataflows import load
+    flow = Flow(
+        load('data/sheets.xlsx', sheet=1),
+    )
+    data, package, stats = flow.results()
+    assert package.descriptor['resources'][0]['schema']['fields'] == [
+        {'name': 'id', 'type': 'integer', 'format': 'default'},
+        {'name': 'name', 'type': 'string', 'format': 'default'},
+    ]
+    assert data == [[
+        {'id': 1, 'name': 'london'},
+    ]]
