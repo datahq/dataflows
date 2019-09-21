@@ -2,8 +2,10 @@ import os
 import warnings
 import datetime
 
+import re
 import tabulator
 from copy import deepcopy
+from slugify import slugify
 from datapackage import Package
 from tabulator import Stream
 from tabulator.parser import Parser
@@ -169,6 +171,7 @@ class load(DataStreamProcessor):
 
         # If load_source is string:
         else:
+
             # Handle Environment vars if necessary:
             if self.load_source.startswith('env://'):
                 env_var = self.load_source[6:]
@@ -185,27 +188,29 @@ class load(DataStreamProcessor):
                         self.resource_descriptors.append(resource.descriptor)
                         self.iterators.append(resource.iter(keyed=True, cast=True))
 
+            # Loading multiple excel sheets
+            elif self.options.get('sheets'):
+                options = deepcopy(self.options)
+                pattern = re.compile(options['sheets'])
+                try:
+                    while True:
+                        options['sheet'] = options.get('sheet', 0) + 1
+                        descriptor, stream = self.get_resource(options)
+                        if re.search(pattern, stream.fragment):
+                            descriptor['name'] = slugify(stream.fragment, to_lower=True)
+                            self.resource_descriptors.append(descriptor)
+                            self.iterators.append(stream.iter(keyed=True))
+                except tabulator.exceptions.SourceError:
+                    pass
+                if not self.resource_descriptors:
+                    message = 'No sheets found for the regex "%s"'
+                    raise RuntimeError(message % options['sheets'])
+
             # Loading for any other source
             else:
-
-                # Excel multiple sheets mode
-                if self.options.get('sheets'):
-                    try:
-                        options = deepcopy(self.options)
-                        while True:
-                            options['sheet'] = options.get('sheet', 0) + 1
-                            descriptor, iterator = self.get_resource(options)
-                            self.resource_descriptors.append(descriptor)
-                            self.iterators.append(iterator)
-                    except tabulator.exceptions.SourceError:
-                        if not self.resource_descriptors:
-                            raise
-
-                # Standard mode
-                else:
-                    descriptor, iterator = self.get_resource(self.options)
-                    self.resource_descriptors.append(descriptor)
-                    self.iterators.append(iterator)
+                descriptor, stream = self.get_resource(self.options)
+                self.resource_descriptors.append(descriptor)
+                self.iterators.append(stream.iter(keyed=True))
 
         dp.descriptor.setdefault('resources', []).extend(self.resource_descriptors)
         return dp
@@ -285,5 +290,4 @@ class load(DataStreamProcessor):
         descriptor['schema'] = schema
         descriptor['format'] = options.get('format', stream.format)
         descriptor['path'] += '.{}'.format(stream.format)
-        iterator = stream.iter(keyed=True)
-        return (descriptor, iterator)
+        return (descriptor, stream)

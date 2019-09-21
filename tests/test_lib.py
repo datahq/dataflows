@@ -1338,15 +1338,43 @@ def test_load_excel_sheet_by_name():
     ]
 
 
-def test_load_excel_sheets():
+def test_load_excel_sheets_all():
     from dataflows import load
     flow = Flow(
-        load('data/sheets.xlsx', sheets='*'),
+        load('data/sheets.xlsx', sheets='.*'),
     )
     data, package, stats = flow.results()
     assert len(package.descriptor['resources']) == 3
+    assert package.descriptor['resources'][0]['name'] == 'sheet1'
+    assert package.descriptor['resources'][1]['name'] == 'sheet2'
+    assert package.descriptor['resources'][2]['name'] == 'sheet3'
     assert data == [
         [{'id': 1, 'name': 'london'}],
         [{'id': 2, 'name': 'paris'}],
         [{'id': 3, 'name': 'rome'}],
     ]
+
+
+def test_load_excel_sheets_matching():
+    from dataflows import load
+    flow = Flow(
+        load('data/sheets.xlsx', sheets='Sheet[1,3]'),
+    )
+    data, package, stats = flow.results()
+    assert len(package.descriptor['resources']) == 2
+    assert package.descriptor['resources'][0]['name'] == 'sheet1'
+    assert package.descriptor['resources'][1]['name'] == 'sheet3'
+    assert data == [
+        [{'id': 1, 'name': 'london'}],
+        [{'id': 3, 'name': 'rome'}],
+    ]
+
+
+def test_load_excel_sheets_not_found():
+    from dataflows import load
+    flow = Flow(
+        load('data/sheets.xlsx', sheets='Sheet[4]'),
+    )
+    with pytest.raises(RuntimeError) as excinfo:
+        data, package, stats = flow.results()
+    assert 'No sheets found' in str(excinfo.value)
