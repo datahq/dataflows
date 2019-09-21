@@ -62,6 +62,7 @@ def load(source, name=None, resources=None, strip=True, limit_rows=None,
     - A list of resource names to load
     - `None` indicates to load all resources
     - The index of the resource in the package
+- `sheets` - REGEX. For the Excel format it's possible to pass the `sheet` option to `tabulator` to open the exact Excel sheet. DPP supports also the `sheets` option allowing to load multiple Excel sheets at once if their names match the given regex.
 - `options` - based on the loaded file, extra options (e.g. `sheet` for Excel files etc., see the link to tabulator above)
 
 Relevant only when _not_ loading data from a datapackage:
