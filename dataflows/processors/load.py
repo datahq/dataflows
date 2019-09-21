@@ -198,6 +198,7 @@ class load(DataStreamProcessor):
                         descriptor, stream = self.get_resource(options)
                         if re.search(pattern, stream.fragment):
                             descriptor['name'] = slugify(stream.fragment, to_lower=True)
+                            descriptor['path'] = '.'.join([descriptor['name'], stream.format])
                             self.resource_descriptors.append(descriptor)
                             self.iterators.append(stream.iter(keyed=True))
                 except tabulator.exceptions.SourceError:
@@ -237,29 +238,6 @@ class load(DataStreamProcessor):
                 for k, v in r.items()
             )
 
-    def process_resources(self, resources):
-        yield from super(load, self).process_resources(resources)
-        for descriptor, it in zip(self.resource_descriptors, self.iterators):
-            it = self.caster(descriptor, it)
-            if self.strip:
-                it = self.stripper(it)
-            if self.limit_rows:
-                it = self.limiter(it)
-            yield it
-
-    def rename_duplicate_headers(self, duplicate_headers):
-        counter = {}
-        headers = []
-        for header in duplicate_headers:
-            counter.setdefault(header, 0)
-            counter[header] += 1
-            if counter[header] > 1:
-                if counter[header] == 2:
-                    headers[headers.index(header)] = '%s (%s)' % (header, 1)
-                header = '%s (%s)' % (header, counter[header])
-            headers.append(header)
-        return headers
-
     def get_resource(self, options):
         options = deepcopy(options)
         path = os.path.basename(self.load_source)
@@ -291,3 +269,26 @@ class load(DataStreamProcessor):
         descriptor['format'] = options.get('format', stream.format)
         descriptor['path'] += '.{}'.format(stream.format)
         return (descriptor, stream)
+
+    def process_resources(self, resources):
+        yield from super(load, self).process_resources(resources)
+        for descriptor, it in zip(self.resource_descriptors, self.iterators):
+            it = self.caster(descriptor, it)
+            if self.strip:
+                it = self.stripper(it)
+            if self.limit_rows:
+                it = self.limiter(it)
+            yield it
+
+    def rename_duplicate_headers(self, duplicate_headers):
+        counter = {}
+        headers = []
+        for header in duplicate_headers:
+            counter.setdefault(header, 0)
+            counter[header] += 1
+            if counter[header] > 1:
+                if counter[header] == 2:
+                    headers[headers.index(header)] = '%s (%s)' % (header, 1)
+                header = '%s (%s)' % (header, counter[header])
+            headers.append(header)
+        return headers

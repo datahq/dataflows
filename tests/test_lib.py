@@ -1345,9 +1345,13 @@ def test_load_excel_sheets_all():
     )
     data, package, stats = flow.results()
     assert len(package.descriptor['resources']) == 3
+    print(package.descriptor['resources'][0])
     assert package.descriptor['resources'][0]['name'] == 'sheet1'
     assert package.descriptor['resources'][1]['name'] == 'sheet2'
     assert package.descriptor['resources'][2]['name'] == 'sheet3'
+    assert package.descriptor['resources'][0]['path'] == 'sheet1.xlsx'
+    assert package.descriptor['resources'][1]['path'] == 'sheet2.xlsx'
+    assert package.descriptor['resources'][2]['path'] == 'sheet3.xlsx'
     assert data == [
         [{'id': 1, 'name': 'london'}],
         [{'id': 2, 'name': 'paris'}],
@@ -1364,6 +1368,8 @@ def test_load_excel_sheets_matching():
     assert len(package.descriptor['resources']) == 2
     assert package.descriptor['resources'][0]['name'] == 'sheet1'
     assert package.descriptor['resources'][1]['name'] == 'sheet3'
+    assert package.descriptor['resources'][0]['path'] == 'sheet1.xlsx'
+    assert package.descriptor['resources'][1]['path'] == 'sheet3.xlsx'
     assert data == [
         [{'id': 1, 'name': 'london'}],
         [{'id': 3, 'name': 'rome'}],
