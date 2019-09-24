@@ -15,7 +15,7 @@ class FileDumper(DumperBase):
         super(FileDumper, self).__init__(options)
         self.force_format = options.get('force_format', True)
         self.forced_format = options.get('format', 'csv')
-        self.temporal_format_property = options.get('temporal_format_property', 'format')
+        self.temporal_format_property = options.get('temporal_format_property', None)
         self.use_titles = options.get('use_titles', False)
 
     def process_datapackage(self, datapackage):
@@ -47,13 +47,14 @@ class FileDumper(DumperBase):
     def handle_datapackage(self):
 
         # Handle temporal_format_property
-        for resource in self.datapackage.descriptor['resources']:
-            for field in resource['schema']['fields']:
-                if field.get('type') in ['datetime', 'date', 'time']:
-                    format = field.pop(self.temporal_format_property, None)
-                    if format:
-                        field['format'] = format
-        self.datapackage.commit()
+        if self.temporal_format_property:
+            for resource in self.datapackage.descriptor['resources']:
+                for field in resource['schema']['fields']:
+                    if field.get('type') in ['datetime', 'date', 'time']:
+                        format = field.pop(self.temporal_format_property, None)
+                        if format:
+                            field['format'] = format
+            self.datapackage.commit()
 
         temp_file = tempfile.NamedTemporaryFile(mode="w+", delete=False, encoding='utf-8')
         indent = 2 if self.pretty_descriptor else None

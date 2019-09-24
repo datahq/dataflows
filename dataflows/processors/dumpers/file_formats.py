@@ -25,7 +25,7 @@ class FileFormat():
     SERIALIZERS = {}
     DEFAULT_SERIALIZER = str
 
-    def __init__(self, writer, schema, temporal_format_property='format'):
+    def __init__(self, writer, schema, temporal_format_property=None):
         self.writer = writer
         self.headers = [f.name for f in schema.fields]
         self.fields = dict((f.name, f) for f in schema.fields)
@@ -48,10 +48,11 @@ class FileFormat():
         if value is None:
             return self.NULL_VALUE
         serializer = self.SERIALIZERS.get(field.type, self.DEFAULT_SERIALIZER)
-        if field.type in ['datetime', 'date', 'time']:
-            format = field.descriptor.get(self.temporal_format_property, None)
-            if format:
-                serializer = lambda d: d.strftime(format)
+        if self.temporal_format_property:
+            if field.type in ['datetime', 'date', 'time']:
+                format = field.descriptor.get(self.temporal_format_property, None)
+                if format:
+                    serializer = lambda d: d.strftime(format)
         return serializer(value)
 
     def write_transformed_row(self, *_):
