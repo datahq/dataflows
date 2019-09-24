@@ -13,9 +13,11 @@ class KeyCalc(object):
 
 def _sorter(rows, key_calc, reverse, batch_size):
     db = KVFile()
-    db.insert(((key_calc(row) + "{:08x}".format(row_num), row) for row_num, row in enumerate(rows)),
-              batch_size=batch_size)
-
+    def process(rows):
+        for row_num, row in enumerate(rows):
+            key = key_calc(row) + "{:08x}".format(row_num)
+            yield (key, row)
+    db.insert(process(rows), batch_size=batch_size)
     for _, value in db.items(reverse=reverse):
         yield value
 
