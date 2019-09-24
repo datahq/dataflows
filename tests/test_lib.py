@@ -1317,7 +1317,7 @@ def test_force_temporal_format():
                 ]
             }
         }),
-        dump_to_path('data/force_temporal_format', temporal_format='outputFormat')
+        dump_to_path('data/force_temporal_format', temporal_format_property='outputFormat')
     ).process()
 
     # Load

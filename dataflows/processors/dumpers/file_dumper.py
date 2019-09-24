@@ -15,7 +15,7 @@ class FileDumper(DumperBase):
         super(FileDumper, self).__init__(options)
         self.force_format = options.get('force_format', True)
         self.forced_format = options.get('format', 'csv')
-        self.temporal_format = options.get('temporal_format', 'format')
+        self.temporal_format_property = options.get('temporal_format_property', 'format')
         self.use_titles = options.get('use_titles', False)
 
     def process_datapackage(self, datapackage):
@@ -46,11 +46,11 @@ class FileDumper(DumperBase):
 
     def handle_datapackage(self):
 
-        # Handle temporal_format
+        # Handle temporal_format_property
         for resource in self.datapackage.descriptor['resources']:
             for field in resource['schema']['fields']:
                 if field.get('type') in ['datetime', 'date', 'time']:
-                    format = field.pop(self.temporal_format, None)
+                    format = field.pop(self.temporal_format_property, None)
                     if format:
                         field['format'] = format
         self.datapackage.commit()
@@ -102,7 +102,7 @@ class FileDumper(DumperBase):
 
             temp_file = tempfile.NamedTemporaryFile(mode="w+", delete=False, newline='')
             writer_kwargs = {'use_titles': True} if self.use_titles else {}
-            writer_kwargs['temporal_format'] = self.temporal_format
+            writer_kwargs['temporal_format_property'] = self.temporal_format_property
             writer = self.file_formatters[resource.res.name](temp_file, schema, **writer_kwargs)
 
             return self.rows_processor(resource,

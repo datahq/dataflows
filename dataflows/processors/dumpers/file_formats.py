@@ -25,11 +25,11 @@ class FileFormat():
     SERIALIZERS = {}
     DEFAULT_SERIALIZER = str
 
-    def __init__(self, writer, schema, temporal_format='format'):
+    def __init__(self, writer, schema, temporal_format_property='format'):
         self.writer = writer
         self.headers = [f.name for f in schema.fields]
         self.fields = dict((f.name, f) for f in schema.fields)
-        self.temporal_format = temporal_format
+        self.temporal_format_property = temporal_format_property
 
     @classmethod
     def prepare_resource(cls, resource):
@@ -49,7 +49,7 @@ class FileFormat():
             return self.NULL_VALUE
         serializer = self.SERIALIZERS.get(field.type, self.DEFAULT_SERIALIZER)
         if field.type in ['datetime', 'date', 'time']:
-            format = field.descriptor.get(self.temporal_format, None)
+            format = field.descriptor.get(self.temporal_format_property, None)
             if format:
                 serializer = lambda d: d.strftime(format)
         return serializer(value)
