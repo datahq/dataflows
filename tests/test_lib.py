@@ -1297,6 +1297,7 @@ def test_load_duplicate_headers_with_deduplicate_headers_flag():
     ]
     assert data == [[
         {'header1': 'value1', 'header2 (1)': 'value2', 'header2 (2)': 'value3'},
+    ]]
 
 
 def test_force_temporal_format():
