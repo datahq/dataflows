@@ -379,6 +379,27 @@ def test_sort_reverse_many_rows():
     assert results[998:1000] == [{'a': 100, 'b': 0}, {'a': 0, 'b': 0}]
 
 
+def test_sort_rows_numbers():
+    from dataflows import sort_rows
+
+    f = Flow(
+        [
+            {'a': 0.1},
+            {'a': 10},
+            {'a': 8},
+            {'a': 1.1},
+        ],
+        sort_rows(key='{a}'),
+    )
+    results, _, _ = f.results()
+    assert list(results[0]) == [
+        {'a': 0.1},
+        {'a': 1.1},
+        {'a': 8},
+        {'a': 10},
+    ]
+
+
 def test_duplicate():
     from dataflows import duplicate
 
