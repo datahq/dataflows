@@ -1,14 +1,25 @@
+import re
 from kvfile import KVFile
-
 from ..helpers.resource_matcher import ResourceMatcher
 
 
 class KeyCalc(object):
     def __init__(self, key_spec):
         self.key_spec = key_spec
+        self.key_list = re.findall(r'\{(.*?)\}', key_spec)
 
     def __call__(self, row):
-        return self.key_spec.format(**row)
+        context = {}
+        for key, value in row.items():
+            # We need to strinfify some values to make them properly comparable
+            if key in self.key_list:
+                # numbers
+                # 1000 -> +1.000000e+03 -> p03ep1.000000
+                if isinstance(value, (int, float)):
+                    value = 'e'.join(reversed('{:+e}'.format(value).split('e')))
+                    value = value.replace('+', 'p').replace('-', 'm')
+                context[key] = value
+        return self.key_spec.format(**context)
 
 
 def _sorter(rows, key_calc, reverse, batch_size):

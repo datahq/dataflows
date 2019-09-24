@@ -376,7 +376,7 @@ def test_sort_reverse_many_rows():
     results, _, _ = f.results()
     results = results[0]
     assert results[0:2] == [{'a': 999, 'b': 4}, {'a': 994, 'b': 4}]
-    assert results[998:1000] == [{'a': 100, 'b': 0}, {'a': 0, 'b': 0}]
+    assert results[998:1000] == [{'a': 5, 'b': 0}, {'a': 0, 'b': 0}]
 
 
 def test_sort_rows_numbers():
