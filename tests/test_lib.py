@@ -1308,28 +1308,23 @@ def test_force_temporal_format():
 
     # Dump
     Flow(
-        load('data/temporal.csv', name='temporal'),
-        update_resource(['temporal'], **{
-            'schema': {
-                'fields': [
-                    {'name': 'date', 'type': 'date', 'format': '%Y-%m-%d', 'outputFormat': '%d/%m/%y'},
-                    {'name': 'event', 'type': 'string'},
-                ]
-            }
-        }),
-        dump_to_path('data/force_temporal_format', temporal_format_property='outputFormat')
+        load('data/temporal.csv',
+            name='temporal',
+            override_fields={'date': {'outputFormat': '%m/%d/%y'}}),
+        dump_to_path('out/force_temporal_format',
+            temporal_format_property='outputFormat')
     ).process()
 
     # Load
     flow = Flow(
-        load('data/force_temporal_format/datapackage.json')
+        load('out/force_temporal_format/datapackage.json')
     )
     data, package, stats = flow.results()
 
     # Assert
     assert package.descriptor['resources'][0]['schema'] == {
         'fields': [
-            {'format': '%d/%m/%y', 'name': 'date', 'type': 'date'},
+            {'format': '%m/%d/%y', 'name': 'date', 'type': 'date'},
             {'format': 'default', 'name': 'event', 'type': 'string'}
         ],
         'missingValues': [''],
