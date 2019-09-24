@@ -1300,6 +1300,8 @@ def test_load_duplicate_headers_with_deduplicate_headers_flag():
     ]]
 
 
+# Temporal format
+
 def test_force_temporal_format():
     import datetime
     from dataflows import load, update_resource, dump_to_path
