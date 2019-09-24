@@ -1317,41 +1317,22 @@ def test_force_temporal_format():
                 ]
             }
         }),
-        dump_to_path('data/force_temporal_format', force_temporal_format=False)
+        dump_to_path('data/force_temporal_format', temporal_format='outputFormat')
     ).process()
 
     # Load
     flow = Flow(
         load('data/force_temporal_format/datapackage.json')
     )
-    data, dp, stats = flow.results()
+    data, package, stats = flow.results()
 
     # Assert
-    assert dp.descriptor == {
-        'profile': 'data-package',
-        'resources': [{
-            'dialect': {
-                'caseSensitiveHeader': False,
-                'delimiter': ',',
-                'doubleQuote': True,
-                'header': True,
-                'lineTerminator': '\r\n',
-                'quoteChar': '"',
-                'skipInitialSpace': False
-            },
-            'encoding': 'utf-8',
-            'format': 'csv',
-            'name': 'temporal',
-            'path': 'temporal.csv',
-            'profile': 'tabular-data-resource',
-            'schema': {
-                'fields': [
-                    {'format': '%d/%m/%y', 'name': 'date', 'type': 'date'},
-                    {'format': 'default', 'name': 'event', 'type': 'string'}
-                ],
-                'missingValues': ['']
-            }
-        }]
+    assert package.descriptor['resources'][0]['schema'] == {
+        'fields': [
+            {'format': '%d/%m/%y', 'name': 'date', 'type': 'date'},
+            {'format': 'default', 'name': 'event', 'type': 'string'}
+        ],
+        'missingValues': [''],
     }
     assert data == [[
         {'date': datetime.date(2015, 1, 2), 'event': 'start'},
