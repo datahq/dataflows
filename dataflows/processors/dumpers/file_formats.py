@@ -3,6 +3,9 @@ import json
 import os
 import isodate
 import logging
+import datetime
+from copy import deepcopy
+from functools import partial
 
 
 DATE_FORMAT = '%Y-%m-%d'
@@ -26,10 +29,22 @@ class FileFormat():
     DEFAULT_SERIALIZER = str
 
     def __init__(self, writer, schema, temporal_format_property=None):
+
+        # Set properties
         self.writer = writer
         self.headers = [f.name for f in schema.fields]
         self.fields = dict((f.name, f) for f in schema.fields)
         self.temporal_format_property = temporal_format_property
+
+        # Set fields' serializers
+        for field in schema.fields:
+            serializer = self.SERIALIZERS.get(field.type, self.DEFAULT_SERIALIZER)
+            if self.temporal_format_property:
+                if field.type in ['datetime', 'date', 'time']:
+                    format = field.descriptor.get(self.temporal_format_property, None)
+                    if format:
+                        serializer = partial(datetime.datetime.strftime, format=format)
+            field.descriptor['serializer'] = serializer
 
     @classmethod
     def prepare_resource(cls, resource):
@@ -47,13 +62,7 @@ class FileFormat():
     def __transform_value(self, value, field):
         if value is None:
             return self.NULL_VALUE
-        serializer = self.SERIALIZERS.get(field.type, self.DEFAULT_SERIALIZER)
-        if self.temporal_format_property:
-            if field.type in ['datetime', 'date', 'time']:
-                format = field.descriptor.get(self.temporal_format_property, None)
-                if format:
-                    serializer = lambda d: d.strftime(format)
-        return serializer(value)
+        return field.descriptor['serializer'](value)
 
     def write_transformed_row(self, *_):
         raise NotImplementedError()
