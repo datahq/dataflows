@@ -17,6 +17,8 @@ Read more in the [Features section below](#features).
 
 Install `dataflows` via `pip install.`
 
+(If you are using minimal UNIX OS, run first `sudo apt install build-essential`)
+
 Then use the command-line interface to bootstrap a basic processing script for any remote data file:
 
 ```bash
