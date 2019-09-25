@@ -17,10 +17,15 @@ class KeyCalc(object):
             if key in self.key_list:
                 # numbers
                 # 1000 -> +1.000000e+03 -> pp03e1.000000
+                # -1000 -> -1/1000 -> -1.000000e-03 -> mm96e1.000000
+                # 0 -> o
                 if isinstance(value, (int, float, decimal.Decimal)):
-                    parts = '{:+e}'.format(value).split('e')
-                    value = '{}{}e{}'.format(parts[0][0], parts[1], parts[0][1:])
-                    value = value.replace('+', 'p').replace('-', 'm')
+                    if value == 0:
+                        value = 'o'
+                    else:
+                        parts = '{:+e}'.format(value if value >= 0 else 1/value).split('e')
+                        value = '{}{}e{}'.format(parts[0][0], (parts[1] if int(parts[1]) >= 0 else str(-99 - int(parts[1]))), parts[0][1:])
+                        value = value.replace('+', 'p').replace('-', 'm')
                 context[key] = value
         return self.key_spec.format(**context)
 

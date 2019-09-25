@@ -389,16 +389,25 @@ def test_sort_rows_number():
             {'a': -4},
             {'a': 10},
             {'a': 8},
+            {'a': 0},
+            {'a': -1000000},
+            {'a': 1000000},
+            {'a': -0.1},
         ],
         sort_rows(key='{a}'),
     )
     results, _, _ = f.results()
+    print(results)
     assert list(results[0]) == [
+        {'a': -1000000},
         {'a': -4},
         {'a': -3},
+        {'a': -0.1},
+        {'a': 0},
         {'a': 0.1},
         {'a': 8},
         {'a': 10},
+        {'a': 1000000},
     ]
 
 
