@@ -386,6 +386,7 @@ def test_sort_rows_number():
         [
             {'a': 0.1},
             {'a': -3},
+            {'a': -4},
             {'a': 10},
             {'a': 8},
         ],
@@ -393,6 +394,7 @@ def test_sort_rows_number():
     )
     results, _, _ = f.results()
     assert list(results[0]) == [
+        {'a': -4},
         {'a': -3},
         {'a': 0.1},
         {'a': 8},
