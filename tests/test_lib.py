@@ -385,6 +385,7 @@ def test_sort_rows_number():
     f = Flow(
         [
             {'a': 0.1},
+            {'a': -3},
             {'a': 10},
             {'a': 8},
         ],
@@ -392,6 +393,7 @@ def test_sort_rows_number():
     )
     results, _, _ = f.results()
     assert list(results[0]) == [
+        {'a': -3},
         {'a': 0.1},
         {'a': 8},
         {'a': 10},

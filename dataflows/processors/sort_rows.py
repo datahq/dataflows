@@ -1,4 +1,5 @@
 import re
+import decimal
 import datetime
 from kvfile import KVFile
 from ..helpers.resource_matcher import ResourceMatcher
@@ -15,9 +16,10 @@ class KeyCalc(object):
             # We need to stringify some types to make them properly comparable
             if key in self.key_list:
                 # numbers
-                # 1000 -> +1.000000e+03 -> p03ep1.000000
-                if isinstance(value, (int, float)):
-                    value = 'e'.join(reversed('{:+e}'.format(value).split('e')))
+                # 1000 -> +1.000000e+03 -> pp03e1.000000
+                if isinstance(value, (int, float, decimal.Decimal)):
+                    parts = '{:+e}'.format(value).split('e')
+                    value = '{}{}e{}'.format(parts[0][0], parts[1], parts[0][1:])
                     value = value.replace('+', 'p').replace('-', 'm')
                 context[key] = value
         return self.key_spec.format(**context)
