@@ -4,7 +4,6 @@ import os
 import isodate
 import logging
 import datetime
-from copy import deepcopy
 from functools import partial
 
 
