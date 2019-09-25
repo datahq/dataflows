@@ -1,6 +1,5 @@
 import re
 import decimal
-import datetime
 from kvfile import KVFile
 from ..helpers.resource_matcher import ResourceMatcher
 
@@ -24,7 +23,8 @@ class KeyCalc(object):
                         value = 'o'
                     else:
                         parts = '{:+e}'.format(value if value >= 0 else 1/value).split('e')
-                        value = '{}{}e{}'.format(parts[0][0], (parts[1] if int(parts[1]) >= 0 else str(-99 - int(parts[1]))), parts[0][1:])
+                        value = '{}{}e{}'.format(
+                            parts[0][0], (parts[1] if int(parts[1]) >= 0 else str(-99 - int(parts[1]))), parts[0][1:])
                         value = value.replace('+', 'p').replace('-', 'm')
                 context[key] = value
         return self.key_spec.format(**context)
