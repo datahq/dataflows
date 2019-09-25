@@ -397,7 +397,6 @@ def test_sort_rows_number():
         sort_rows(key='{a}'),
     )
     results, _, _ = f.results()
-    print(results)
     assert list(results[0]) == [
         {'a': -1000000},
         {'a': -4},
