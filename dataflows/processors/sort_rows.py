@@ -21,9 +21,10 @@ class KeyCalc(object):
                 if isinstance(value, (int, float, decimal.Decimal)):
                     if value:
                         parts = '{:+e}'.format(value if value >= 0 else 1/value).split('e')
+                        power = int(parts[1])
                         value = '{}{}e{}'.format(
                             parts[0][0],
-                            parts[1] if int(parts[1]) >= 0 else str(-99 - int(parts[1])),
+                            parts[1] if power >= 0 else str(-99 - power),
                             parts[0][1:])
                         value = value.replace('+', 'p').replace('-', 'm')
                     else:
