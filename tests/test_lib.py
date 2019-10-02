@@ -1298,3 +1298,38 @@ def test_load_duplicate_headers_with_deduplicate_headers_flag():
     assert data == [[
         {'header1': 'value1', 'header2 (1)': 'value2', 'header2 (2)': 'value3'},
     ]]
+
+
+# Temporal format
+
+def test_force_temporal_format():
+    import datetime
+    from dataflows import load, update_resource, dump_to_path
+
+    # Dump
+    Flow(
+        load('data/temporal.csv',
+            name='temporal',
+            override_fields={'date': {'outputFormat': '%m/%d/%y'}}),
+        dump_to_path('out/force_temporal_format',
+            temporal_format_property='outputFormat')
+    ).process()
+
+    # Load
+    flow = Flow(
+        load('out/force_temporal_format/datapackage.json')
+    )
+    data, package, stats = flow.results()
+
+    # Assert
+    assert package.descriptor['resources'][0]['schema'] == {
+        'fields': [
+            {'format': '%m/%d/%y', 'name': 'date', 'type': 'date'},
+            {'format': 'default', 'name': 'event', 'type': 'string'}
+        ],
+        'missingValues': [''],
+    }
+    assert data == [[
+        {'date': datetime.date(2015, 1, 2), 'event': 'start'},
+        {'date': datetime.date(2016, 6, 25), 'event': 'finish'}
+    ]]
