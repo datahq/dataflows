@@ -1,6 +1,7 @@
 import re
 import decimal
 from kvfile import KVFile
+from bitstring import BitArray
 from ..helpers.resource_matcher import ResourceMatcher
 
 
@@ -15,21 +16,10 @@ class KeyCalc(object):
             # We need to stringify some types to make them properly comparable
             if key in self.key_list:
                 # numbers
-                # 1000 -> +1.000000e+03 -> pp03e1.000000
-                # -1000 -> -1/1000 -> -1.000000e-03 -> mm96e1.000000
-                # 0 -> o
                 if isinstance(value, (int, float, decimal.Decimal)):
-                    if value:
-                        parts = '{:+e}'.format(value if value >= 0 else 1/value).split('e')
-                        power = int(parts[1])
-                        value = '{}{}e{}'.format(
-                            parts[0][0],
-                            parts[1] if power >= 0 else str(-99 - power),
-                            parts[0][1:])
-                        value = value.replace('+', 'p').replace('-', 'm')
-                    else:
-                        value = 'o'
-                    context[key] = value
+                    bits = BitArray(float=value, length=32)
+                    bits.invert(0)
+                    context[key] = bits.bin
         return self.key_spec.format(**context)
 
 
