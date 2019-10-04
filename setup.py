@@ -32,7 +32,7 @@ INSTALL_REQUIRES = [
     'tabulate',
     'tableschema-sql',
     'xmljson',
-    'bitstring',
+    'bitstring>=3',
 ]
 SPEEDUP_REQUIRES = [
     'plyvel',

@@ -16,10 +16,15 @@ class KeyCalc(object):
             # We need to stringify some types to make them properly comparable
             if key in self.key_list:
                 # numbers
+                # https://www.h-schmidt.net/FloatConverter/IEEE754.html
                 if isinstance(value, (int, float, decimal.Decimal)):
-                    bits = BitArray(float=value, length=32)
+                    bits = BitArray(float=value, length=64)
+                    # invert the sign bit
                     bits.invert(0)
-                    context[key] = bits.bin
+                    # invert negative numbers
+                    if value < 0:
+                        bits.invert(range(1, 64))
+                    context[key] = bits.hex
         return self.key_spec.format(**context)
 
 
