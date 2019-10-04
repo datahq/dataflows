@@ -200,7 +200,8 @@ class load(DataStreamProcessor):
                 if len(stream.headers) != len(set(stream.headers)):
                     if not self.deduplicate_headers:
                         raise ValueError(
-                            'Found duplicate headers. Use the `deduplicate_headers` flag')
+                            'Found duplicate headers.' +
+                            'Use the `deduplicate_headers` flag (found headers=%r)' % stream.headers)
                     stream.headers = self.rename_duplicate_headers(stream.headers)
                 schema = Schema().infer(
                     stream.sample, headers=stream.headers,

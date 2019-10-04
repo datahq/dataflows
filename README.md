@@ -17,6 +17,8 @@ Read more in the [Features section below](#features).
 
 Install `dataflows` via `pip install.`
 
+(If you are using minimal UNIX OS, run first `sudo apt install build-essential`)
+
 Then use the command-line interface to bootstrap a basic processing script for any remote data file:
 
 ```bash
@@ -72,7 +74,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 * Trivial to get started and easy to scale up
 * Set up and run from command line in seconds ...
-    * `dataflow init` => `flow.py`
+    * `dataflows init` => `flow.py`
     * `python flow.py`
 * Validate input (and esp source) quickly (non-zero length, right structure, etc.)
 * Supports caching data from source and even between steps

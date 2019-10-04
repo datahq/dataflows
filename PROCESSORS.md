@@ -120,6 +120,7 @@ Store the results to a specified path on disk, in a valid datapackage
 ```python
 def dump_to_path(out_path='.',
                  force_format=True, format='csv',
+                 temporal_format_property='format',
                  counters={},
                  add_filehash_to_path=False,
                  pretty_Descriptor=True):
@@ -136,6 +137,7 @@ def dump_to_path(out_path='.',
     - if `True` (the default), all resources will use the same format
     - if `False`, format will be deduced from the file extension. Resources with unknown extensions will be discarded.
 - `format` - Specifies the type of output files to be generated (if `force-format` is true): `csv` (the default) or `json`
+- `temporal-format-property` - Specifies a property to be used for temporal values serialization. For example, if some field has a property `outputFormat: %d/%m/%y` setting `temporal-format-property` to `outputFormat` will lead to using this format for this field serialization.
 - `add-filehash-to-path`: Specifies whether to include file md5 hash into the resource path. Defaults to `False`. If `True` Embeds hash in path like so:
     - If original path is `path/to/the/file.ext`
     - Modified path will be `path/to/the/HASH/file.ext`

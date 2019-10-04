@@ -3,6 +3,8 @@ import json
 import os
 import isodate
 import logging
+import datetime
+from functools import partial
 
 
 DATE_FORMAT = '%Y-%m-%d'
@@ -25,10 +27,23 @@ class FileFormat():
     SERIALIZERS = {}
     DEFAULT_SERIALIZER = str
 
-    def __init__(self, writer, schema):
+    def __init__(self, writer, schema, temporal_format_property=None):
+
+        # Set properties
         self.writer = writer
         self.headers = [f.name for f in schema.fields]
         self.fields = dict((f.name, f) for f in schema.fields)
+        self.temporal_format_property = temporal_format_property
+
+        # Set fields' serializers
+        for field in schema.fields:
+            serializer = self.SERIALIZERS.get(field.type, self.DEFAULT_SERIALIZER)
+            if self.temporal_format_property:
+                if field.type in ['datetime', 'date', 'time']:
+                    format = field.descriptor.get(self.temporal_format_property, None)
+                    if format:
+                        serializer = partial(datetime.datetime.strftime, format=format)
+            field.descriptor['serializer'] = serializer
 
     @classmethod
     def prepare_resource(cls, resource):
@@ -37,18 +52,16 @@ class FileFormat():
 
     def __transform_row(self, row):
         try:
-            return dict((k, self.__transform_value(v, self.fields[k].type))
+            return dict((k, self.__transform_value(v, self.fields[k]))
                         for k, v in row.items())
         except Exception:
             logging.exception('Failed to transform row %r', row)
             raise
 
-    @classmethod
-    def __transform_value(cls, value, field_type):
+    def __transform_value(self, value, field):
         if value is None:
-            return cls.NULL_VALUE
-        serializer = cls.SERIALIZERS.get(field_type, cls.DEFAULT_SERIALIZER)
-        return serializer(value)
+            return self.NULL_VALUE
+        return field.descriptor['serializer'](value)
 
     def write_transformed_row(self, *_):
         raise NotImplementedError()
@@ -101,7 +114,7 @@ class CSVFormat(FileFormat):
         },
     }
 
-    def __init__(self, file, schema, use_titles=False):
+    def __init__(self, file, schema, use_titles=False, **options):
         headers = [f.name for f in schema.fields]
         if use_titles:
             titles = [f.descriptor.get('title', f.name) for f in schema.fields]
@@ -109,7 +122,7 @@ class CSVFormat(FileFormat):
         else:
             csv_writer = csv.DictWriter(file, headers)
         csv_writer.writeheader()
-        super(CSVFormat, self).__init__(csv_writer, schema)
+        super(CSVFormat, self).__init__(csv_writer, schema, **options)
 
     @classmethod
     def prepare_resource(cls, resource):
@@ -160,11 +173,11 @@ class JSONFormat(FileFormat):
         },
     }
 
-    def __init__(self, file, schema):
+    def __init__(self, file, schema, **options):
         writer = file
         writer.write('[')
         writer.__first = True
-        super(JSONFormat, self).__init__(writer, schema)
+        super(JSONFormat, self).__init__(writer, schema, **options)
 
     @classmethod
     def prepare_resource(cls, resource):
