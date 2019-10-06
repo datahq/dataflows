@@ -188,7 +188,7 @@ Store the results in a relational database (creates one or more tables or update
 def dump_to_sql(tables,
                 engine='env://DATAFLOWS_DB_ENGINE',
                 updated_column=None, updated_id_column=None,
-                counters={}):
+                counters={}, batch_size=1000):
     pass
 ```
 
@@ -212,7 +212,7 @@ def dump_to_sql(tables,
   - `true` - row was updated
   - `false` - row was inserted
 - `updated_id_column` - Optional name of a column that will be added to the output data containing the id of the updated row in DB.
-
+- `batch_size` - Maximum amount of rows to write at the same time to the DB.
 
 #### checkpoint
 
