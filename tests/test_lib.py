@@ -430,6 +430,27 @@ def test_sort_rows_number():
     ]
 
 
+def test_sort_rows_decimal():
+    from decimal import Decimal
+    from dataflows import sort_rows, load
+
+    f = Flow(
+        load('data/numbers.csv', cast_strategy=load.CAST_WITH_SCHEMA),
+        sort_rows(key='{a}'),
+    )
+    results, dp, _ = f.results()
+    assert list(results[0]) == [
+        {'a': Decimal('-1000')},
+        {'a': Decimal('-0.5')},
+        {'a': Decimal('-0.4')},
+        {'a': Decimal('0')},
+        {'a': Decimal('1.1')},
+        {'a': Decimal('2')},
+        {'a': Decimal('10')},
+        {'a': Decimal('1000')}
+    ]
+
+
 def test_sort_rows_datetime():
     import datetime
     from dataflows import sort_rows
