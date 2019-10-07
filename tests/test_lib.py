@@ -376,7 +376,99 @@ def test_sort_reverse_many_rows():
     results, _, _ = f.results()
     results = results[0]
     assert results[0:2] == [{'a': 999, 'b': 4}, {'a': 994, 'b': 4}]
-    assert results[998:1000] == [{'a': 100, 'b': 0}, {'a': 0, 'b': 0}]
+    assert results[998:1000] == [{'a': 5, 'b': 0}, {'a': 0, 'b': 0}]
+
+
+def test_sort_rows_number():
+    from dataflows import sort_rows
+
+    f = Flow(
+        [
+            {'a': 0.1},
+            {'a': -3},
+            {'a': -4},
+            {'a': 10},
+            {'a': 8},
+            {'a': 0},
+            {'a': -1000000},
+            {'a': 1000000},
+            {'a': -0.1},
+            {'a': -0.2},
+            {'a': 0.2},
+            {'a': -1000001},
+            {'a': 1000001},
+            {'a': 6},
+            {'a': -10},
+            {'a': -0.001},
+            {'a': 0.001},
+            {'a': 1},
+            {'a': -1},
+        ],
+        sort_rows(key='{a}'),
+    )
+    results, _, _ = f.results()
+    assert list(results[0]) == [
+        {'a': -1000001},
+        {'a': -1000000},
+        {'a': -10},
+        {'a': -4},
+        {'a': -3},
+        {'a': -1},
+        {'a': -0.2},
+        {'a': -0.1},
+        {'a': -0.001},
+        {'a': 0},
+        {'a': 0.001},
+        {'a': 0.1},
+        {'a': 0.2},
+        {'a': 1},
+        {'a': 6},
+        {'a': 8},
+        {'a': 10},
+        {'a': 1000000},
+        {'a': 1000001},
+    ]
+
+
+def test_sort_rows_decimal():
+    from decimal import Decimal
+    from dataflows import sort_rows, load
+
+    f = Flow(
+        load('data/numbers.csv', cast_strategy=load.CAST_WITH_SCHEMA),
+        sort_rows(key='{a}'),
+    )
+    results, dp, _ = f.results()
+    assert list(results[0]) == [
+        {'a': Decimal('-1000')},
+        {'a': Decimal('-0.5')},
+        {'a': Decimal('-0.4')},
+        {'a': Decimal('0')},
+        {'a': Decimal('1.1')},
+        {'a': Decimal('2')},
+        {'a': Decimal('10')},
+        {'a': Decimal('1000')}
+    ]
+
+
+def test_sort_rows_datetime():
+    import datetime
+    from dataflows import sort_rows
+
+    f = Flow(
+        [
+            {'a': datetime.date(2000, 1, 3)},
+            {'a': datetime.date(2010, 1, 2)},
+            {'a': datetime.date(2020, 1, 1)},
+        ],
+        sort_rows(key='{a}'),
+    )
+    results, _, _ = f.results()
+    assert list(results[0]) == [
+        {'a': datetime.date(2000, 1, 3)},
+        {'a': datetime.date(2010, 1, 2)},
+        {'a': datetime.date(2020, 1, 1)},
+    ]
 
 
 def test_duplicate():
