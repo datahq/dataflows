@@ -76,6 +76,7 @@ class SQLDumper(DumperBase):
         self.updated_column = updated_column
         self.updated_id_column = updated_id_column
         self.batch_size = options.get('batch_size', 1000)
+        self.use_bloom_filter = options.get('use_bloom_filter', True)
 
     def normalize_for_engine(self, dialect, resource, schema_descriptor):
         actions = {}
@@ -132,6 +133,7 @@ class SQLDumper(DumperBase):
                            keyed=True, as_generator=True,
                            update_keys=update_keys,
                            buffer_size=self.batch_size,
+                           use_bloom_filter=self.use_bloom_filter,
                        ))
 
     def get_output_row(self, written):

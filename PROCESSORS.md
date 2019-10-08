@@ -212,7 +212,8 @@ def dump_to_sql(tables,
   - `true` - row was updated
   - `false` - row was inserted
 - `updated_id_column` - Optional name of a column that will be added to the output data containing the id of the updated row in DB.
-- `batch_size` - Maximum amount of rows to write at the same time to the DB.
+- `batch_size` - Maximum amount of rows to write at the same time to the DB (default 1000)
+- `use_bloom_filter` - Preprocess existing DB data to improve update performance (default: True)
 
 #### checkpoint
 
