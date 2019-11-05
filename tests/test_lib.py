@@ -617,8 +617,8 @@ def test_load_strategies():
         'pytypes nothing': out_t + out_s,
         'pytypes schema': out_t + out_s,
         'pytypes strings': out_s + out_s,
-        'strings nothing': out_t + out_s,
-        'strings schema': [] + out_s,
+        'strings nothing': out_s + out_s,
+        'strings schema': out_s + out_s,
         'strings strings': out_s + out_s
     }
 
