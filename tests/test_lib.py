@@ -623,6 +623,24 @@ def test_load_strategies():
     }
 
 
+def test_load_strategy_infer_strings_from_native_types():
+    from dataflows import load
+
+    flow = Flow(
+        load(
+            'data/beatles_age.json',
+            infer_strategy='strings',
+        ),
+    )
+    data, package, stats = flow.results()
+    assert data == [[
+        {'age': '18', 'name': 'john'},
+        {'age': '16', 'name': 'paul'},
+        {'age': '17', 'name': 'george'},
+        {'age': '22', 'name': 'ringo'},
+    ]]
+
+
 def test_load_name_path():
     from dataflows import load
 
