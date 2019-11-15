@@ -211,7 +211,7 @@ def test_example_8():
         # Emmies is the first - read all its data and create a set of winner names
         emmy = next(resources)
         emmy_winners = set(
-            map(lambda x: x['nominee'], 
+            map(lambda x: x['nominee'],
                 filter(lambda x: x['winner'],
                        emmy))
         )
@@ -240,7 +240,7 @@ def test_example_9():
         filter_rows(equals=[dict(winner=1)]),
         concatenate(dict(
                 emmy_nominee=['nominee'],
-            ), 
+            ),
             dict(name='emmies_filtered'),
             resources='emmies'),
         # Academy award nominees and winners
@@ -286,3 +286,21 @@ def test_rename_resource2():
     results, dp, stats = f.results()
     print(dp.descriptor)
     assert dp.descriptor['resources'][0]['name'] == 'renamed'
+
+def test_cast_strings_none_excel():
+    from dataflows import Flow, load, printer
+    f = Flow(
+        # Emmy award nominees and winners
+        load(
+            'data/cast_string_none.xlsx',
+            name='res',
+            format='xlsx',
+            sheet=1,
+            headers=1,
+            cast_strategy='strings',
+            infer_strategy='strings',
+        ),
+        printer(),
+    )
+    results, dp, stats = f.results()
+    assert results[0][0]['Individual'] is None
