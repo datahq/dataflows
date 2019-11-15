@@ -237,7 +237,7 @@ class load(DataStreamProcessor):
     def stringer(self, iterator):
         for r in iterator:
             yield dict(
-                (k, str(v)) if not isinstance(v, str) else (k, v)
+                (k, str(v)) if not isinstance(v, str) and v is not None else (k, v)
                 for k, v in r.items()
             )
 
