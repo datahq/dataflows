@@ -63,7 +63,9 @@ class SQLDumper(DumperBase):
                                      "Please set your '%s' environment variable" % env_var)
 
             self.engine = create_engine(engine)
-            self.engine.connect()
+            # check connection
+            with self.engine.connect():
+                pass
         else:
             self.engine = engine
 

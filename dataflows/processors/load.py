@@ -157,6 +157,13 @@ class load(DataStreamProcessor):
         }[cast_strategy or self.CAST_DO_NOTHING]
 
     def process_datapackage(self, dp: Package):
+        try:
+            return self.safe_process_datapackage(dp)
+        except Exception as e: 
+            raise e from Exception('Failed to run load with load source {!r} and options {!r}'
+                                        .format(self.load_source, self.options))
+
+    def safe_process_datapackage(self, dp: Package):
 
         # If loading from datapackage & resource iterator:
         if isinstance(self.load_source, tuple):
