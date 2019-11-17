@@ -159,9 +159,9 @@ class load(DataStreamProcessor):
     def process_datapackage(self, dp: Package):
         try:
             return self.safe_process_datapackage(dp)
-        except Exception as e: 
+        except Exception as e:
             raise e from Exception('Failed to run load with load source {!r} and options {!r}'
-                                        .format(self.load_source, self.options))
+                                   .format(self.load_source, self.options))
 
     def safe_process_datapackage(self, dp: Package):
 
