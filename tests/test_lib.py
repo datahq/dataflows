@@ -617,10 +617,28 @@ def test_load_strategies():
         'pytypes nothing': out_t + out_s,
         'pytypes schema': out_t + out_s,
         'pytypes strings': out_s + out_s,
-        'strings nothing': out_t + out_s,
-        'strings schema': [] + out_s,
+        'strings nothing': out_s + out_s,
+        'strings schema': out_s + out_s,
         'strings strings': out_s + out_s
     }
+
+
+def test_load_strategy_infer_strings_from_native_types():
+    from dataflows import load
+
+    flow = Flow(
+        load(
+            'data/beatles_age.json',
+            infer_strategy='strings',
+        ),
+    )
+    data, package, stats = flow.results()
+    assert data == [[
+        {'age': '18', 'name': 'john'},
+        {'age': '16', 'name': 'paul'},
+        {'age': '17', 'name': 'george'},
+        {'age': '22', 'name': 'ringo'},
+    ]]
 
 
 def test_load_name_path():

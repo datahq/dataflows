@@ -140,6 +140,10 @@ class load(DataStreamProcessor):
             if options['validate']:
                 cast_strategy = self.CAST_WITH_SCHEMA
 
+        # Force strings from stream for the INFER_STRINGS strategy
+        if infer_strategy == self.INFER_STRINGS:
+            self.options['force_strings'] = True
+
         self.guesser = {
             self.INFER_FULL: None,
             self.INFER_PYTHON_TYPES: TypesGuesser,
