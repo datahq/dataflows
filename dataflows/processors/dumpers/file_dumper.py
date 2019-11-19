@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 import tempfile
 import hashlib
 
@@ -62,6 +63,7 @@ class FileDumper(DumperBase):
         temp_file_name = temp_file.name
         filesize = temp_file.tell()
         temp_file.close()
+        # TODO: it doesn't seem have any effect
         DumperBase.inc_attr(self.datapackage.descriptor, self.datapackage_bytes, filesize)
         self.write_file_to_output(temp_file_name, 'datapackage.json')
         # if location is not None:
@@ -78,18 +80,25 @@ class FileDumper(DumperBase):
             yield row
         writer.finalize_file()
 
+        # Get resource descriptor
+        resource_descriptor = resource.res.descriptor
+        for descriptor in self.datapackage.descriptor['resources']:
+            if descriptor['name'] == resource.res.descriptor['name']:
+                resource_descriptor = descriptor
+
         # File size:
         filesize = temp_file.tell()
+        # TODO: it adds resource's size as a data package size
         DumperBase.inc_attr(self.datapackage.descriptor, self.datapackage_bytes, filesize)
-        DumperBase.inc_attr(resource.res.descriptor, self.resource_bytes, filesize)
+        DumperBase.inc_attr(resource_descriptor, self.resource_bytes, filesize)
 
         # File Hash:
         if self.resource_hash:
             hasher = FileDumper.hash_handler(temp_file)
             # Update path with hash
             if self.add_filehash_to_path:
-                DumperBase.insert_hash_in_path(resource.res.descriptor, hasher.hexdigest())
-            DumperBase.set_attr(resource.res.descriptor, self.resource_hash, hasher.hexdigest())
+                DumperBase.insert_hash_in_path(resource_descriptor, hasher.hexdigest())
+            DumperBase.set_attr(resource_descriptor, self.resource_hash, hasher.hexdigest())
 
         # Finalise
         filename = temp_file.name
