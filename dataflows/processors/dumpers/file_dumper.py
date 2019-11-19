@@ -1,6 +1,5 @@
 import os
 import json
-import logging
 import tempfile
 import hashlib
 
