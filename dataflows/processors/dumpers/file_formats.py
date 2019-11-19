@@ -42,7 +42,8 @@ class FileFormat():
                 if field.type in ['datetime', 'date', 'time']:
                     format = field.descriptor.get(self.temporal_format_property, None)
                     if format:
-                        serializer = partial(datetime.datetime.strftime, format=format)
+                        strftime = getattr(datetime, field.type).strftime
+                        serializer = partial(strftime, format=format)
             field.descriptor['serializer'] = serializer
 
     @classmethod
