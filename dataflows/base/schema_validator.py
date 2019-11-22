@@ -30,8 +30,10 @@ def drop(res_name, row, i, e):
     return False
 
 
-def schema_validator(resource, iterator,
-                     field_names=None, on_error=None):
+def schema_validator(
+    resource, iterator, field_names=None,
+    on_error=None, preserve_missing_values=False,
+):
     if on_error is None:
         on_error = raise_exception
     if isinstance(resource, Resource):
@@ -46,7 +48,7 @@ def schema_validator(resource, iterator,
     for i, row in enumerate(iterator):
         try:
             for f in schema_fields:
-                row[f.name] = f.cast_value(row.get(f.name))
+                row[f.name] = f.cast_value(row.get(f.name), preserve_missing_values=preserve_missing_values)
         except CastError as e:
             if not on_error(resource['name'], row, i, e):
                 continue

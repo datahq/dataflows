@@ -6,7 +6,10 @@ from .. import DataStreamProcessor, schema_validator
 
 class set_type(DataStreamProcessor):
 
-    def __init__(self, name, resources=-1, regex=True, on_error=None, **options):
+    def __init__(
+        self, name, resources=-1, regex=True,
+        on_error=None, preserve_missing_values=False, **options
+    ):
         super(set_type, self).__init__()
         if not regex:
             name = re.escape(name)
@@ -15,6 +18,7 @@ class set_type(DataStreamProcessor):
         self.resources = resources
         self.field_names = []
         self.on_error = on_error
+        self.preserve_missing_values = preserve_missing_values
 
     def process_resources(self, resources):
         for res in resources:
@@ -22,7 +26,8 @@ class set_type(DataStreamProcessor):
                 if len(self.field_names) > 0:
                     yield schema_validator(res.res, res,
                                            field_names=self.field_names,
-                                           on_error=self.on_error)
+                                           on_error=self.on_error,
+                                           preserve_missing_values=self.preserve_missing_values)
                 else:
                     yield res
             else:
