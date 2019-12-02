@@ -1420,7 +1420,11 @@ def test_force_temporal_format():
     Flow(
         load('data/temporal.csv',
             name='temporal',
-            override_fields={'date': {'outputFormat': '%m/%d/%y'}}),
+            override_fields={
+                'datetime': {'type': 'datetime', 'outputFormat': '%y|%m|%d %H|%M|%S'},
+                'date': {'outputFormat': '%y|%m|%d'},
+                'time': {'outputFormat': '%H|%M|%S'},
+            }),
         dump_to_path('out/force_temporal_format',
             temporal_format_property='outputFormat')
     ).process()
@@ -1434,12 +1438,24 @@ def test_force_temporal_format():
     # Assert
     assert package.descriptor['resources'][0]['schema'] == {
         'fields': [
-            {'format': '%m/%d/%y', 'name': 'date', 'type': 'date'},
-            {'format': 'default', 'name': 'event', 'type': 'string'}
+            {'format': 'default', 'name': 'event', 'type': 'string'},
+            {'format': '%y|%m|%d %H|%M|%S', 'name': 'datetime', 'type': 'datetime'},
+            {'format': '%y|%m|%d', 'name': 'date', 'type': 'date'},
+            {'format': '%H|%M|%S', 'name': 'time', 'type': 'time'},
         ],
         'missingValues': [''],
     }
     assert data == [[
-        {'date': datetime.date(2015, 1, 2), 'event': 'start'},
-        {'date': datetime.date(2016, 6, 25), 'event': 'finish'}
+        {
+            'event': 'start',
+            'datetime': datetime.datetime(2015, 1, 2, 15, 30, 45),
+            'date': datetime.date(2015, 1, 2),
+            'time': datetime.time(15, 30, 45),
+        },
+        {
+            'event': 'end',
+            'datetime': datetime.datetime(2016, 6, 25, 8, 10, 4),
+            'date': datetime.date(2016, 6, 25),
+            'time': datetime.time(8, 10, 4),
+        }
     ]]
