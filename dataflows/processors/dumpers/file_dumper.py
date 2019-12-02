@@ -62,7 +62,6 @@ class FileDumper(DumperBase):
         temp_file_name = temp_file.name
         filesize = temp_file.tell()
         temp_file.close()
-        # TODO: it doesn't seem have any effect
         DumperBase.inc_attr(self.datapackage.descriptor, self.datapackage_bytes, filesize)
         self.write_file_to_output(temp_file_name, 'datapackage.json')
         # if location is not None:
@@ -87,7 +86,6 @@ class FileDumper(DumperBase):
 
         # File size:
         filesize = temp_file.tell()
-        # TODO: it adds resource's size as a data package size
         DumperBase.inc_attr(self.datapackage.descriptor, self.datapackage_bytes, filesize)
         DumperBase.inc_attr(resource_descriptor, self.resource_bytes, filesize)
 
