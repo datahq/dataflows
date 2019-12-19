@@ -78,18 +78,24 @@ class FileDumper(DumperBase):
             yield row
         writer.finalize_file()
 
+        # Get resource descriptor
+        resource_descriptor = resource.res.descriptor
+        for descriptor in self.datapackage.descriptor['resources']:
+            if descriptor['name'] == resource.res.descriptor['name']:
+                resource_descriptor = descriptor
+
         # File size:
         filesize = temp_file.tell()
         DumperBase.inc_attr(self.datapackage.descriptor, self.datapackage_bytes, filesize)
-        DumperBase.inc_attr(resource.res.descriptor, self.resource_bytes, filesize)
+        DumperBase.inc_attr(resource_descriptor, self.resource_bytes, filesize)
 
         # File Hash:
         if self.resource_hash:
             hasher = FileDumper.hash_handler(temp_file)
             # Update path with hash
             if self.add_filehash_to_path:
-                DumperBase.insert_hash_in_path(resource.res.descriptor, hasher.hexdigest())
-            DumperBase.set_attr(resource.res.descriptor, self.resource_hash, hasher.hexdigest())
+                DumperBase.insert_hash_in_path(resource_descriptor, hasher.hexdigest())
+            DumperBase.set_attr(resource_descriptor, self.resource_hash, hasher.hexdigest())
 
         # Finalise
         filename = temp_file.name
