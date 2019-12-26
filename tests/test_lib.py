@@ -471,6 +471,26 @@ def test_sort_rows_datetime():
     ]
 
 
+def test_deduplicate():
+    from dataflows import deduplicate, set_primary_key
+
+    a = [
+            {'a': 1, 'b': 3, 'c': 'First'},
+            {'a': 2, 'b': 3, 'c': 'First'},
+            {'a': 1, 'b': 3, 'c': '!First'},
+            {'a': 1, 'b': 2, 'c': 'First'},
+            {'a': 2, 'b': 3, 'c': '!First'},
+        ]
+
+    f = Flow(
+        a,
+        set_primary_key(['a', 'b']),
+        deduplicate(),
+    )
+    results, _, _ = f.results()
+    assert set(x['c'] for x in results[0]) == {'First'}
+
+
 def test_duplicate():
     from dataflows import duplicate
 

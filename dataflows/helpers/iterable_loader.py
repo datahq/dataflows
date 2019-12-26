@@ -88,7 +88,7 @@ class iterable_loader(DataStreamProcessor):
         try:
             for x in self.iterable:
                 if mode is None:
-                    assert isinstance(x, (dict, list)), 'Bad item %r' % x
+                    assert isinstance(x, (dict, list, tuple)), 'Bad item %r' % x
                     mode = dict if isinstance(x, dict) else list
                 assert isinstance(x, mode)
                 if mode == dict:

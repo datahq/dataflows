@@ -9,6 +9,7 @@ from .add_field import add_field
 from .checkpoint import checkpoint
 from .concatenate import concatenate
 from .delete_fields import delete_fields
+from .deduplicate import deduplicate
 from .duplicate import duplicate
 from .filter_rows import filter_rows
 from .find_replace import find_replace

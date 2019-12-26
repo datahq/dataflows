@@ -567,6 +567,23 @@ def filter_rows(condition=None, equals=tuple(), not_equals=tuple(), resources=No
   - `None` indicates operation should be done on all resources
   - The index of the resource in the package
 
+#### deduplicate.py
+Deduplicates rows in resources based on the resources' primary key
+
+`deduplicate` accepts a resource specifier.
+For each resource, it will output only unique rows (based on the values in the primary key fields). Rows with duplicate primary keys will be ignored.
+
+```python
+def deduplicate(resources=None):
+    pass
+```
+
+- `resources`
+  - A name of a resource to operate on
+  - A regular expression matching resource names
+  - A list of resource names
+  - `None` indicates operation should be done on all resources
+  - The index of the resource in the package
 
 ### Manipulate package
 #### update_package.py
