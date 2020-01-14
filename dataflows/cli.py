@@ -229,7 +229,7 @@ or leave empty for an interactive walkthrough.
 
     try:
         print('Running {}'.format(filename))
-        ret = subprocess.check_output('python '+filename,
+        ret = subprocess.check_output(sys.executable + ' ' + filename,
                                       stderr=subprocess.PIPE, universal_newlines=True, shell=True)
         print(ret)
         print('Done!')
