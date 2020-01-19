@@ -619,6 +619,24 @@ You can use `update_resource` to rename a resource like so:
   update_resource('current-name', name='new-name')
 ```
 
+#### update_schema.py
+Update schema properties for one or more resources in the package
+
+```python
+def update_schema(resources, **metadata):
+    pass
+```
+
+- `resources`
+  - A name of a resource to operate on
+  - A regular expression matching resource names
+  - A list of resource names
+  - `None` indicates operation should be done on all resources
+  - The index of the resource in the package
+- `metadata` - Any allowed schema property (according to the [spec]([https://frictionlessdata.io/specs/table-schema/#descriptor)) can be provided here.
+
+You can use `update_schema` to add a `missingValues` property, change the primary key etc.
+
 #### set_primary_key.py
 Updates the primary key for one or more resources in the package
 

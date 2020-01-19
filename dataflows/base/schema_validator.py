@@ -52,3 +52,8 @@ def schema_validator(resource, iterator,
                 continue
 
         yield row
+
+
+schema_validator.drop = drop
+schema_validator.ignore = ignore
+schema_validator.raise_exception = raise_exception

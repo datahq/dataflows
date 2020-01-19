@@ -763,6 +763,22 @@ def test_update_resource():
     assert dp.descriptor['resources'][4]['source'] == 'thewild'
 
 
+def test_update_schema():
+    from dataflows import Flow, printer, update_schema, validate
+
+    f = Flow(
+        [['a', '-'], ['a', 0]],
+        update_schema(-1, missingValues=['-']),
+        validate(),
+        printer()
+    )
+    results, dp, stats = f.results()
+    print(dp.descriptor)
+    assert results[0] == [
+        dict(col0='a', col1=None),
+        dict(col0='a', col1=0),
+    ]
+
 def test_set_type_resources():
     from dataflows import Flow, set_type, validate
 
