@@ -6,10 +6,10 @@ from ..helpers.resource_matcher import ResourceMatcher
 def concatenator(resources, all_target_fields, field_mapping):
     for resource_ in resources:
         for row in resource_:
-            processed = dict((k, '') for k in all_target_fields)
+            processed = dict((k, None) for k in all_target_fields)
             values = [(field_mapping[k], v) for (k, v)
                       in row.items()
-                      if k in field_mapping]
+                      if k in field_mapping and v is not None]
             if len(values) == 0:
                 message = 'Got an empty row after concatenation' +\
                     '(resource=%s, source=%r)' % (resource_.res.name, row)

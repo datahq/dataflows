@@ -308,6 +308,31 @@ def test_concatenate():
     ]
 
 
+def test_concatenate_multifield():
+    from dataflows import concatenate
+
+    f = Flow(
+        [
+            {'a': 1, 'b': 2, 'c': None},
+            {'a': 2, 'b': None, 'c': 3},
+            {'a': 3, 'c': 4},
+            {'a': 3, 'b': 6, 'c': 4},
+        ],
+        concatenate({
+            'f1': ['a'],
+            'f2': ['b', 'c'],
+        })
+    )
+    results, _, _ = f.results()
+    assert results[0] == [
+        {'f1': 1, 'f2': 2},
+        {'f1': 2, 'f2': 3},
+        {'f1': 3, 'f2': 4},
+        {'f1': 3, 'f2': 4},
+    ]
+
+
+
 def test_filter_rows():
     from dataflows import filter_rows
 
