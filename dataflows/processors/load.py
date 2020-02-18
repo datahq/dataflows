@@ -108,6 +108,7 @@ class load(DataStreamProcessor):
     def __init__(self, load_source, name=None, resources=None, strip=True, limit_rows=None,
                  infer_strategy=None, cast_strategy=None,
                  override_schema=None, override_fields=None,
+                 extract_missing_values=None,
                  deduplicate_headers=False,
                  on_error=raise_exception,
                  **options):
@@ -122,6 +123,7 @@ class load(DataStreamProcessor):
         self.override_schema = override_schema
         self.override_fields = override_fields
         self.deduplicate_headers = deduplicate_headers
+        self.extract_missing_values = extract_missing_values
 
         self.load_dp = None
         self.resource_descriptors = []

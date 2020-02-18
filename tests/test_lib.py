@@ -1520,3 +1520,30 @@ def test_force_temporal_format():
             'time': datetime.time(8, 10, 4),
         }
     ]]
+
+
+# Extract missing values
+
+def test_extract_missing_values():
+    from dataflows import load
+    schema = {
+        'missingValues': ['err1', 'err2', 'mis1', 'mis2'],
+        'fields': [
+            {'name': 'col1', 'type': 'number', 'format': 'default'},
+            {'name': 'col2', 'type': 'number', 'format': 'default'},
+        ]
+    }
+    flow = Flow(
+        load('data/missing_values.csv', override_schema=schema),
+    )
+    data, package, stats = flow.results()
+    assert package.descriptor['resources'][0]['schema'] == schema
+    assert data == [[
+        {'col1': 1, 'col2': 1},
+        {'col1': None, 'col2': 2},
+        {'col1': 3, 'col2': 3},
+        {'col1': 4, 'col2': None},
+        {'col1': 5, 'col2': 5},
+        {'col1': None, 'col2': None},
+        {'col1': 7, 'col2': 7},
+    ]]
