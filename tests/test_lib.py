@@ -1588,3 +1588,36 @@ def test_extract_missing_values_options():
         {'col1': None, 'col2': None, 'notes': {'col1': 'mis1'}},
         {'col1': 7, 'col2': 7, 'notes': {}},
     ]]
+
+def test_extract_missing_values_options_source_is_list():
+    from dataflows import load
+    schema = {
+        'missingValues': ['err1', 'err2', 'mis1', 'mis2'],
+        'fields': [
+            {'name': 'col1', 'type': 'number', 'format': 'default'},
+            {'name': 'col2', 'type': 'number', 'format': 'default'},
+        ]
+    }
+    flow = Flow(
+        load('data/missing_values.csv', override_schema=schema, extract_missing_values={
+            'source': ['col1', 'col2'],
+        }),
+    )
+    data, package, stats = flow.results()
+    assert package.descriptor['resources'][0]['schema']['fields'][0] == schema['fields'][0]
+    assert package.descriptor['resources'][0]['schema']['fields'][1] == schema['fields'][1]
+    assert package.descriptor['resources'][0]['schema']['fields'][2] == {
+        'name': 'missingValues',
+        'type': 'object',
+        'format': 'default',
+        'values': schema['missingValues'],
+    }
+    assert data == [[
+        {'col1': 1, 'col2': 1, 'missingValues': {}},
+        {'col1': None, 'col2': 2, 'missingValues': {'col1': 'err1'}},
+        {'col1': 3, 'col2': 3, 'missingValues': {}},
+        {'col1': 4, 'col2': None, 'missingValues': {'col2': 'err2'}},
+        {'col1': 5, 'col2': 5, 'missingValues': {}},
+        {'col1': None, 'col2': None, 'missingValues': {'col1': 'mis1', 'col2': 'mis2'}},
+        {'col1': 7, 'col2': 7, 'missingValues': {}},
+    ]]
