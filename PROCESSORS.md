@@ -79,7 +79,7 @@ Relevant only when _not_ loading data from a datapackage:
 - `extract_missing_values (bool|dict)` - If `True` it will extract missing values defined in a schema and place in to a new field called `missingValues` with a type `object` in a form of `{field1: value1, field2: value2}`. If a row doesn't have any missing values the field will get an empty object. This option can be a hash with 3 optional keys `source`, `target` and `values` where:
     - `source (str|str[])` - a field or list of fields to extract missing values (default: all fields)
     - `target (str)` - a field to place a missing values mapping (default: `missingValues`)
-    - `values (str[]])` - an alternative list of missing values (default: `schema['missingValues']`)
+    - `values (str[])` - an alternative list of missing values (default: `schema['missingValues']`)
 - `override_fields` - Provided mapping will patch the inferred `schema.fields` array. In the mapping keys must be field names and values must be dictionaries intended to be merged into the corresponding field's metadata.
 - `deduplicate_headers` - (default `False`) If there are duplicate headers and the flag is set to `True` it will rename them using a `header (1), header (2), etc` approach. If there are duplicate headers and the flag is set to `False` it will raise an error.
 - `on_error` - Dictates how `load` will behave in case of a validation error.
