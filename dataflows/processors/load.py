@@ -123,7 +123,18 @@ class load(DataStreamProcessor):
         self.override_schema = override_schema
         self.override_fields = override_fields
         self.deduplicate_headers = deduplicate_headers
-        self.extract_missing_values = extract_missing_values
+
+        # Extract missing values
+        self.extract_missing_values = None
+        if extract_missing_values is not None:
+            if isinstance(extract_missing_values, bool):
+                extract_missing_values = {}
+            extract_missing_values.setdefault('source', None)
+            extract_missing_values.setdefault('target', 'missingValues')
+            extract_missing_values.setdefault('values', [])
+            if isinstance(extract_missing_values.get('source'), str):
+                extract_missing_values['source'] = [extract_missing_values['source']]
+            self.extract_missing_values = extract_missing_values
 
         self.load_dp = None
         self.resource_descriptors = []
@@ -225,6 +236,16 @@ class load(DataStreamProcessor):
                     fields = schema.get('fields', [])
                     for field in fields:
                         field.update(self.override_fields.get(field['name'], {}))
+                if self.extract_missing_values:
+                    missing_values = schema.get('missingValues', [])
+                    if not self.extract_missing_values['values']:
+                        self.extract_missing_values['values'] = missing_values
+                    schema['fields'].append({
+                        'name': self.extract_missing_values['target'],
+                        'type': 'object',
+                        'format': 'default',
+                        'values': self.extract_missing_values['values'],
+                    })
                 descriptor['schema'] = schema
                 descriptor['format'] = self.options.get('format', stream.format)
                 descriptor['path'] += '.{}'.format(stream.format)
@@ -254,9 +275,25 @@ class load(DataStreamProcessor):
                 for k, v in r.items()
             )
 
+    def missing_values_extractor(self, iterator):
+        source = self.extract_missing_values['source']
+        target = self.extract_missing_values['target']
+        values = self.extract_missing_values['values']
+        for row in iterator:
+            mapping = {}
+            if values:
+                for key, value in row.items():
+                    if not source or key in source:
+                        if value in values:
+                            mapping[key] = value
+            row[target] = mapping
+            yield row
+
     def process_resources(self, resources):
         yield from super(load, self).process_resources(resources)
         for descriptor, it in zip(self.resource_descriptors, self.iterators):
+            if self.extract_missing_values:
+                it = self.missing_values_extractor(it)
             it = self.caster(descriptor, it)
             if self.strip:
                 it = self.stripper(it)
