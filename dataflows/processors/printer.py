@@ -61,7 +61,7 @@ def printer(num_rows=10, last_rows=None, fields=None, resources=None,
         for i, row in enumerate(rows):
 
             index = i + 1
-            prow = [index] + [truncate_cell(row[f], max_cell_size) for f in field_names]
+            prow = [index] + [truncate_cell(row.get(f), max_cell_size) for f in field_names]
             yield row
 
             if index - x == (num_rows + 1):
