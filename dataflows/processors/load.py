@@ -187,7 +187,6 @@ class load(DataStreamProcessor):
 
             # Loading from datapackage:
             if os.path.basename(self.load_source) == 'datapackage.json' or self.options.get('format') == 'datapackage':
-                self.options.pop('format')
                 self.load_dp = Package(self.load_source)
                 resource_matcher = ResourceMatcher(self.resources, self.load_dp)
                 for resource in self.load_dp.resources:
