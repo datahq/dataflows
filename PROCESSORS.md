@@ -53,6 +53,7 @@ def load(source, name=None, resources=None, strip=True, limit_rows=None,
     - a remote URL (e.g. `https://path.to/the/data.csv`)
     - Other supported links, based on the current support of schemes and formats in [tabulator](https://github.com/frictionlessdata/tabulator-py#schemes)
     - a local path or remote URL to a datapackage.json file (e.g. `https://path.to/data_package/datapackage.json`)
+    - a local path or remote URL to a zipped datapackage.json file (e.g. `https://path.to/data_package/datapackage.zip`) - add a `format='datapackage'` option in this scenario
     - a reference to an environment variable containing the source location,
       in the form of `env://ENV_VAR`
     - a tuple containing (datapackage_descriptor, resources_iterator)

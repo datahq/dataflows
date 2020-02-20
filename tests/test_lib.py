@@ -587,6 +587,17 @@ def test_load_from_package():
     assert [list(res) for res in ds.res_iter] == [[{'foo': 'bar', 'moo': 12}]]
 
 
+def test_load_from_package_zip():
+    from dataflows import load
+
+    ds = Flow(
+        load('data/load_from_package.zip', format='datapackage')
+    ).datastream()
+
+    assert len(ds.dp.resources) == 1
+    assert [list(res) for res in ds.res_iter] == [[{'foo': 'bar', 'moo': 12}]]
+
+
 def test_load_from_env_var():
     import os
     from dataflows import load, dump_to_path
