@@ -130,7 +130,7 @@ class load(DataStreamProcessor):
             if isinstance(extract_missing_values, bool):
                 extract_missing_values = {}
             extract_missing_values.setdefault('source', None)
-            extract_missing_values.setdefault('target', 'missingValues')
+            extract_missing_values.setdefault('target', 'extractedMissingValues')
             extract_missing_values.setdefault('values', [])
             if isinstance(extract_missing_values.get('source'), str):
                 extract_missing_values['source'] = [extract_missing_values['source']]
@@ -240,17 +240,14 @@ class load(DataStreamProcessor):
                     missing_values = schema.get('missingValues', [])
                     if not self.extract_missing_values['values']:
                         self.extract_missing_values['values'] = missing_values
-                    schema['fields'].append({
-                        'name': self.extract_missing_values['target'],
-                        'type': 'object',
-                        'format': 'default',
-                        'values': self.extract_missing_values['values'],
-                    })
+                    for field in schema.get('fields', []):
+                        field[self.extract_missing_values['target']] = {}
                 descriptor['schema'] = schema
                 descriptor['format'] = self.options.get('format', stream.format)
                 descriptor['path'] += '.{}'.format(stream.format)
                 self.iterators.append(stream.iter(keyed=True))
         dp.descriptor.setdefault('resources', []).extend(self.resource_descriptors)
+        self.dp = dp
         return dp
 
     def stripper(self, iterator):
@@ -275,25 +272,30 @@ class load(DataStreamProcessor):
                 for k, v in r.items()
             )
 
-    def missing_values_extractor(self, iterator):
+    def missing_values_extractor(self, iterator, descriptor):
         source = self.extract_missing_values['source']
         target = self.extract_missing_values['target']
         values = self.extract_missing_values['values']
-        for row in iterator:
-            mapping = {}
-            if values:
-                for key, value in row.items():
-                    if not source or key in source:
-                        if value in values:
-                            mapping[key] = value
-            row[target] = mapping
+        fieldMap = {}
+        for resource in self.dp.descriptor['resources']:
+            if resource.get('name', 'res') == descriptor.get('name', 'des'):
+                for field in resource.get('schema', {}).get('fields', []):
+                    fieldMap[field['name']] = field
+        for index, row in enumerate(iterator):
+            row_number = index + 1
+            for key, value in row.items():
+                if source and key not in source:
+                    continue
+                if value in values:
+                    fieldMap[key][target][row_number] = value
             yield row
+        self.dp.commit()
 
     def process_resources(self, resources):
         yield from super(load, self).process_resources(resources)
         for descriptor, it in zip(self.resource_descriptors, self.iterators):
             if self.extract_missing_values:
-                it = self.missing_values_extractor(it)
+                it = self.missing_values_extractor(it, descriptor)
             it = self.caster(descriptor, it)
             if self.strip:
                 it = self.stripper(it)
