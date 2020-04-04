@@ -61,10 +61,12 @@ class FileFormat():
             raise
 
     def __transform_value(self, value, field):
-        # The second condition supports a `tableschema`'s mode of perserving missing values
-        # https://github.com/frictionlessdata/tableschema-py#experimental
-        if value is None or value in self.missing_values:
+        if value is None:
             return self.NULL_VALUE
+        # It supports a `tableschema`'s mode of perserving missing values
+        # https://github.com/frictionlessdata/tableschema-py#experimental
+        if value in self.missing_values:
+            return value
         return field.descriptor['serializer'](value)
 
     def write_transformed_row(self, *_):
