@@ -34,6 +34,7 @@ class FileFormat():
         self.headers = [f.name for f in schema.fields]
         self.fields = dict((f.name, f) for f in schema.fields)
         self.temporal_format_property = temporal_format_property
+        self.missing_values = schema.descriptor.get('missingValues', [])
 
         # Set fields' serializers
         for field in schema.fields:
@@ -60,7 +61,9 @@ class FileFormat():
             raise
 
     def __transform_value(self, value, field):
-        if value is None:
+        # The second condition supports a `tableschema`'s mode of perserving missing values
+        # https://github.com/frictionlessdata/tableschema-py#experimental
+        if value is None or value in self.missing_values:
             return self.NULL_VALUE
         return field.descriptor['serializer'](value)
 
