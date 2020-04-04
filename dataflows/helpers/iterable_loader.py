@@ -29,12 +29,12 @@ class iterable_storage(Storage):
         for value in values:
             if isinstance(value, str):
                 types.add('string')
+            elif isinstance(value, bool):
+                types.add('boolean')
             elif isinstance(value, int):
                 types.add('integer')
             elif isinstance(value, (float, decimal.Decimal)):
                 types.add('number')
-            elif isinstance(value, bool):
-                types.add('boolean')
             elif isinstance(value, list):
                 types.add('array')
             elif isinstance(value, dict):
