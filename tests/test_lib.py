@@ -1456,6 +1456,48 @@ def test_join_full_outer():
     ]]
 
 
+def test_join_row_number():
+    from dataflows import load, set_type, join
+    flow = Flow(
+        load('data/population.csv'),
+        load('data/cities.csv'),
+        join(
+            source_name='population',
+            source_key=['#'],
+            target_name='cities',
+            target_key=['#'],
+            fields={'population': {'name': 'population'}}
+        ),
+    )
+    data = flow.results()[0]
+    assert data == [[
+        {'id': 1, 'city': 'london', 'population': 8},
+        {'id': 2, 'city': 'paris', 'population': 2},
+        {'id': 3, 'city': 'rome', 'population': 3},
+    ]]
+
+
+def test_join_row_number_format_string():
+    from dataflows import load, set_type, join
+    flow = Flow(
+        load('data/population.csv'),
+        load('data/cities_comment.csv'),
+        join(
+            source_name='population',
+            source_key='city with population in row {#}',
+            target_name='cities_comment',
+            target_key='{comment}',
+            fields={'population': {'name': 'population'}}
+        ),
+    )
+    data = flow.results()[0]
+    assert data == [[
+        {'city': 'paris', 'population': 2, 'comment': 'city with population in row 2'},
+        {'city': 'london', 'population': 8, 'comment': 'city with population in row 1'},
+        {'city': 'rome', 'population': 3, 'comment': 'city with population in row 3'},
+    ]]
+
+
 def test_load_duplicate_headers():
     from dataflows import load
     flow = Flow(
