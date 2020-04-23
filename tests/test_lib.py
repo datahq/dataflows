@@ -1532,6 +1532,7 @@ def test_force_temporal_format():
         }
     ]]
 
+
 # Extract missing values
 
 def test_extract_missing_values():
@@ -1657,3 +1658,16 @@ def test_conditional():
     assert result2[0] == [
         dict(a=i, c=i) for i in range(3)
     ]
+
+
+def test_exception_information():
+    from dataflows import load
+    flow = Flow(
+        load('data/bad-path1.csv'),
+        load('data/bad-path2.csv'),
+    )
+    with pytest.raises(Exception) as excinfo:
+        data = flow.results()
+    assert excinfo.value.processorName == 'load'
+    assert excinfo.value.processorObject.load_source == 'data/bad-path2.csv'
+    assert excinfo.value.processorPosition == 2

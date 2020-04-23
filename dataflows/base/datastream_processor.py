@@ -26,11 +26,13 @@ class DataStreamProcessor:
         self.stats = {}
         self.source = None
         self.datapackage = None
+        self.position = None
 
-    def __call__(self, source=None):
+    def __call__(self, source=None, position=None):
         if source is None:
             source = DataStream()
         self.source = source
+        self.position = position
         return self
 
     def process_resource(self, resource: ResourceWrapper):
@@ -69,7 +71,14 @@ class DataStreamProcessor:
         return func
 
     def _process(self):
-        datastream = self.source._process()
+        try:
+            datastream = self.source._process()
+        except Exception as exception:
+            if (not hasattr(exception, 'processorName')):
+                exception.processorName = self.__class__.__name__
+                exception.processorObject = self
+                exception.processorPosition = self.position
+            raise exception
 
         self.datapackage = Package(descriptor=copy.deepcopy(datastream.dp.descriptor))
         self.datapackage = self.process_datapackage(self.datapackage)
