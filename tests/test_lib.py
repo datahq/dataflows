@@ -1420,6 +1420,7 @@ def test_load_override_schema_and_fields():
         {'name': None, 'age': '22'},
     ]]
 
+
 def test_delete_fields_regex():
     from dataflows import load, delete_fields
     flow = Flow(
@@ -1432,6 +1433,7 @@ def test_delete_fields_regex():
         {'city': 'paris'},
         {'city': 'rome'},
     ]]
+
 
 def test_join_full_outer():
     from dataflows import load, set_type, join
