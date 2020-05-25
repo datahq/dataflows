@@ -10,6 +10,9 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 - **dump_to_zip** - Store the results in a valid datapackage, all files archived in one zipped file
 - **dump_to_sql** - Store the results in a relational database (creates one or more tables or updates existing tables)
 
+### Flow Control
+- **conditional** - Run parts of the flow based on the structure of the datapackage at the calling point 
+- **finalizer** - Call a function when all data had been processed
 - **checkpoint** - Cache results of a subflow in a datapackage and load it upon request
 
 ### Manipulate row-by-row
@@ -239,7 +242,7 @@ Example - add a field if it doesn't exist in the first resource in the data pack
 ```python
 def no_such_field(field_name):
     def func(dp):
-        return any(field_name == f.name for f in dp.resources[0].schema.fields)
+        return all(field_name != f.name for f in dp.resources[0].schema.fields)
     return func
 
 Flow(
@@ -249,6 +252,32 @@ Flow(
             add_field('my-field', 'string', 'default-value')
         ))
     )
+    # ...
+)
+```
+
+
+#### finalizer
+
+Call a function when all data had been processed at the calling point.
+
+```python
+def finalizer(callback):
+    pass
+```
+
+- `callback` - a callback function which the processor will call once all data finished passing through it
+
+Example - show a message when done loading a file
+
+```python
+def print_done():
+    print('done loading')
+
+Flow(
+    # ...
+    load(...),
+    finalizer(print_done)
     # ...
 )
 ```

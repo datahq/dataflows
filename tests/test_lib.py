@@ -1657,3 +1657,26 @@ def test_conditional():
     assert result2[0] == [
         dict(a=i, c=i) for i in range(3)
     ]
+
+def test_finalizer():
+    from dataflows import Flow, finalizer
+
+    stats = dict(
+        processed=0,
+        detected=None
+    )
+
+    def process(row):
+        stats['processed'] += 1
+
+    def finalize():
+        stats['detected'] = stats['processed']
+
+    Flow(
+        (dict(a=1) for i in range(10)),
+        process,
+        finalizer(finalize),
+    ).process()
+
+    assert stats['processed'] == 10
+    assert stats['detected'] == 10
