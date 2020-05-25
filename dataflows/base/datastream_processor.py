@@ -6,6 +6,7 @@ import copy
 from datapackage import Package
 from tableschema.exceptions import CastError
 
+from . import exceptions
 from .datastream import DataStream
 from .resource_wrapper import ResourceWrapper
 from .schema_validator import schema_validator
@@ -74,10 +75,14 @@ class DataStreamProcessor:
         try:
             datastream = self.source._process()
         except Exception as exception:
-            if (not hasattr(exception, 'processorName')):
-                exception.processorName = self.__class__.__name__
-                exception.processorObject = self
-                exception.processorPosition = self.position
+            if not isinstance(exception, exceptions.ProcessorError):
+                error = exceptions.ProcessorError(
+                    exception,
+                    processor_name=self.source.__class__.__name__,
+                    processor_object=self.source,
+                    processor_position=self.source.position
+                )
+                raise error from exception
             raise exception
 
         self.datapackage = Package(descriptor=copy.deepcopy(datastream.dp.descriptor))
@@ -99,7 +104,18 @@ class DataStreamProcessor:
         return ds.dp, ds.merge_stats()
 
     def results(self, on_error=None):
-        ds = self._process()
+        try:
+            ds = self._process()
+        except Exception as exception:
+            if not isinstance(exception, exceptions.ProcessorError):
+                error = exceptions.ProcessorError(
+                    exception,
+                    processor_name=self.__class__.__name__,
+                    processor_object=self,
+                    processor_position=self.position
+                )
+                raise error from exception
+            raise exception
         results = [
             list(schema_validator(res.res, res, on_error=on_error))
             for res in ds.res_iter

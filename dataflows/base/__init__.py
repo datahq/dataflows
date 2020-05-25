@@ -1,3 +1,4 @@
+from . import exceptions
 from .datastream import DataStream
 from .datastream_processor import DataStreamProcessor
 from .resource_wrapper import ResourceWrapper
