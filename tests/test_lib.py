@@ -1479,6 +1479,26 @@ def test_join_row_number():
     ]]
 
 
+def test_join_row_number_readme_example():
+    from dataflows import load, set_type, join
+    flow = Flow(
+        load('data/values.csv'),
+        load('data/names.csv'),
+        join(
+            source_name='values',
+            source_key=['#'],
+            target_name='names',
+            target_key=['#'],
+            fields={'values': {'name': 'values'}}
+        ),
+    )
+    data = flow.results()[0]
+    assert data == [[
+        {'id': 1, 'names': 'name1', 'values': 'value1'},
+        {'id': 2, 'names': 'name2', 'values': 'value2'},
+    ]]
+
+
 def test_join_row_number_format_string():
     from dataflows import load, set_type, join
     flow = Flow(

@@ -905,3 +905,34 @@ age|first_name  |last_name  |the_house
 27|Tyrion      |Lannister  |Lannister
 5|Rickon      |Stark      |Stark
 16|Daenerys    |Targaryen  |Targaryen
+
+*Joining using row numbers*:
+`source`:
+| values |
+|--------|
+| value1 |
+| value2 |
+
+`target`:
+| id | names |
+|----|-------|
+| 01 | name1 |
+| 02 | name2 |
+
+```python
+Flow(#...
+    join(
+        source_name='source',
+        source_key=['#'],
+        target_name='target',
+        target_key=['#'],
+        fields={'values': {'name': 'values'}}
+    ),
+)
+```
+
+Output:
+| id | names | values |
+|----|-------|--------|
+| 01 | name1 | value1 |
+| 02 | name2 | value2 |
