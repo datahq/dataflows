@@ -8,6 +8,7 @@ from .add_computed_field import add_computed_field
 from .add_field import add_field
 from .checkpoint import checkpoint
 from .concatenate import concatenate
+from .conditional import conditional
 from .delete_fields import delete_fields
 from .deduplicate import deduplicate
 from .duplicate import duplicate

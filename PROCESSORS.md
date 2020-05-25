@@ -220,6 +220,39 @@ def dump_to_sql(tables,
 - `batch_size` - Maximum amount of rows to write at the same time to the DB (default 1000)
 - `use_bloom_filter` - Preprocess existing DB data to improve update performance (default: True)
 
+### Flow Control
+
+#### conditional
+
+Run parts of the flow based on the structure of the datapackage at this point.
+
+```python
+def conditional(predicate, flow):
+    pass
+```
+
+- `predicate` - a boolean function, receiving a single parameter which is a `Package.datapacakge` and returns true/false
+- `flow` - a `Flow` to chain to the processing pipeline if the predicate is positive.
+
+Example - add a field if it doesn't exist in the first resource in the data package:
+
+```python
+def no_such_field(field_name):
+    def func(dp):
+        return any(field_name == f.name for f in dp.resources[0].schema.fields)
+    return func
+
+Flow(
+    # ...
+    conditional(
+        no_such_field('my-field', Flow(
+            add_field('my-field', 'string', 'default-value')
+        ))
+    )
+    # ...
+)
+```
+
 #### checkpoint
 
 Save results from running a series of steps, if checkpoint exists - loads from checkpoint instead of running the steps.

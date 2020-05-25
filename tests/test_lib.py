@@ -1532,7 +1532,6 @@ def test_force_temporal_format():
         }
     ]]
 
-
 # Extract missing values
 
 def test_extract_missing_values():
@@ -1632,3 +1631,29 @@ def test_extract_missing_values_options_source_is_list():
         {'col1': None, 'col2': None, 'missingValues': {'col1': 'mis1', 'col2': 'mis2'}},
         {'col1': 7, 'col2': 7, 'missingValues': {}},
     ]]
+
+
+def test_conditional():
+    from dataflows import Flow, conditional, add_field
+
+    tester = lambda dp: 'b' in [f.name for r in dp.resources for f in r.schema.fields]
+
+    data1 = [
+        dict(a=i, b=i) for i in range(3)
+    ]
+    data2 = [
+        dict(a=i, c=i) for i in range(3)
+    ]
+
+    result1, _, _ = Flow(
+        data1, conditional(tester, Flow(add_field('d', 'integer', lambda r: r['a'])))
+    ).results()
+    result2, _, _ = Flow(
+        data2, conditional(tester, Flow(add_field('d', 'integer', lambda r: r['a'])))
+    ).results()
+    assert result1[0] == [
+        dict(a=i, b=i, d=i) for i in range(3)
+    ]
+    assert result2[0] == [
+        dict(a=i, c=i) for i in range(3)
+    ]
