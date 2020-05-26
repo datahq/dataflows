@@ -72,52 +72,49 @@ class DataStreamProcessor:
         return func
 
     def _process(self):
+        datastream = self.source._process()
+
         try:
-            datastream = self.source._process()
+            self.datapackage = Package(descriptor=copy.deepcopy(datastream.dp.descriptor))
+            self.datapackage = self.process_datapackage(self.datapackage)
+            self.datapackage.commit()
+
+            return DataStream(self.datapackage,
+                            LazyIterator(self.get_iterator(datastream)),
+                            datastream.stats + [self.stats])
         except Exception as exception:
-            if not isinstance(exception, exceptions.ProcessorError):
-                error = exceptions.ProcessorError(
-                    exception,
-                    processor_name=self.source.__class__.__name__,
-                    processor_object=self.source,
-                    processor_position=self.source.position
-                )
-                raise error from exception
-            raise exception
+            self.raise_exception(exception)
 
-        self.datapackage = Package(descriptor=copy.deepcopy(datastream.dp.descriptor))
-        self.datapackage = self.process_datapackage(self.datapackage)
-        self.datapackage.commit()
-
-        return DataStream(self.datapackage,
-                          LazyIterator(self.get_iterator(datastream)),
-                          datastream.stats + [self.stats])
+    def raise_exception(self, cause):
+        if not isinstance(cause, exceptions.ProcessorError):
+            error = exceptions.ProcessorError(
+                cause,
+                processor_name=self.__class__.__name__,
+                processor_object=self,
+                processor_position=self.position
+            )
+            raise error from cause
+        raise cause
 
     def process(self):
-        ds = self._process()
         try:
+            ds = self._process()
             for res in ds.res_iter:
                 collections.deque(res, maxlen=0)
         except CastError as e:
             for err in e.errors:
                 logging.error('%s', err)
+        except Exception as exception:
+            self.raise_exception(exception)
         return ds.dp, ds.merge_stats()
 
     def results(self, on_error=None):
         try:
             ds = self._process()
+            results = [
+                list(schema_validator(res.res, res, on_error=on_error))
+                for res in ds.res_iter
+            ]
         except Exception as exception:
-            if not isinstance(exception, exceptions.ProcessorError):
-                error = exceptions.ProcessorError(
-                    exception,
-                    processor_name=self.__class__.__name__,
-                    processor_object=self,
-                    processor_position=self.position
-                )
-                raise error from exception
-            raise exception
-        results = [
-            list(schema_validator(res.res, res, on_error=on_error))
-            for res in ds.res_iter
-        ]
+            self.raise_exception(exception)
         return results, ds.dp, ds.merge_stats()
