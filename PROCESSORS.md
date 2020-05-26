@@ -11,7 +11,7 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 - **dump_to_sql** - Store the results in a relational database (creates one or more tables or updates existing tables)
 
 ### Flow Control
-- **conditional** - Run parts of the flow based on the structure of the datapackage at the calling point 
+- **conditional** - Run parts of the flow based on the structure of the datapackage at the calling point
 - **finalizer** - Call a function when all data had been processed
 - **checkpoint** - Cache results of a subflow in a datapackage and load it upon request
 
@@ -66,6 +66,7 @@ def load(source, name=None, resources=None, strip=True, limit_rows=None,
     - A list of resource names to load
     - `None` indicates to load all resources
     - The index of the resource in the package
+- `sheets` - REGEX. For the Excel format it's possible to pass the `sheet` option to `tabulator` to open the exact Excel sheet. Dataflows supports also the `sheets` option allowing to load multiple Excel sheets at once if their names match the given regex.
 - `options` - based on the loaded file, extra options (e.g. `sheet` for Excel files etc., see the link to tabulator above)
 
 Relevant only when _not_ loading data from a datapackage:
