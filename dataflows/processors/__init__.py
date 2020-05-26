@@ -13,7 +13,7 @@ from .delete_fields import delete_fields
 from .deduplicate import deduplicate
 from .duplicate import duplicate
 from .filter_rows import filter_rows
-from .finalizer import finalizer
+#  from .finalizer import finalizer
 from .find_replace import find_replace
 from .join import join, join_self, join_with_self
 from .select_fields import select_fields
