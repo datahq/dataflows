@@ -21,8 +21,8 @@ class KeyCalc(object):
         self.key_spec = key_spec
         self.key_list = key_list
 
-    def __call__(self, row):
-        return self.key_spec.format(**row)
+    def __call__(self, row, row_number):
+        return self.key_spec.format(**{**row, '#': row_number})
 
 
 # Aggregator helpers
@@ -183,8 +183,8 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
 
     # Indexes the source data
     def indexer(resource):
-        for row in resource:
-            key = source_key(row)
+        for row_number, row in enumerate(resource, start=1):
+            key = source_key(row, row_number)
             try:
                 current = db.get(key)
             except KeyError:
@@ -223,8 +223,8 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
                 ))
                 yield row
         else:
-            for row in resource:
-                key = target_key(row)
+            for row_number, row in enumerate(resource, start=1):
+                key = target_key(row, row_number)
                 try:
                     extra = create_extra_by_key(key)
                     db_keys_usage.set(key, True)

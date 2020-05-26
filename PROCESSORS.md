@@ -10,6 +10,9 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 - **dump_to_zip** - Store the results in a valid datapackage, all files archived in one zipped file
 - **dump_to_sql** - Store the results in a relational database (creates one or more tables or updates existing tables)
 
+### Flow Control
+- **conditional** - Run parts of the flow based on the structure of the datapackage at the calling point 
+- **finalizer** - Call a function when all data had been processed
 - **checkpoint** - Cache results of a subflow in a datapackage and load it upon request
 
 ### Manipulate row-by-row
@@ -239,7 +242,7 @@ Example - add a field if it doesn't exist in the first resource in the data pack
 ```python
 def no_such_field(field_name):
     def func(dp):
-        return any(field_name == f.name for f in dp.resources[0].schema.fields)
+        return all(field_name != f.name for f in dp.resources[0].schema.fields)
     return func
 
 Flow(
@@ -249,6 +252,32 @@ Flow(
             add_field('my-field', 'string', 'default-value')
         ))
     )
+    # ...
+)
+```
+
+
+#### finalizer
+
+Call a function when all data had been processed at the calling point.
+
+```python
+def finalizer(callback):
+    pass
+```
+
+- `callback` - a callback function which the processor will call once all data finished passing through it
+
+Example - show a message when done loading a file
+
+```python
+def print_done():
+    print('done loading')
+
+Flow(
+    # ...
+    load(...),
+    finalizer(print_done)
     # ...
 )
 ```
@@ -750,7 +779,7 @@ def join_with_self(resource_name, join_key, fields):
 - `source_name` - name of the _source_ resource
 - `source_key` - One of
     - List of field names which should be used as the lookup key
-    - String, which would be interpreted as a Python format string used to form the key (e.g. `{<field_name_1>}:{field_name_2}`)
+    - String, which would be interpreted as a Python format string used to form the key (e.g. `{<field_name_1>}:{field_name_2}`). It's possible to use `#` as a special field name to include a row number (startring from the first row after the headers row) e.g. `{#}:{field_name_2}`.
 - `source_delete` - delete source from data-package after joining (`True` by default)
 
 - `target_name` - name of the _target_ resource to hold the joined data.
@@ -905,3 +934,34 @@ age|first_name  |last_name  |the_house
 27|Tyrion      |Lannister  |Lannister
 5|Rickon      |Stark      |Stark
 16|Daenerys    |Targaryen  |Targaryen
+
+*Joining using row numbers*:
+`source`:
+| values |
+|--------|
+| value1 |
+| value2 |
+
+`target`:
+| id | names |
+|----|-------|
+| 01 | name1 |
+| 02 | name2 |
+
+```python
+Flow(#...
+    join(
+        source_name='source',
+        source_key=['#'],
+        target_name='target',
+        target_key=['#'],
+        fields={'values': {'name': 'values'}}
+    ),
+)
+```
+
+Output:
+| id | names | values |
+|----|-------|--------|
+| 01 | name1 | value1 |
+| 02 | name2 | value2 |

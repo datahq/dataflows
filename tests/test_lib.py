@@ -1420,6 +1420,7 @@ def test_load_override_schema_and_fields():
         {'name': None, 'age': '22'},
     ]]
 
+
 def test_delete_fields_regex():
     from dataflows import load, delete_fields
     flow = Flow(
@@ -1432,6 +1433,7 @@ def test_delete_fields_regex():
         {'city': 'paris'},
         {'city': 'rome'},
     ]]
+
 
 def test_join_full_outer():
     from dataflows import load, set_type, join
@@ -1453,6 +1455,68 @@ def test_join_full_outer():
         {'id': 2, 'city': 'paris', 'population': 2},
         {'id': 3, 'city': 'rome', 'population': None},
         {'id': 4, 'city': None, 'population': 3},
+    ]]
+
+
+def test_join_row_number():
+    from dataflows import load, set_type, join
+    flow = Flow(
+        load('data/population.csv'),
+        load('data/cities.csv'),
+        join(
+            source_name='population',
+            source_key=['#'],
+            target_name='cities',
+            target_key=['#'],
+            fields={'population': {'name': 'population'}}
+        ),
+    )
+    data = flow.results()[0]
+    assert data == [[
+        {'id': 1, 'city': 'london', 'population': 8},
+        {'id': 2, 'city': 'paris', 'population': 2},
+        {'id': 3, 'city': 'rome', 'population': 3},
+    ]]
+
+
+def test_join_row_number_readme_example():
+    from dataflows import load, set_type, join
+    flow = Flow(
+        load('data/values.csv'),
+        load('data/names.csv'),
+        join(
+            source_name='values',
+            source_key=['#'],
+            target_name='names',
+            target_key=['#'],
+            fields={'values': {'name': 'values'}}
+        ),
+    )
+    data = flow.results()[0]
+    assert data == [[
+        {'id': 1, 'names': 'name1', 'values': 'value1'},
+        {'id': 2, 'names': 'name2', 'values': 'value2'},
+    ]]
+
+
+def test_join_row_number_format_string():
+    from dataflows import load, set_type, join
+    flow = Flow(
+        load('data/population.csv'),
+        load('data/cities_comment.csv'),
+        join(
+            source_name='population',
+            source_key='city with population in row {#}',
+            target_name='cities_comment',
+            target_key='{comment}',
+            fields={'population': {'name': 'population'}}
+        ),
+    )
+    data = flow.results()[0]
+    assert data == [[
+        {'city': 'paris', 'population': 2, 'comment': 'city with population in row 2'},
+        {'city': 'london', 'population': 8, 'comment': 'city with population in row 1'},
+        {'city': 'rome', 'population': 3, 'comment': 'city with population in row 3'},
     ]]
 
 
@@ -1659,7 +1723,6 @@ def test_conditional():
         dict(a=i, c=i) for i in range(3)
     ]
 
-
 def test_exception_information():
     from dataflows import load, exceptions
     flow = Flow(
@@ -1699,3 +1762,27 @@ def test_exception_information_multiple_processors_last_errored():
     assert excinfo.value.processor_name == 'load'
     assert excinfo.value.processor_object.load_source == 'data/bad-path2.csv'
     assert excinfo.value.processor_position == 2
+
+
+def test_finalizer():
+    from dataflows import Flow, finalizer
+
+    stats = dict(
+        processed=0,
+        detected=None
+    )
+
+    def process(row):
+        stats['processed'] += 1
+
+    def finalize():
+        stats['detected'] = stats['processed']
+
+    Flow(
+        (dict(a=1) for i in range(10)),
+        process,
+        finalizer(finalize),
+    ).process()
+
+    assert stats['processed'] == 10
+    assert stats['detected'] == 10
