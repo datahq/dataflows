@@ -29,11 +29,11 @@ class Flow:
     def _chain(self, ds=None):
         from ..helpers import datapackage_processor, rows_processor, row_processor, iterable_loader
 
-        for link in self._preprocess_chain():
+        for position, link in enumerate(self._preprocess_chain(), start=1):
             if isinstance(link, Flow):
                 ds = link._chain(ds)
             elif isinstance(link, DataStreamProcessor):
-                ds = link(ds)
+                ds = link(ds, position=position)
             elif isfunction(link):
                 sig = signature(link)
                 params = list(sig.parameters)

@@ -6,6 +6,7 @@ import copy
 from datapackage import Package
 from tableschema.exceptions import CastError
 
+from . import exceptions
 from .datastream import DataStream
 from .resource_wrapper import ResourceWrapper
 from .schema_validator import schema_validator
@@ -26,11 +27,13 @@ class DataStreamProcessor:
         self.stats = {}
         self.source = None
         self.datapackage = None
+        self.position = None
 
-    def __call__(self, source=None):
+    def __call__(self, source=None, position=None):
         if source is None:
             source = DataStream()
         self.source = source
+        self.position = position
         return self
 
     def process_resource(self, resource: ResourceWrapper):
@@ -69,7 +72,18 @@ class DataStreamProcessor:
         return func
 
     def _process(self):
-        datastream = self.source._process()
+        try:
+            datastream = self.source._process()
+        except Exception as exception:
+            if not isinstance(exception, exceptions.ProcessorError):
+                error = exceptions.ProcessorError(
+                    exception,
+                    processor_name=self.source.__class__.__name__,
+                    processor_object=self.source,
+                    processor_position=self.source.position
+                )
+                raise error from exception
+            raise exception
 
         self.datapackage = Package(descriptor=copy.deepcopy(datastream.dp.descriptor))
         self.datapackage = self.process_datapackage(self.datapackage)
@@ -90,7 +104,18 @@ class DataStreamProcessor:
         return ds.dp, ds.merge_stats()
 
     def results(self, on_error=None):
-        ds = self._process()
+        try:
+            ds = self._process()
+        except Exception as exception:
+            if not isinstance(exception, exceptions.ProcessorError):
+                error = exceptions.ProcessorError(
+                    exception,
+                    processor_name=self.__class__.__name__,
+                    processor_object=self,
+                    processor_position=self.position
+                )
+                raise error from exception
+            raise exception
         results = [
             list(schema_validator(res.res, res, on_error=on_error))
             for res in ds.res_iter
