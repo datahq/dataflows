@@ -835,7 +835,7 @@ def test_set_type_resources():
 
 
 def test_set_type_errors():
-    from dataflows import Flow, set_type, ValidationError
+    from dataflows import Flow, set_type, ValidationError, exceptions
     from dataflows.base.schema_validator import ignore, drop, raise_exception
 
     data = [
@@ -863,21 +863,18 @@ def test_set_type_errors():
         data,
         set_type('b', type='integer', on_error=raise_exception),
     )
-    try:
+
+    with pytest.raises(exceptions.ProcessorError) as excinfo:
         results, *_ = f.results()
-        assert False
-    except ValidationError:
-        pass
+    assert isinstance(excinfo.value.cause, ValidationError)
 
     f = Flow(
         data,
         set_type('b', type='integer'),
     )
-    try:
+    with pytest.raises(exceptions.ProcessorError) as excinfo:
         results, *_ = f.results()
-        assert False
-    except ValidationError:
-        pass
+    assert isinstance(excinfo.value.cause, ValidationError)
 
 
 def test_dump_to_path_use_titles():
@@ -899,7 +896,7 @@ def test_dump_to_path_use_titles():
 
 def test_load_dates():
     # from dateutil.tz import tzutc
-    from dataflows import Flow, dump_to_path, load, set_type, ValidationError
+    from dataflows import Flow, dump_to_path, load, set_type, ValidationError, exceptions
     import datetime
 
     _today = datetime.date.today()
@@ -913,11 +910,9 @@ def test_load_dates():
             dump_to_path('out/dump_dates')
         ).process()
 
-    try:
+    with pytest.raises(exceptions.ProcessorError) as excinfo:
         run_flow()
-        assert False
-    except ValidationError:
-        assert True
+    assert isinstance(excinfo.value.cause, ValidationError)
 
     # Default is isoformat(), str() gives a slightly different format:
     # >>> from datetime import datetime
@@ -1521,13 +1516,14 @@ def test_join_row_number_format_string():
 
 
 def test_load_duplicate_headers():
-    from dataflows import load
+    from dataflows import load, exceptions
     flow = Flow(
         load('data/duplicate_headers.csv'),
     )
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(exceptions.ProcessorError) as excinfo:
         flow.results()
-    assert 'duplicate headers' in str(excinfo.value)
+    cause = excinfo.value.cause
+    assert 'duplicate headers' in str(cause)
 
 
 def test_load_duplicate_headers_with_deduplicate_headers_flag():
@@ -1596,6 +1592,7 @@ def test_force_temporal_format():
         }
     ]]
 
+
 # Extract missing values
 
 def test_extract_missing_values():
@@ -1663,6 +1660,7 @@ def test_extract_missing_values_options():
         {'col1': 7, 'col2': 7, 'notes': {}},
     ]]
 
+
 def test_extract_missing_values_options_source_is_list():
     from dataflows import load
     schema = {
@@ -1721,6 +1719,7 @@ def test_conditional():
     assert result2[0] == [
         dict(a=i, c=i) for i in range(3)
     ]
+
 
 def test_finalizer():
     from dataflows import Flow, finalizer

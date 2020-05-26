@@ -8,6 +8,7 @@ from tabulator.parser import Parser
 from tabulator.helpers import reset_stream
 from tableschema.schema import Schema
 from .. import DataStreamProcessor
+from ..base.exceptions import SourceLoadError
 from ..base.schema_validator import schema_validator, ignore, drop, raise_exception
 from ..helpers.resource_matcher import ResourceMatcher
 
@@ -173,8 +174,8 @@ class load(DataStreamProcessor):
         try:
             return self.safe_process_datapackage(dp)
         except Exception as e:
-            raise e from Exception('Failed to run load with load source {!r} and options {!r}'
-                                   .format(self.load_source, self.options))
+            raise SourceLoadError('Failed to load source {!r} and options {!r}: {}'
+                                  .format(self.load_source, self.options, e)) from e
 
     def safe_process_datapackage(self, dp: Package):
 

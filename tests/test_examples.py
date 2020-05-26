@@ -1,3 +1,5 @@
+import pytest
+
 def test_example_1():
     from dataflows import Flow
 
@@ -16,8 +18,6 @@ def test_example_1():
     )
     data, *_ = f.results()
 
-    print(data)
-
     # [[{'data': 'hello'}, {'data': 'world'}]]
 
 
@@ -32,8 +32,6 @@ def test_example_2():
         titleName
     )
     data, *_ = f.results()
-
-    print(data)
 
 
 def country_population():
@@ -63,8 +61,6 @@ def test_example_3():
     )
     data, *_ = f.results()
 
-    print(data)
-
 def test_example_4():
     from dataflows import Flow, set_type
 
@@ -73,8 +69,6 @@ def test_example_4():
         set_type('population', type='number', groupChar=',')
     )
     data, dp, _ = f.results()
-
-    print(data[0][:10])
 
 def test_example_5():
     from dataflows import Flow, set_type, dump_to_path
@@ -112,8 +106,9 @@ def test_example_6():
     )
     _ = f.process()
 
+
 def test_validate():
-    from dataflows import Flow, validate, set_type, printer, ValidationError
+    from dataflows import Flow, validate, set_type, printer, ValidationError, exceptions
 
     def adder(row):
         row['a'] += 0.5
@@ -127,11 +122,10 @@ def test_validate():
         validate(),
         printer()
     )
-    try:
-        _ = f.process()
-        assert False
-    except ValidationError:
-        pass
+
+    with pytest.raises(exceptions.ProcessorError) as excinfo:
+        f.process()
+    assert isinstance(excinfo.value.cause, ValidationError)
 
 
 def test_example_7():

@@ -6,6 +6,7 @@ import copy
 from datapackage import Package
 from tableschema.exceptions import CastError
 
+from . import exceptions
 from .datastream import DataStream
 from .resource_wrapper import ResourceWrapper
 from .schema_validator import schema_validator
@@ -26,11 +27,13 @@ class DataStreamProcessor:
         self.stats = {}
         self.source = None
         self.datapackage = None
+        self.position = None
 
-    def __call__(self, source=None):
+    def __call__(self, source=None, position=None):
         if source is None:
             source = DataStream()
         self.source = source
+        self.position = position
         return self
 
     def process_resource(self, resource: ResourceWrapper):
@@ -71,28 +74,47 @@ class DataStreamProcessor:
     def _process(self):
         datastream = self.source._process()
 
-        self.datapackage = Package(descriptor=copy.deepcopy(datastream.dp.descriptor))
-        self.datapackage = self.process_datapackage(self.datapackage)
-        self.datapackage.commit()
+        try:
+            self.datapackage = Package(descriptor=copy.deepcopy(datastream.dp.descriptor))
+            self.datapackage = self.process_datapackage(self.datapackage)
+            self.datapackage.commit()
 
-        return DataStream(self.datapackage,
-                          LazyIterator(self.get_iterator(datastream)),
-                          datastream.stats + [self.stats])
+            return DataStream(self.datapackage,
+                            LazyIterator(self.get_iterator(datastream)),
+                            datastream.stats + [self.stats])
+        except Exception as exception:
+            self.raise_exception(exception)
+
+    def raise_exception(self, cause):
+        if not isinstance(cause, exceptions.ProcessorError):
+            error = exceptions.ProcessorError(
+                cause,
+                processor_name=self.__class__.__name__,
+                processor_object=self,
+                processor_position=self.position
+            )
+            raise error from cause
+        raise cause
 
     def process(self):
-        ds = self._process()
         try:
+            ds = self._process()
             for res in ds.res_iter:
                 collections.deque(res, maxlen=0)
         except CastError as e:
             for err in e.errors:
                 logging.error('%s', err)
+        except Exception as exception:
+            self.raise_exception(exception)
         return ds.dp, ds.merge_stats()
 
     def results(self, on_error=None):
-        ds = self._process()
-        results = [
-            list(schema_validator(res.res, res, on_error=on_error))
-            for res in ds.res_iter
-        ]
+        try:
+            ds = self._process()
+            results = [
+                list(schema_validator(res.res, res, on_error=on_error))
+                for res in ds.res_iter
+            ]
+        except Exception as exception:
+            self.raise_exception(exception)
         return results, ds.dp, ds.merge_stats()
