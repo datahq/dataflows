@@ -78,6 +78,7 @@ def test_exception_information_multiple_processors_function_error():
     assert excinfo.value.processor_name == 'rows_processor'
     assert excinfo.value.processor_position == 2
 
+
 def test_exception_information_multiple_processors_iterable_error():
     from dataflows import Flow, printer, exceptions
 
