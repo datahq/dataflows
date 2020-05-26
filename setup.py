@@ -21,7 +21,7 @@ def read(*paths):
 PACKAGE = 'dataflows'
 NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
-    'tabulator>=1.23.0',
+    'tabulator>=1.38.4',
     'datapackage>=1.5.0',
     'tableschema>=1.5',
     'kvfile>=0.0.8',

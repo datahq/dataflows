@@ -779,7 +779,7 @@ def join_with_self(resource_name, join_key, fields):
 - `source_name` - name of the _source_ resource
 - `source_key` - One of
     - List of field names which should be used as the lookup key
-    - String, which would be interpreted as a Python format string used to form the key (e.g. `{<field_name_1>}:{field_name_2}`)
+    - String, which would be interpreted as a Python format string used to form the key (e.g. `{<field_name_1>}:{field_name_2}`). It's possible to use `#` as a special field name to include a row number (startring from the first row after the headers row) e.g. `{#}:{field_name_2}`.
 - `source_delete` - delete source from data-package after joining (`True` by default)
 
 - `target_name` - name of the _target_ resource to hold the joined data.
@@ -934,3 +934,34 @@ age|first_name  |last_name  |the_house
 27|Tyrion      |Lannister  |Lannister
 5|Rickon      |Stark      |Stark
 16|Daenerys    |Targaryen  |Targaryen
+
+*Joining using row numbers*:
+`source`:
+| values |
+|--------|
+| value1 |
+| value2 |
+
+`target`:
+| id | names |
+|----|-------|
+| 01 | name1 |
+| 02 | name2 |
+
+```python
+Flow(#...
+    join(
+        source_name='source',
+        source_key=['#'],
+        target_name='target',
+        target_key=['#'],
+        fields={'values': {'name': 'values'}}
+    ),
+)
+```
+
+Output:
+| id | names | values |
+|----|-------|--------|
+| 01 | name1 | value1 |
+| 02 | name2 | value2 |
