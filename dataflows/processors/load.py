@@ -214,14 +214,14 @@ class load(DataStreamProcessor):
 
             # Loading multiple excel sheets
             elif self.options.get('sheets'):
-                options = deepcopy(self.options)
-                pattern = re.compile(options['sheets'])
-                sheets = options.pop('sheets')
-                options['sheet'] = 0
+                sheets = self.options.pop('sheets')
+                pattern = re.compile(sheets)
+                self.options['workbook_cache'] = {}
+                self.options['sheet'] = 0
                 try:
                     while True:
-                        options['sheet'] += 1
-                        descriptor, stream = self.get_resource(options)
+                        self.options['sheet'] += 1
+                        descriptor, stream = self.get_resource()
                         if re.search(pattern, stream.fragment):
                             descriptor['name'] = slugify(stream.fragment, to_lower=True)
                             descriptor['path'] = '.'.join([descriptor['name'], stream.format])
@@ -235,26 +235,25 @@ class load(DataStreamProcessor):
 
             # Loading for any other source
             else:
-                descriptor, stream = self.get_resource(self.options)
+                descriptor, stream = self.get_resource()
                 self.resource_descriptors.append(descriptor)
                 self.iterators.append(stream.iter(keyed=True))
 
         dp.descriptor.setdefault('resources', []).extend(self.resource_descriptors)
         return dp
 
-    def get_resource(self, options):
-        options = deepcopy(options)
+    def get_resource(self):
         path = os.path.basename(self.load_source)
         path = os.path.splitext(path)[0]
         descriptor = dict(path=self.name or path,
                           profile='tabular-data-resource')
         descriptor['name'] = self.name or path
-        if 'encoding' in options:
-            descriptor['encoding'] = options['encoding']
-        options.setdefault('custom_parsers', {}).setdefault('xml', XMLParser)
-        options.setdefault('ignore_blank_headers', True)
-        options.setdefault('headers', 1)
-        stream: Stream = Stream(self.load_source, **options).open()
+        if 'encoding' in self.options:
+            descriptor['encoding'] = self.options['encoding']
+        self.options.setdefault('custom_parsers', {}).setdefault('xml', XMLParser)
+        self.options.setdefault('ignore_blank_headers', True)
+        self.options.setdefault('headers', 1)
+        stream: Stream = Stream(self.load_source, **self.options).open()
         if len(stream.headers) != len(set(stream.headers)):
             if not self.deduplicate_headers:
                 raise ValueError(
@@ -281,7 +280,7 @@ class load(DataStreamProcessor):
                 'values': self.extract_missing_values['values'],
             })
         descriptor['schema'] = schema
-        descriptor['format'] = options.get('format', stream.format)
+        descriptor['format'] = self.options.get('format', stream.format)
         descriptor['path'] += '.{}'.format(stream.format)
         return (descriptor, stream)
 
