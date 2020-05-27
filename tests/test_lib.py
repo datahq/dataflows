@@ -1822,10 +1822,10 @@ def test_load_excel_sheets_matching():
 
 
 def test_load_excel_sheets_not_found():
-    from dataflows import load
+    from dataflows import load, exceptions
     flow = Flow(
         load('data/sheets.xlsx', sheets='Sheet[4]'),
     )
-    with pytest.raises(RuntimeError) as excinfo:
+    with pytest.raises(exceptions.ProcessorError) as excinfo:
         data, package, stats = flow.results()
     assert 'No sheets found' in str(excinfo.value)
