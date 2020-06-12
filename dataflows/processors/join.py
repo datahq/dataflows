@@ -124,6 +124,7 @@ AGGREGATORS = {
 
 
 # Input helpers
+
 def fix_fields(fields):
     for field in sorted(fields.keys()):
         spec = fields[field]
@@ -145,6 +146,17 @@ def expand_fields(fields, schema_fields):
             if sf_name not in existing_names:
                 fields[sf_name] = copy.deepcopy(spec)
                 fields[sf_name]['name'] = sf_name
+
+
+def order_fields(fields, schema_fields):
+    ordered_fields = collections.OrderedDict()
+    for descriptor in schema_fields:
+        name = descriptor['name']
+        if name in fields:
+            ordered_fields[name] = fields.pop(name)
+    for name in sorted(fields.keys()):
+        ordered_fields[name] = fields[name]
+    return ordered_fields
 
 
 def concatenator(resources, all_target_fields, field_mapping):
@@ -277,9 +289,7 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
     def process_target_resource(source_spec, resource):
         target_fields = \
             resource.setdefault('schema', {}).setdefault('fields', [])
-        added_fields = sorted(fields.keys())
-        for field in added_fields:
-            spec = fields[field]
+        for name, spec in fields.items():
             agg = spec['aggregate']
             data_type = AGGREGATORS[agg].dataType
             copy_properties = AGGREGATORS[agg].copyProperties
@@ -297,13 +307,13 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
                 data_type = source_field['type']
             try:
                 existing_field = next(iter(filter(
-                    lambda f: f['name'] == field,
+                    lambda f: f['name'] == name,
                     target_fields)))
                 assert existing_field['type'] == data_type, \
-                    'Reusing %s but with different data types: %s != %s' % (field, existing_field['type'], data_type)
+                    'Reusing %s but with different data types: %s != %s' % (name, existing_field['type'], data_type)
             except StopIteration:
                 to_copy.update({
-                    'name': field,
+                    'name': name,
                     'type': data_type
                 })
                 target_fields.append(to_copy)
@@ -326,8 +336,11 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
         for resource in datapackage['resources']:
 
             if resource['name'] == source_name:
+                nonlocal fields
                 source_spec = resource
-                expand_fields(fields, source_spec.get('schema', {}).get('fields', []))
+                schema_fields = source_spec.get('schema', {}).get('fields', [])
+                expand_fields(fields, schema_fields)
+                fields = order_fields(fields, schema_fields)
                 if not source_delete:
                     new_resources.append(resource)
                 if deduplication:

@@ -1515,6 +1515,33 @@ def test_join_row_number_format_string():
     ]]
 
 
+def test_join_preserve_source_fields_order():
+    from dataflows import load, join
+    flow = Flow(
+        load('data/cities_metadata.csv'),
+        load('data/cities.csv'),
+        join(
+            source_name='cities_metadata',
+            source_key='{id}',
+            target_name='cities',
+            target_key='{id}',
+            fields={'key1': {'name': 'key1'}, 'key2': {'name': 'key2'}}
+        ),
+    )
+    data, package, stats = flow.results()
+    assert package.descriptor['resources'][0]['schema']['fields'] == [
+        {'name': 'id', 'type': 'integer', 'format': 'default'},
+        {'name': 'city', 'type': 'string', 'format': 'default'},
+        {'name': 'key2', 'type': 'string', 'format': 'default'},
+        {'name': 'key1', 'type': 'string', 'format': 'default'}
+    ]
+    assert data == [[
+        {'id': 1, 'name': 'london', 'key1': 'val1', 'key2': 'val2'},
+        {'id': 2, 'name': 'paris', 'key1': 'val1', 'key2': 'val2'},
+        {'id': 3, 'name': 'rome', 'key1': 'val1', 'key2': 'val2'},
+    ]]
+
+
 def test_load_duplicate_headers():
     from dataflows import load, exceptions
     flow = Flow(
