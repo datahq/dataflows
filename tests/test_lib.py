@@ -1536,9 +1536,9 @@ def test_join_preserve_source_fields_order():
         {'name': 'key1', 'type': 'string', 'format': 'default'}
     ]
     assert data == [[
-        {'id': 1, 'name': 'london', 'key1': 'val1', 'key2': 'val2'},
-        {'id': 2, 'name': 'paris', 'key1': 'val1', 'key2': 'val2'},
-        {'id': 3, 'name': 'rome', 'key1': 'val1', 'key2': 'val2'},
+        {'id': 1, 'city': 'london', 'key1': 'val1', 'key2': 'val2'},
+        {'id': 2, 'city': 'paris', 'key1': 'val1', 'key2': 'val2'},
+        {'id': 3, 'city': 'rome', 'key1': 'val1', 'key2': 'val2'},
     ]]
 
 
