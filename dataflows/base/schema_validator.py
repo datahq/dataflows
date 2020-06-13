@@ -1,3 +1,5 @@
+from inspect import isfunction, signature
+
 from datapackage import Resource
 from tableschema import Schema
 from tableschema.exceptions import CastError
@@ -30,10 +32,22 @@ def drop(res_name, row, i, e):
     return False
 
 
+def wrap_handler(on_error):
+    assert callable(on_error)
+    if len(list(signature(on_error).parameters)) > 4:
+        return on_error
+
+    def func(res_name, row, i, e, _):
+        return on_error(res_name, row, i, e)
+    return func
+
+
 def schema_validator(resource, iterator,
                      field_names=None, on_error=None):
     if on_error is None:
         on_error = raise_exception
+    on_error = wrap_handler(on_error)
+
     if isinstance(resource, Resource):
         schema: Schema = resource.schema
         assert schema is not None
@@ -44,11 +58,12 @@ def schema_validator(resource, iterator,
         field_names = [f.name for f in schema.fields]
     schema_fields = [f for f in schema.fields if f.name in field_names]
     for i, row in enumerate(iterator):
+        field = None
         try:
-            for f in schema_fields:
-                row[f.name] = f.cast_value(row.get(f.name))
+            for field in schema_fields:
+                row[field.name] = field.cast_value(row.get(field.name))
         except CastError as e:
-            if not on_error(resource['name'], row, i, e):
+            if not on_error(resource['name'], row, i, e, field):
                 continue
 
         yield row

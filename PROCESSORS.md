@@ -480,11 +480,16 @@ def set_type(name, resources=-1, regex=True, on_error=None, **options):
   - The index of the resource in the package
 - `regex` - if set to `False` field names will be interpreted as strings not as regular expressions (`True` by default)
 - `on_error` - callback function to be called when a validation error occurs.
-  Function has the signature `callback(resource_name, row, row_index, exception)`.
-  It could raise an exception, or return `True` (for keeping the row anyway) or `False` (for dropping it).
+
+  Function can have the signature
+  - `callback(resource_name, row, row_index, exception)` - will receive the resource name, the contents of the offending row, its index and the raised exception
+  - `callback(resource_name, row, row_index, exception, field)` - will receive the resource name, the contents of the offending row, its index and the raised exception and the offending field (as a Field object)
+  
+  This function may raise an exception, return `True` for keeping the row anyway or `False` for dropping it.
+
   A few predefined options are:
   - `dataflows.base.schema_validator.raise_exception` - the default behaviour, will raise a `dataflows.ValidationError` exception.
-  - `dataflows.base.schema_validator.ignore` - drop invalid rows
+  - `dataflows.base.schema_validator.drop` - drop invalid rows
   - `dataflows.base.schema_validator.ignore` - ignore all errors
 - `options` - options to set for the field. Most common ones would be:
   - `type` - set the data type (e.g. `string`, `integer`, `number` etc.)

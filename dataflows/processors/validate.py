@@ -1,7 +1,7 @@
 from inspect import isfunction
 
 from .. import DataStreamProcessor, schema_validator, ResourceWrapper
-from ..base.schema_validator import raise_exception
+from ..base.schema_validator import raise_exception, wrap_handler
 from ..helpers import ResourceMatcher
 
 
@@ -11,7 +11,7 @@ class validate(DataStreamProcessor):
         super(validate, self).__init__()
         if on_error is None:
             on_error = raise_exception
-        self.on_error = on_error
+        self.on_error = wrap_handler(on_error)
         self.resources = resources
         if len(args) == 2:
             field, validator = args
@@ -40,7 +40,7 @@ class validate(DataStreamProcessor):
             res_name = rows.res.name
             for i, row in enumerate(rows):
                 if not row_validator(row):
-                    if not self.on_error(res_name, row, i, None):
+                    if not self.on_error(res_name, row, i, None, None):
                         continue
                 yield row
         return func

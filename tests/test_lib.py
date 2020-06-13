@@ -1146,6 +1146,15 @@ def test_validate():
             self.bad_row, self.bad_index = row, i
             return False
 
+    class on_error_fields():
+        def __init__(self):
+            self.bad_row, self.bad_index, self.bad_field = None, None, None
+
+        def __call__(self, name, row, i, e, field):
+            self.bad_row, self.bad_index = row, i
+            self.bad_field = field
+            return False
+
     # Schema validator
     handler = on_error()
     res, *_ = Flow(
@@ -1156,6 +1165,18 @@ def test_validate():
     assert len(res[0]) == 3
     assert handler.bad_row == {'a': 4, 'b': 'a'}
     assert handler.bad_index == 3
+
+    # Schema validator with fields
+    handler = on_error_fields()
+    res, *_ = Flow(
+        data,
+        set_type('b', type='integer', on_error=ignore),
+        validate(on_error=handler)
+    ).results()
+    assert len(res[0]) == 3
+    assert handler.bad_row == {'a': 4, 'b': 'a'}
+    assert handler.bad_index == 3
+    assert handler.bad_field.name == 'b'
 
     # Field validator
     handler = on_error()

@@ -35,10 +35,11 @@ def test_example_2():
 
 
 def country_population():
-    from xml.etree import ElementTree
+    from lxml import etree
     from urllib.request import urlopen
     page = urlopen('https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population').read()
-    tree = ElementTree.fromstring(page)
+    parser = etree.HTMLParser()
+    tree = etree.fromstring(page, parser=parser)
     tables = tree.findall('.//table')
     for table in tables:
         if 'wikitable' in table.attrib.get('class', ''):
