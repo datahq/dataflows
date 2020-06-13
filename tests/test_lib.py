@@ -1,6 +1,7 @@
 import pytest
 from dataflows import Flow
 
+
 data = [
     dict(x=1, y='a'),
     dict(x=2, y='b'),
