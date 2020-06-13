@@ -1,6 +1,7 @@
 import pytest
 from dataflows import Flow
 
+
 data = [
     dict(x=1, y='a'),
     dict(x=2, y='b'),
@@ -1533,6 +1534,33 @@ def test_join_row_number_format_string():
         {'city': 'paris', 'population': 2, 'comment': 'city with population in row 2'},
         {'city': 'london', 'population': 8, 'comment': 'city with population in row 1'},
         {'city': 'rome', 'population': 3, 'comment': 'city with population in row 3'},
+    ]]
+
+
+def test_join_preserve_source_fields_order():
+    from dataflows import load, join
+    flow = Flow(
+        load('data/cities_metadata.csv'),
+        load('data/cities.csv'),
+        join(
+            source_name='cities_metadata',
+            source_key='{id}',
+            target_name='cities',
+            target_key='{id}',
+            fields={'key1': {'name': 'key1'}, 'key2': {'name': 'key2'}}
+        ),
+    )
+    data, package, stats = flow.results()
+    assert package.descriptor['resources'][0]['schema']['fields'] == [
+        {'name': 'id', 'type': 'integer', 'format': 'default'},
+        {'name': 'city', 'type': 'string', 'format': 'default'},
+        {'name': 'key2', 'type': 'string', 'format': 'default'},
+        {'name': 'key1', 'type': 'string', 'format': 'default'}
+    ]
+    assert data == [[
+        {'id': 1, 'city': 'london', 'key1': 'val1', 'key2': 'val2'},
+        {'id': 2, 'city': 'paris', 'key1': 'val1', 'key2': 'val2'},
+        {'id': 3, 'city': 'rome', 'key1': 'val1', 'key2': 'val2'},
     ]]
 
 
