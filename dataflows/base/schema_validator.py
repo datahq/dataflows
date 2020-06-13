@@ -1,4 +1,4 @@
-from inspect import isfunction, signature
+from inspect import signature
 
 from datapackage import Resource
 from tableschema import Schema
