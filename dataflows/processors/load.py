@@ -302,7 +302,8 @@ class load(DataStreamProcessor):
                 it = self.limiter(it)
             yield it
 
-    def rename_duplicate_headers(self, duplicate_headers):
+    @staticmethod
+    def rename_duplicate_headers(duplicate_headers):
         counter = {}
         headers = []
         for header in duplicate_headers:

@@ -37,7 +37,7 @@ def delete_fields(fields, resources=None, regex=True):
                         new_fields.append(sf)
                 not_matched = [f for f in field_res if f.pattern not in matched]
                 if len(not_matched) > 0:
-                    print('WARNING: Failed to match these fields to delete {:r}'.format(not_matched))
+                    print('WARNING: Failed to match these fields to delete {!r}'.format(not_matched))
                 resource['schema']['fields'] = new_fields
                 new_field_names[resource['name']] = [f['name'] for f in new_fields]
         yield package.pkg
