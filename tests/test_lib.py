@@ -1762,11 +1762,20 @@ def test_conditional():
     result2, _, _ = Flow(
         data2, conditional(tester, Flow(add_field('d', 'integer', lambda r: r['a'])))
     ).results()
+    def duplicate_last_field(dp):
+        last_field = dp.descriptor['resources'][0]['schema']['fields'][-1]['name']
+        return Flow(add_field(last_field + '_1', 'integer', lambda r: r['a']))
+    result3, _, _ = Flow(
+        data1, conditional(tester, duplicate_last_field)
+    ).results()
     assert result1[0] == [
         dict(a=i, b=i, d=i) for i in range(3)
     ]
     assert result2[0] == [
         dict(a=i, c=i) for i in range(3)
+    ]
+    assert result3[0] == [
+        dict(a=i, b=i, b_1=i) for i in range(3)
     ]
 
 
