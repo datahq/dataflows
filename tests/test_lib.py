@@ -1801,3 +1801,22 @@ def test_finalizer():
 
     assert stats['processed'] == 10
     assert stats['detected'] == 10
+
+
+def test_update_stats():
+
+    stats1 =  dict(a=1)
+    stats2 =  dict(b=1)
+    data = [{'c': 1}, {'c': 2}]
+
+    from dataflows import update_stats, Flow
+
+    res, _, stats = Flow(
+        data,
+        update_stats(stats1),
+        update_stats(stats2),
+    ).results()
+
+    assert res == [data]
+    assert stats == {'a': 1, 'b': 1}
+
