@@ -1820,3 +1820,14 @@ def test_update_stats():
     assert res == [data]
     assert stats == {'a': 1, 'b': 1}
 
+
+def test_collect_errors():
+    from dataflows import load, collect_errors, Flow
+    res, dp, stats = Flow(
+        load('data/cities.csv', name='cities'),
+        collect_errors({'fields': [{'name': 'city', 'constraints': {'maxLength': 4}}]}),
+    ).results()
+    assert dp.get_resource('cities').descriptor.get('errors') == [
+        'Field "city" has constraint "maxLength" which is not satisfied for value "london"',
+        'Field "city" has constraint "maxLength" which is not satisfied for value "paris"'
+    ]
