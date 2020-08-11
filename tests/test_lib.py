@@ -1820,3 +1820,10 @@ def test_update_stats():
     assert res == [data]
     assert stats == {'a': 1, 'b': 1}
 
+
+def test_dump_to_zip():
+    from dataflows import Flow, dump_to_zip
+
+    zz = dump_to_zip('out/test_dump_to_zip.zip')
+    Flow([dict(a=1)], zz).process()
+    assert zz.out_file.closed
