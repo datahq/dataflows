@@ -1827,3 +1827,14 @@ def test_dump_to_zip():
     zz = dump_to_zip('out/test_dump_to_zip.zip')
     Flow([dict(a=1)], zz).process()
     assert zz.out_file.closed
+
+
+def test_validate_metadata_resource():
+    from dataflows import load, validate_metadata, Flow
+    res, dp, stats = Flow(
+        load('data/cities.csv', name='cities'),
+        validate_metadata({'type': 'object', 'required': ['some']}),
+    ).results()
+    assert dp.get_resource('cities').descriptor.get('errors') == [
+        '"\'some\' is a required property" at "" in metadata and at "required" in profile'
+    ]
