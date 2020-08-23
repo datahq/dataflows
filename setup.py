@@ -33,6 +33,7 @@ INSTALL_REQUIRES = [
     'tableschema-sql',
     'xmljson',
     'bitstring>=3',
+    'python-dateutil'
 ]
 SPEEDUP_REQUIRES = [
     'plyvel',

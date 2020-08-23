@@ -5,11 +5,10 @@ import isodate
 import logging
 import datetime
 from functools import partial
-
-
-DATE_FORMAT = '%Y-%m-%d'
-DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
-TIME_FORMAT = '%H:%M:%S'
+from dataflows.helpers.extended_json import (
+    DATETIME_F_FORMAT, DATE_F_FORMAT, TIME_F_FORMAT,
+    DATETIME_P_FORMAT, DATE_P_FORMAT, TIME_P_FORMAT,
+)
 
 
 def identity(x):
@@ -92,9 +91,9 @@ class CSVFormat(FileFormat):
     SERIALIZERS = {
         'array': json_dumps,
         'object': json_dumps,
-        'datetime': lambda d: d.strftime(DATETIME_FORMAT),
-        'date': lambda d: d.strftime(DATE_FORMAT),
-        'time': lambda d: d.strftime(TIME_FORMAT),
+        'datetime': lambda d: d.strftime(DATETIME_F_FORMAT),
+        'date': lambda d: d.strftime(DATE_F_FORMAT),
+        'time': lambda d: d.strftime(TIME_F_FORMAT),
         'duration': lambda d: isodate.duration_isoformat(d),
         'geopoint': lambda d: '{}, {}'.format(*d),
         'geojson': json.dumps,
@@ -110,13 +109,13 @@ class CSVFormat(FileFormat):
             'groupChar': ''
         },
         'date': {
-            'format': DATE_FORMAT
+            'format': DATE_P_FORMAT
         },
         'time': {
-            'format': TIME_FORMAT
+            'format': TIME_P_FORMAT
         },
         'datetime': {
-            'format': DATETIME_FORMAT
+            'format': DATETIME_P_FORMAT
         },
     }
 
@@ -156,9 +155,9 @@ class CSVFormat(FileFormat):
 class JSONFormat(FileFormat):
 
     SERIALIZERS = {
-        'datetime': lambda d: d.strftime(DATETIME_FORMAT),
-        'date': lambda d: d.strftime(DATE_FORMAT),
-        'time': lambda d: d.strftime(TIME_FORMAT),
+        'datetime': lambda d: d.strftime(DATETIME_F_FORMAT),
+        'date': lambda d: d.strftime(DATE_F_FORMAT),
+        'time': lambda d: d.strftime(TIME_F_FORMAT),
         'number': float,
         'duration': lambda d: isodate.duration_isoformat(d),
         'geopoint': lambda d: list(map(float, d)),
@@ -169,13 +168,13 @@ class JSONFormat(FileFormat):
 
     PYTHON_DIALECT = {
         'date': {
-            'format': DATE_FORMAT
+            'format': DATE_P_FORMAT
         },
         'time': {
-            'format': TIME_FORMAT
+            'format': TIME_P_FORMAT
         },
         'datetime': {
-            'format': DATETIME_FORMAT
+            'format': DATETIME_P_FORMAT
         },
     }
 

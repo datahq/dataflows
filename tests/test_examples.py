@@ -47,8 +47,8 @@ def country_population():
             for row in rows:
                 cells = row.findall('td')
                 if len(cells) > 3:
-                    name = cells[1].find('.//a').attrib.get('title')
-                    population = cells[2].text
+                    name = cells[0].find('.//a').attrib.get('title')
+                    population = cells[1].text
                     yield(dict(
                         name=name,
                         population=population

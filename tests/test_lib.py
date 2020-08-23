@@ -937,8 +937,8 @@ def test_load_dates_timezones():
     import shutil
 
     dates = [
-        datetime.now(),
-        datetime.now(timezone.utc).astimezone()
+        datetime.now().replace(microsecond=0),
+        datetime.now(timezone.utc).replace(microsecond=0).astimezone()
     ]
 
     shutil.rmtree('.checkpoints/test_load_dates_timezones', ignore_errors=True)
@@ -1112,6 +1112,28 @@ def test_stream_simple():
 
     assert results[0] == datas1
     assert results[1] == datas2
+
+
+def test_stream_bad_dates():
+    from dataflows import stream, unstream, set_type, dump_to_path
+    import datetime
+
+    datas1 = [
+        {'a': '0001/1/1'},
+    ]
+    Flow(
+        datas1,
+        set_type('a', type='date', format='%Y/%m/%d'),
+        stream(open('out/test_stream_bad_dates.stream', 'w'))
+    ).process()
+
+    results, dp, _ = Flow(
+        unstream(open('out/test_stream_bad_dates.stream')),
+        dump_to_path('out/test_stream_bad_dates')
+    ).results()
+
+    assert results[0][0]['a'] == datetime.date(1,1,1)
+
 
 
 def test_set_primary_key():
