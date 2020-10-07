@@ -5,12 +5,17 @@ import decimal
 import isodate
 
 # On some platforms, pre year 1000 dates are not formatted using 4 digits (which is later unparseable)
-if datetime.date(1, 1, 1).strftime('%04Y') == '4Y':
+try:
+    if datetime.date(1, 1, 1).strftime('%04Y') == '4Y':
+        DATE_F_FORMAT = '%Y-%m-%d'
+        DATETIME_F_FORMAT = '%Y-%m-%dT%H:%M:%S'
+    else:
+        DATE_F_FORMAT = '%04Y-%m-%d'
+        DATETIME_F_FORMAT = '%04Y-%m-%dT%H:%M:%S'
+except ValueError:
     DATE_F_FORMAT = '%Y-%m-%d'
     DATETIME_F_FORMAT = '%Y-%m-%dT%H:%M:%S'
-else:
-    DATE_F_FORMAT = '%04Y-%m-%d'
-    DATETIME_F_FORMAT = '%04Y-%m-%dT%H:%M:%S'
+
 DATE_FORMAT = DATE_F_FORMAT
 DATETIME_FORMAT = DATETIME_F_FORMAT
 TIME_FORMAT = '%H:%M:%S'
