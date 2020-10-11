@@ -24,7 +24,7 @@ INSTALL_REQUIRES = [
     'tabulator>=1.38.4',
     'datapackage>=1.5.0',
     'tableschema>=1.5',
-    'kvfile>=0.0.8',
+    'kvfile>=0.0.9',
     'click',
     'jinja2',
     'awesome-slugify',
