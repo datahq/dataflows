@@ -192,6 +192,44 @@ def test_unpivot():
     ]
 
 
+def test_unpivot_simple():
+    from dataflows import unpivot
+    up_data = [
+        dict(k='a', v1=1, v2=2, v3=3),
+        dict(k='b', v1=2, v2=4, v3=6),
+    ]
+
+    f = Flow(
+        up_data,
+        unpivot(
+            [
+                dict(
+                    name='v\d',
+                    keys=dict()
+                ),
+            ],
+            [],
+            dict(
+                name='v',
+                type='integer'
+            )
+        )
+    )
+    results, _, _ = f.results()
+    assert results[0] == [
+        dict(zip(['k', 'v'], r))
+        for r in
+        [
+            ['a', 1],
+            ['a', 2],
+            ['a', 3],
+            ['b', 2],
+            ['b', 4],
+            ['b', 6],
+        ]
+    ]
+
+
 def test_unpivot_any_resources():
     from dataflows import unpivot, validate
     data1 = [

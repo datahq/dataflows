@@ -57,7 +57,7 @@ def unpivot(unpivot_fields, extra_keys, extra_value, resources=None):
                             new_val = re.sub(
                                 u_field['name'], new_val, field_to_pivot['name'])
                         new_key_values[key] = new_val
-                        field_to_pivot['keys'] = new_key_values
+                    field_to_pivot['keys'] = new_key_values
                     config['unpivot_fields_without_regex'].append(field_to_pivot)
 
             config['fields_to_keep'] = [f['name'] for f in fields]
