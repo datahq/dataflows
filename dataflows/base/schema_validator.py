@@ -59,15 +59,15 @@ def schema_validator(resource, iterator,
     schema_fields = [f for f in schema.fields if f.name in field_names]
     for i, row in enumerate(iterator):
         field = None
-        try:
-            for field in schema_fields:
+        okay = True
+        for field in schema_fields:
+            try:
                 row[field.name] = field.cast_value(row.get(field.name))
-        except CastError as e:
-            if not on_error(resource['name'], row, i, e, field):
-                continue
-
-        yield row
-
+            except CastError as e:
+                if not on_error(resource['name'], row, i, e, field):
+                    okay = False
+        if okay:
+            yield row
 
 schema_validator.drop = drop
 schema_validator.ignore = ignore
