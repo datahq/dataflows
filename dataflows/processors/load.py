@@ -231,6 +231,10 @@ class load(DataStreamProcessor):
                 schema = Schema().infer(
                     stream.sample, headers=stream.headers,
                     confidence=1, guesser_cls=self.guesser)
+                # restore schema field names to original headers
+                for header, field in zip(stream.headers, schema['fields']):
+                    print(header, field)
+                    field['name'] = header
                 if self.override_schema:
                     schema.update(self.override_schema)
                 if self.override_fields:
