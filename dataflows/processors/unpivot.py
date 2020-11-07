@@ -20,7 +20,7 @@ def unpivot_rows(rows, fields_to_unpivot, fields_to_keep, extra_value):
             yield new_row
 
 
-def unpivot(unpivot_fields, extra_keys, extra_value, resources=None):
+def unpivot(unpivot_fields, extra_keys, extra_value, regex=True, resources=None):
 
     def func(package):
 
@@ -38,13 +38,22 @@ def unpivot(unpivot_fields, extra_keys, extra_value, resources=None):
             fields = schema.get('fields', [])
 
             for u_field in unpivot_fields:
-                field_name_re = re.compile(u_field['name'])
-                fields_to_pivot = list(
-                    filter(match_fields(field_name_re, True), fields)
-                )
-                fields = list(
-                    filter(match_fields(field_name_re, False), fields)
-                )
+                if regex:
+                    field_name_re = re.compile(u_field['name'])
+                    fields_to_pivot = list(
+                        filter(match_fields(field_name_re, True), fields)
+                    )
+                    fields = list(
+                        filter(match_fields(field_name_re, False), fields)
+                    )
+                else:
+                    field_name = u_field['name']
+                    fields_to_pivot = list(
+                        filter(lambda f: f['name'] == field_name, fields)
+                    )
+                    fields = list(
+                        filter(lambda f: f['name'] != field_name, fields)
+                    )
 
                 # handle with regex
                 config.setdefault('unpivot_fields_without_regex', [])
@@ -53,7 +62,7 @@ def unpivot(unpivot_fields, extra_keys, extra_value, resources=None):
                     new_key_values = {}
                     for key in original_key_values:
                         new_val = original_key_values[key]
-                        if isinstance(new_val, str):
+                        if regex and isinstance(new_val, str):
                             new_val = re.sub(
                                 u_field['name'], new_val, field_to_pivot['name'])
                         new_key_values[key] = new_val

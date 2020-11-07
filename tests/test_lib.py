@@ -146,6 +146,55 @@ def test_find_replace():
     assert y == ['Apple', 'Banana', 'Coconut']
 
 
+def test_unpivot_no_regex():
+    from dataflows import unpivot
+    data = [
+        dict([('[.]', i), ('[,+', str(i))]) for i in range(3)
+    ]
+    f = Flow(
+        data,
+        unpivot(
+            [
+                dict(
+                    name='[.]',
+                    keys=dict(
+                        field='x'
+                    )
+                ),
+                dict(
+                    name='[,+',
+                    keys=dict(
+                        field='y'
+                    )
+                ),
+            ],
+            [
+                dict(
+                    name='field',
+                    type='string'
+                )
+            ],
+            dict(
+                name='the-value',
+                type='any'
+            ), regex=False
+        )
+    )
+    results, _, _ = f.results()
+    assert results[0] == [
+        dict(zip(['field', 'the-value'], r))
+        for r in
+        [
+            ['x', 0],
+            ['y', '0'],            
+            ['x', 1],
+            ['y', '1'],
+            ['x', 2],
+            ['y', '2'],
+        ]
+    ]
+
+
 def test_unpivot():
     from dataflows import unpivot
     f = Flow(
@@ -190,7 +239,6 @@ def test_unpivot():
             ['y-value', 'c'],
         ]
     ]
-
 
 def test_unpivot_simple():
     from dataflows import unpivot

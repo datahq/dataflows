@@ -545,12 +545,12 @@ def sort_rows(key, resources=None, reverse=False):
 Unpivot a table - convert one row with multiple value columns to multiple rows with one value column
 
 ```python
-def unpivot(unpivot_fields, extra_keys, extra_value, resources=None):
+def unpivot(unpivot_fields, extra_keys, extra_value, regex=True, resources=None):
     pass
 ```
 
 - `unpivot_fields` - List of source field definitions, each definition is an object containing at least these properties:
-  - `name` - Either simply the name, or a regular expression matching the name of original field to unpivot.
+  - `name` - Either simply the name, or a regular expression matching the name of original field to unpivot (if `regex` is `True`)
   - `keys` - A Map between target field name and values for original field
     - Keys should be target field names from `extra_keys`
     - Values may be either simply the constant value to insert, or a regular expression matching the `name`.
@@ -560,6 +560,7 @@ def unpivot(unpivot_fields, extra_keys, extra_value, resources=None):
 - `extra_value` - Target field definition - an object containing at least these properties (unpivoted cell values will go here)
   - `name` - Name of the target field
   - `type` - Type of the target field
+- `regex` - Should regular expressions functionality be enabled (see `name`)
 - `resources`
   - A name of a resource to operate on
   - A regular expression matching resource names
