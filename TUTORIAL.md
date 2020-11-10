@@ -114,28 +114,29 @@ Data sources can be generators and not just lists or files. Let's take as an exa
 ```python
 from dataflows import Flow, printer
 
-from xml.etree import ElementTree
+from lxml import etree
 from urllib.request import urlopen
-
 
 def country_population():
     """Get from Wikipedia the population count for each country."""
     # Read the Wikipedia page and parse it using etree
-    page = urlopen(
-        "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population"
-    ).read()
-    tree = ElementTree.fromstring(page)
+    page = urlopen('https://en.wikipedia.org/w/index.php?title=List_of_countries_and_dependencies_by_population&oldid=987469839').read()
+    parser = etree.XMLParser(recover=True)
+    tree = etree.fromstring(page, parser)
     # Iterate on all tables, rows and cells
-    for table in tree.findall(".//table"):
-        if "wikitable" in table.attrib.get("class", ""):
-            for row in table.find("tbody").findall("tr"):
-                cells = row.findall("td")
+    for table in tree.findall('.//table'):
+        if 'wikitable' in table.attrib.get('class', ''):
+            for row in table.find('tbody').findall('tr'):
+                cells = row.findall('td')
                 if len(cells) > 3:
                     # If a matching row is found...
-                    name = cells[1].find(".//a").attrib.get("title")
-                    population = cells[2].text
+                    name = cells[0].find('.//a').attrib.get('title').replace("Demographics of","")
+                    population = cells[1].text
                     # ... yield a row with the information
-                    yield dict(name=name, population=population)
+                    yield dict(
+                        name=name,
+                        population=population
+                    )
 
 Flow(
       country_population(),
