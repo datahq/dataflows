@@ -9,8 +9,7 @@ from tableschema.exceptions import CastError
 from . import exceptions
 from .datastream import DataStream
 from .resource_wrapper import ResourceWrapper
-from .schema_validator import schema_validator
-
+from .schema_validator import schema_validator, raise_exception
 
 class LazyIterator:
 
@@ -96,25 +95,30 @@ class DataStreamProcessor:
             raise error from cause
         raise cause
 
-    def process(self):
+    def safe_process(self, on_error=None):
+        results = []
         try:
             ds = self._process()
             for res in ds.res_iter:
-                collections.deque(res, maxlen=0)
+                if on_error is not None:
+                    results.append(list(
+                        schema_validator(res.res, res, on_error=on_error)
+                    ))
+                else:
+                    collections.deque(res, maxlen=0)
         except CastError as e:
             for err in e.errors:
                 logging.error('%s', err)
         except Exception as exception:
             self.raise_exception(exception)
+        return ds, results
+
+    def process(self):
+        ds, _ = self.safe_process()
         return ds.dp, ds.merge_stats()
 
     def results(self, on_error=None):
-        try:
-            ds = self._process()
-            results = [
-                list(schema_validator(res.res, res, on_error=on_error))
-                for res in ds.res_iter
-            ]
-        except Exception as exception:
-            self.raise_exception(exception)
+        if on_error is None:
+            on_error = raise_exception
+        ds, results = self.safe_process(on_error=on_error)
         return results, ds.dp, ds.merge_stats()

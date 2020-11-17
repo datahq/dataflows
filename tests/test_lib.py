@@ -1911,6 +1911,21 @@ def test_finalizer():
     assert stats['detected'] == 10
 
 
+def test_finalizer_with_stats():
+    from dataflows import Flow, finalizer, update_stats
+
+    def finalize(stats={}):
+        assert stats['processed'] == 100
+        assert stats['detected'] == 200
+
+    Flow(
+        (dict(a=1) for i in range(10)),
+        update_stats(dict(processed=100)),
+        update_stats(dict(detected=200)),
+        finalizer(finalize),
+    ).process()
+
+
 def test_update_stats():
 
     stats1 =  dict(a=1)

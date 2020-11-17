@@ -266,7 +266,8 @@ def finalizer(callback):
     pass
 ```
 
-- `callback` - a callback function which the processor will call once all data finished passing through it
+- `callback` - a callback function which the processor will call once all data finished passing through it.
+               In case `callback` has a `stats` parameter, it will also receive the stats collected up till this point.
 
 Example - show a message when done loading a file
 
