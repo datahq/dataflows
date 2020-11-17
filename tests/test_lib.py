@@ -1914,9 +1914,12 @@ def test_finalizer():
 def test_finalizer_with_stats():
     from dataflows import Flow, finalizer, update_stats
 
+    visited = dict(visited=False)
+
     def finalize(stats={}):
         assert stats['processed'] == 100
         assert stats['detected'] == 200
+        visited['visited'] = True
 
     Flow(
         (dict(a=1) for i in range(10)),
@@ -1925,6 +1928,27 @@ def test_finalizer_with_stats():
         finalizer(finalize),
     ).process()
 
+    assert visited['visited']
+
+def test_finalizer_not_last():
+    from dataflows import Flow, finalizer, update_stats, printer
+
+    visited = dict(visited=False)
+
+    def finalize(stats={}):
+        assert stats['processed'] == 100
+        assert stats['detected'] == 200
+        visited['visited'] = True
+
+    Flow(
+        (dict(a=1) for i in range(10)),
+        update_stats(dict(processed=100)),
+        update_stats(dict(detected=200)),
+        finalizer(finalize),
+        printer()
+    ).process()
+
+    assert visited['visited']
 
 def test_update_stats():
 
