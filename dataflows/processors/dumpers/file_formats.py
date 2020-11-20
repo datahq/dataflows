@@ -161,6 +161,7 @@ class JSONFormat(FileFormat):
         'geopoint': lambda d: list(map(float, d)),
         'yearmonth': lambda d: '{:04d}-{:02d}'.format(*d),
     }
+
     NULL_VALUE = None
 
     PYTHON_DIALECT = {
