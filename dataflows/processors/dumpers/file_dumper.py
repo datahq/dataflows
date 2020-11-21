@@ -6,7 +6,7 @@ import hashlib
 from datapackage import Resource
 
 from .dumper_base import DumperBase
-from .file_formats import CSVFormat, JSONFormat
+from .file_formats import CSVFormat, JSONFormat, GeoJSONFormat
 
 
 class FileDumper(DumperBase):
@@ -34,7 +34,8 @@ class FileDumper(DumperBase):
                 file_format = file_format[1:]
             file_formatter = {
                 'csv': CSVFormat,
-                'json': JSONFormat
+                'json': JSONFormat,
+                'geojson': GeoJSONFormat
             }.get(file_format)
             if file_format is not None:
                 self.file_formatters[resource.name] = file_formatter
@@ -72,9 +73,9 @@ class FileDumper(DumperBase):
     def write_file_to_output(self, filename, path):
         raise NotImplementedError()
 
-    def rows_processor(self, resource, writer, temp_file):
+    def rows_processor(self, resource, writer, temp_file, schema):
         for row in resource:
-            writer.write_row(row)
+            writer.write_row(row, schema)
             yield row
         writer.finalize_file()
 
@@ -114,7 +115,8 @@ class FileDumper(DumperBase):
 
             return self.rows_processor(resource,
                                        writer,
-                                       temp_file)
+                                       temp_file,
+                                       schema)
         else:
             return resource
 
