@@ -70,7 +70,7 @@ class FileFormat():
     def write_transformed_row(self, *_):
         raise NotImplementedError()
 
-    def write_row(self, row):
+    def write_row(self, row, schema):
         transformed_row = self.__transform_row(row)
         self.write_transformed_row(transformed_row)
 
@@ -201,3 +201,36 @@ class JSONFormat(FileFormat):
 
     def finalize_file(self):
         self.writer.write(']')
+
+
+class GeoJSONFormat(JSONFormat):
+    def __init__(self, file, schema, **options):
+        writer = file
+        writer.write('{"type": "FeatureCollection","features":')
+        writer.__first = True
+        super(GeoJSONFormat, self).__init__(writer, schema, **options)
+
+
+    def __transform_row(self, row, schema):
+        try:
+            geometry = {}
+            for k, v in row.items():
+                if schema.get_field(k).type == "geopoint":
+                    geometry = {"type": "Point",
+                                "coordinates" : self._FileFormat__transform_value(v, self.fields[k])}
+        except Exception:
+            logging.exception('Missing geopoint in row %r', row)
+            raise
+        try:
+            properties = dict((k, self._FileFormat__transform_value(v, self.fields[k]))
+                        for k, v in row.items() if schema.get_field(k).type != "geopoint")
+            return {"geometry": geometry, "type":"Feature", "properties":properties}
+        except Exception:
+            logging.exception('Failed to transform row %r', row)
+            raise
+
+    def finalize_file(self):
+        self.writer.write(']}')
+
+
+
