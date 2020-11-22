@@ -24,7 +24,7 @@ class FileFormat():
     PYTHON_DIALECT = {}
     NULL_VALUE = None
     SERIALIZERS = {}
-    DEFAULT_SERIALIZER = str
+    DEFAULT_SERIALIZER = identity
 
     def __init__(self, writer, schema, temporal_format_property=None):
 
@@ -71,7 +71,7 @@ class FileFormat():
     def write_transformed_row(self, *_):
         raise NotImplementedError()
 
-    def write_row(self, row, schema):
+    def write_row(self, row):
         transformed_row = self.__transform_row(row)
         self.write_transformed_row(transformed_row)
 
@@ -212,24 +212,28 @@ class GeoJSONFormat(JSONFormat):
         writer.__first = True
         super(GeoJSONFormat, self).__init__(writer, schema, **options)
 
-
-    def __transform_row(self, row, schema):
+    def write_row(self, row):
         try:
             geometry = {}
             for k, v in row.items():
-                if schema.get_field(k).type == "geopoint":
+                if self.fields[k].type == "geopoint":
                     geometry = {"type": "Point",
                                 "coordinates" : self._FileFormat__transform_value(v, self.fields[k])}
+                    break
+                elif self.fields[k].type == "geojson":
+                    geometry = self._FileFormat__transform_value(v, self.fields[k])
+                    break
         except Exception:
-            logging.exception('Missing geopoint in row %r', row)
+            logging.exception('Missing point geometry in row %r', row)
             raise
         try:
             properties = dict((k, self._FileFormat__transform_value(v, self.fields[k]))
-                        for k, v in row.items() if schema.get_field(k).type != "geopoint")
-            return {"geometry": geometry, "type":"Feature", "properties":properties}
+                        for k, v in row.items() if self.fields[k].type != "geopoint")
+            transformed_row = {"geometry": geometry, "type":"Feature", "properties":properties}
         except Exception:
             logging.exception('Failed to transform row %r', row)
             raise
+        self.write_transformed_row(transformed_row)
 
     def finalize_file(self):
         self.writer.write(']}')

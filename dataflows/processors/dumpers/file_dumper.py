@@ -73,9 +73,9 @@ class FileDumper(DumperBase):
     def write_file_to_output(self, filename, path):
         raise NotImplementedError()
 
-    def rows_processor(self, resource, writer, temp_file, schema):
+    def rows_processor(self, resource, writer, temp_file):
         for row in resource:
-            writer.write_row(row, schema)
+            writer.write_row(row)
             yield row
         writer.finalize_file()
 
@@ -115,8 +115,7 @@ class FileDumper(DumperBase):
 
             return self.rows_processor(resource,
                                        writer,
-                                       temp_file,
-                                       schema)
+                                       temp_file)
         else:
             return resource
 
