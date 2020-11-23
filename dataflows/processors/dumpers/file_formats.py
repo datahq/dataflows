@@ -229,7 +229,7 @@ class GeoJSONFormat(JSONFormat):
             logging.exception('Missing point geometry in row %r', transformed_row)
             raise
         properties = dict((k, self._FileFormat__transform_value(v, self.fields[k]))
-                        for k, v in transformed_row.items() if self.fields[k].type != "geopoint")
+                        for k, v in transformed_row.items() if self.fields[k].type not in ["geopoint","geojson"])
         feature = {"geometry": geometry, "type": "Feature", "properties": properties}
    
         self.writer.write(json.dumps(feature, sort_keys=True, ensure_ascii=True))
