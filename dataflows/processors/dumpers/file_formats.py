@@ -24,9 +24,8 @@ class FileFormat():
     PYTHON_DIALECT = {}
     NULL_VALUE = None
     SERIALIZERS = {}
-    DEFAULT_SERIALIZER = identity
 
-    def __init__(self, writer, schema, temporal_format_property=None):
+    def __init__(self, writer, schema, temporal_format_property=None, default_serializer=str):
 
         # Set properties
         self.writer = writer
@@ -37,7 +36,7 @@ class FileFormat():
 
         # Set fields' serializers
         for field in schema.fields:
-            serializer = self.SERIALIZERS.get(field.type, self.DEFAULT_SERIALIZER)
+            serializer = self.SERIALIZERS.get(field.type, default_serializer)
             if self.temporal_format_property:
                 if field.type in ['datetime', 'date', 'time']:
                     format = field.descriptor.get(self.temporal_format_property, None)
@@ -100,7 +99,6 @@ class CSVFormat(FileFormat):
         'year': lambda d: '{:04d}'.format(d),
         'yearmonth': lambda d: '{:04d}-{:02d}'.format(*d),
     }
-    DEFAULT_SERIALIZER = str
     NULL_VALUE = ''
 
     PYTHON_DIALECT = {
@@ -163,7 +161,7 @@ class JSONFormat(FileFormat):
         'geopoint': lambda d: list(map(float, d)),
         'yearmonth': lambda d: '{:04d}-{:02d}'.format(*d),
     }
-    DEFAULT_SERIALIZER = str
+
     NULL_VALUE = None
 
     PYTHON_DIALECT = {
@@ -182,7 +180,7 @@ class JSONFormat(FileFormat):
         writer = file
         writer.write('[')
         writer.__first = True
-        super(JSONFormat, self).__init__(writer, schema, **options)
+        super(JSONFormat, self).__init__(writer, schema, default_serializer=identity, **options)
 
     @classmethod
     def prepare_resource(cls, resource):
