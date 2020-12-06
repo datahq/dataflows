@@ -468,7 +468,7 @@ Sets a field's data type and type options and validates its data based on its ne
 By default, this processor modifies the last resource in the package.
 
 ```python
-def set_type(name, resources=-1, regex=True, on_error=None, **options):
+def set_type(name, resources=-1, regex=True, on_error=None, transform=None, **options):
     pass
 ```
 
@@ -480,6 +480,10 @@ def set_type(name, resources=-1, regex=True, on_error=None, **options):
   - `None` indicates operation should be done on all resources
   - The index of the resource in the package
 - `regex` - if set to `False` field names will be interpreted as strings not as regular expressions (`True` by default)
+- `transform` - callable to be used to transform the value while setting its type.
+
+  This function should have the signature `func(value, field_name=None, row=None)` and return the transformed value.
+
 - `on_error` - callback function to be called when a validation error occurs.
 
   Function can have the signature

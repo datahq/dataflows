@@ -6,7 +6,7 @@ from .. import DataStreamProcessor, schema_validator
 
 class set_type(DataStreamProcessor):
 
-    def __init__(self, name, resources=-1, regex=True, on_error=None, **options):
+    def __init__(self, name, resources=-1, regex=True, on_error=None, transform=None, **options):
         super(set_type, self).__init__()
         if not regex:
             name = re.escape(name)
@@ -15,12 +15,22 @@ class set_type(DataStreamProcessor):
         self.resources = resources
         self.field_names = []
         self.on_error = on_error
+        self.transform = transform
+
+    def transformer(self, rows):
+        for row in rows:
+            for field_name in self.field_names:
+                row[field_name] = self.transform(row.get(field_name), field_name=field_name, row=row)
+            yield row
 
     def process_resources(self, resources):
         for res in resources:
             if self.matcher.match(res.res.name):
                 if len(self.field_names) > 0:
-                    yield schema_validator(res.res, res,
+                    it = res
+                    if self.transform is not None:
+                        it = self.transformer(it)
+                    yield schema_validator(res.res, it,
                                            field_names=self.field_names,
                                            on_error=self.on_error)
                 else:

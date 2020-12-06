@@ -963,6 +963,31 @@ def test_set_type_errors():
         results, *_ = f.results()
     assert isinstance(excinfo.value.cause, ValidationError)
 
+def test_set_type_transform():
+    from dataflows import Flow, set_type, validate, exceptions
+
+    data = [
+        dict(a=i) for i in range(5)
+    ]
+    
+    with pytest.raises(exceptions.ProcessorError):
+        Flow(
+            data,
+            set_type('a', type='integer'),
+            validate(),
+            set_type('a', type='string'),
+            validate(),
+        ).process()
+
+    r = Flow(
+        data,
+        set_type('a', type='integer'),
+        validate(),
+        set_type('a', type='string', transform=lambda v, **_: str(v)),
+        validate(),
+    ).results()[0][0][0]
+    assert r['a'] == '0'
+
 
 def test_dump_to_path_use_titles():
     from dataflows import Flow, dump_to_path, set_type

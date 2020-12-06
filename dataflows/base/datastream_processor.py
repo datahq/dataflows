@@ -11,6 +11,7 @@ from .datastream import DataStream
 from .resource_wrapper import ResourceWrapper
 from .schema_validator import schema_validator, raise_exception
 
+
 class LazyIterator:
 
     def __init__(self, get_iterator):
