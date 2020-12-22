@@ -177,10 +177,12 @@ class JSONFormat(FileFormat):
     }
 
     def __init__(self, file, schema, **options):
-        writer = file
-        writer.write('[')
-        writer.__first = True
-        super(JSONFormat, self).__init__(writer, schema, default_serializer=identity, **options)
+        self.initialize_file(file)
+        super(JSONFormat, self).__init__(file, schema, default_serializer=identity, **options)
+
+    def initialize_file(self, file):
+        file.write('[')
+        file.__first = True
 
     @classmethod
     def prepare_resource(cls, resource):
@@ -204,33 +206,35 @@ class JSONFormat(FileFormat):
 
 
 class GeoJSONFormat(JSONFormat):
-    def __init__(self, file, schema, **options):
-        writer = file
-        writer.write('{"type": "FeatureCollection","features":')
-        writer.__first = True
-        super(GeoJSONFormat, self).__init__(writer, schema, **options)
+
+    def initialize_file(self, file):
+        file.write('{"type": "FeatureCollection","features":')
+        super(GeoJSONFormat, self).initialize_file(file)
 
     def write_transformed_row(self, transformed_row):
-        if not self.writer.__first:
-            self.writer.write(',')
-        else:
-            self.writer.__first = False
-        properties = {}
+        properties = dict()
         for k, v in transformed_row.items():
             if self.fields[k].type == "geopoint":
-                geometry = {"type": "Point",
-                            "coordinates" : v}
+                geometry = dict(
+                    type='Point',
+                    coordinates=v
+                )
                 break
             elif self.fields[k].type == "geojson":
                 geometry = v
                 break
             else:
-                properties[k] =  self._FileFormat__transform_value(v, self.fields[k])
-        feature = {"geometry": geometry, "type": "Feature", "properties": properties}
-        self.writer.write(json.dumps(feature, sort_keys=True, ensure_ascii=True))
+                properties[k] = v
+        feature = dict(
+            geometry=geometry,
+            type='Feature',
+            properties=properties
+        )
+        super(GeoJSONFormat, self).write_transformed_row(feature)
 
     def finalize_file(self):
-        self.writer.write(']}')
+        super(GeoJSONFormat, self).finalize_file()
+        self.writer.write('}')
 
 
 

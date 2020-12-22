@@ -2000,11 +2000,11 @@ def test_dump_to_zip():
     Flow([dict(a=1)], zz).process()
     assert zz.out_file.closed
 
-def test_geopoints():
+def test_dump_to_geojson():
     from dataflows import Flow, dump_to_path, load, add_computed_field, delete_fields
     Flow(
         load('data/cities_location.csv'),
         add_computed_field(target=dict(name='Location', type='geopoint'), operation='format', with_='{lat}, {long}'),
         delete_fields(['lat', 'long']),
-        dump_to_path(out_path="out/cities.json", force_format=True, format="geojson"),
+        dump_to_path(out_path='out', format='geojson'),
     ).process()
