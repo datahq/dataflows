@@ -161,6 +161,7 @@ class JSONFormat(FileFormat):
         'geopoint': lambda d: list(map(float, d)),
         'yearmonth': lambda d: '{:04d}-{:02d}'.format(*d),
     }
+
     NULL_VALUE = None
 
     PYTHON_DIALECT = {
@@ -176,10 +177,12 @@ class JSONFormat(FileFormat):
     }
 
     def __init__(self, file, schema, **options):
-        writer = file
-        writer.write('[')
-        writer.__first = True
-        super(JSONFormat, self).__init__(writer, schema, default_serializer=identity, **options)
+        self.initialize_file(file)
+        super(JSONFormat, self).__init__(file, schema, default_serializer=identity, **options)
+
+    def initialize_file(self, file):
+        file.write('[')
+        file.__first = True
 
     @classmethod
     def prepare_resource(cls, resource):
@@ -200,3 +203,35 @@ class JSONFormat(FileFormat):
 
     def finalize_file(self):
         self.writer.write(']')
+
+
+class GeoJSONFormat(JSONFormat):
+
+    def initialize_file(self, file):
+        file.write('{"type": "FeatureCollection","features":')
+        super(GeoJSONFormat, self).initialize_file(file)
+
+    def write_transformed_row(self, transformed_row):
+        properties = dict()
+        for k, v in transformed_row.items():
+            if self.fields[k].type == "geopoint":
+                geometry = dict(
+                    type='Point',
+                    coordinates=v
+                )
+                break
+            elif self.fields[k].type == "geojson":
+                geometry = v
+                break
+            else:
+                properties[k] = v
+        feature = dict(
+            geometry=geometry,
+            type='Feature',
+            properties=properties
+        )
+        super(GeoJSONFormat, self).write_transformed_row(feature)
+
+    def finalize_file(self):
+        super(GeoJSONFormat, self).finalize_file()
+        self.writer.write('}')

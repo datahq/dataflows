@@ -6,7 +6,7 @@ import hashlib
 from datapackage import Resource
 
 from .dumper_base import DumperBase
-from .file_formats import CSVFormat, JSONFormat
+from .file_formats import CSVFormat, JSONFormat, GeoJSONFormat
 
 
 class FileDumper(DumperBase):
@@ -34,7 +34,8 @@ class FileDumper(DumperBase):
                 file_format = file_format[1:]
             file_formatter = {
                 'csv': CSVFormat,
-                'json': JSONFormat
+                'json': JSONFormat,
+                'geojson': GeoJSONFormat
             }.get(file_format)
             if file_format is not None:
                 self.file_formatters[resource.name] = file_formatter
