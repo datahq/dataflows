@@ -1,6 +1,5 @@
 from inspect import signature
 
-from dataflows.base.schema_validator import wrap_handler
 import re
 
 from ..helpers.resource_matcher import ResourceMatcher
@@ -24,8 +23,9 @@ class set_type(DataStreamProcessor):
         assert callable(transform)
         try:
             sig = signature(transform).parameters
-        except:
+        except Exception:
             sig = set()
+
         def func(v, field_name=None, row=None):
             kw = {}
             if 'row' in sig:
