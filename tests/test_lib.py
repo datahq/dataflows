@@ -991,10 +991,28 @@ def test_set_type_transform():
         data,
         set_type('a', type='integer'),
         validate(),
-        set_type('a', type='string', transform=lambda v, **_: str(v)),
+        set_type('a', type='string', transform=str),
         validate(),
     ).results()[0][0][0]
     assert r['a'] == '0'
+
+    r = Flow(
+        data,
+        set_type('a', type='integer'),
+        validate(),
+        set_type('a', type='string', transform=lambda v: str(v)),
+        validate(),
+    ).results()[0][0][0]
+    assert r['a'] == '0'
+
+    r = Flow(
+        data,
+        set_type('a', type='integer'),
+        validate(),
+        set_type('a', type='string', transform=lambda v, field_name: field_name),
+        validate(),
+    ).results()[0][0][0]
+    assert r['a'] == 'a'
 
 
 def test_dump_to_path_use_titles():

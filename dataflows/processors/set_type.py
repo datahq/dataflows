@@ -1,3 +1,6 @@
+from inspect import signature
+
+from dataflows.base.schema_validator import wrap_handler
 import re
 
 from ..helpers.resource_matcher import ResourceMatcher
@@ -15,7 +18,22 @@ class set_type(DataStreamProcessor):
         self.resources = resources
         self.field_names = []
         self.on_error = on_error
-        self.transform = transform
+        self.transform = self.wrap_transformer(transform) if transform else None
+
+    def wrap_transformer(self, transform):
+        assert callable(transform)
+        try:
+            sig = signature(transform).parameters
+        except:
+            sig = set()
+        def func(v, field_name=None, row=None):
+            kw = {}
+            if 'row' in sig:
+                kw['row'] = row
+            if 'field_name' in sig:
+                kw['field_name'] = field_name
+            return transform(v, **kw)
+        return func
 
     def transformer(self, rows):
         for row in rows:
