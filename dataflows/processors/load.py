@@ -9,7 +9,7 @@ from tabulator.helpers import reset_stream
 from tableschema.schema import Schema
 from .. import DataStreamProcessor
 from ..base.exceptions import SourceLoadError
-from ..base.schema_validator import schema_validator, ignore, drop, raise_exception
+from ..base.schema_validator import schema_validator, ignore, drop, raise_exception, clear
 from ..helpers.resource_matcher import ResourceMatcher
 
 
@@ -105,6 +105,7 @@ class load(DataStreamProcessor):
     ERRORS_IGNORE = ignore
     ERRORS_DROP = drop
     ERRORS_RAISE = raise_exception
+    ERRORS_CLEAR = raise_exception
 
     def __init__(self, load_source, name=None, resources=None, strip=True, limit_rows=None,
                  infer_strategy=None, cast_strategy=None,

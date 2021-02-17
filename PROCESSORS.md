@@ -496,6 +496,7 @@ def set_type(name, resources=-1, regex=True, on_error=None, transform=None, **op
   - `dataflows.base.schema_validator.raise_exception` - the default behaviour, will raise a `dataflows.ValidationError` exception.
   - `dataflows.base.schema_validator.drop` - drop invalid rows
   - `dataflows.base.schema_validator.ignore` - ignore all errors
+  - `dataflows.base.schema_validator.clear` - clear invalid fields to None
 - `options` - options to set for the field. Most common ones would be:
   - `type` - set the data type (e.g. `string`, `integer`, `number` etc.)
   - `format` - e.g. for date fields

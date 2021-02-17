@@ -32,6 +32,14 @@ def drop(res_name, row, i, e):
     return False
 
 
+def clear(res_name, row, i, e, field):
+    if field is not None:
+        row[field.name] = None
+        return True
+    else:
+        return False
+
+
 def wrap_handler(on_error):
     assert callable(on_error)
     if len(list(signature(on_error).parameters)) > 4:
@@ -72,4 +80,5 @@ def schema_validator(resource, iterator,
 
 schema_validator.drop = drop
 schema_validator.ignore = ignore
+schema_validator.clear = clear
 schema_validator.raise_exception = raise_exception

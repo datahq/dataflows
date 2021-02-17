@@ -923,7 +923,7 @@ def test_set_type_resources():
 
 def test_set_type_errors():
     from dataflows import Flow, set_type, ValidationError, exceptions
-    from dataflows.base.schema_validator import ignore, drop, raise_exception
+    from dataflows.base.schema_validator import ignore, drop, raise_exception, clear
 
     data = [
         {'a': 1, 'b': 1},
@@ -945,6 +945,14 @@ def test_set_type_errors():
     )
     results, *_ = f.results(on_error=ignore)
     assert results[0] == data[:4]
+    
+    f = Flow(
+        data,
+        set_type('b', type='integer', on_error=clear),
+    )
+    results, *_ = f.results(on_error=ignore)
+    assert results[0][:3] == data[:3]
+    assert results[0][3] == dict(a=4, b=None)
 
     f = Flow(
         data,
