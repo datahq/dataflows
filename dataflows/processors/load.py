@@ -105,7 +105,7 @@ class load(DataStreamProcessor):
     ERRORS_IGNORE = ignore
     ERRORS_DROP = drop
     ERRORS_RAISE = raise_exception
-    ERRORS_CLEAR = raise_exception
+    ERRORS_CLEAR = clear
 
     def __init__(self, load_source, name=None, resources=None, strip=True, limit_rows=None,
                  infer_strategy=None, cast_strategy=None,
