@@ -4,6 +4,7 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 
 ### Load and Save Data
 - **load** - Loads data from various source types (local files, remote URLS, Google Spreadsheets, databases...)
+- **sources** - Combines efficiently data loading from multiple sources
 - **printer** - Just prints whatever it sees. Good for debugging.
 
 - **dump_to_path** - Store the results to a specified path on disk, in a valid datapackage
@@ -96,6 +97,16 @@ Some deprecated options:
 - `validate` - Attempt to cast data to the inferred data-types.
     (equivalent to `cast_strategy = CAST_WITH_SCHEMA, on_error = raise_exception`)
 
+
+#### sources
+Combines efficiently data loading from multiple sources
+
+```python
+def sources(*data_sources):
+    pass
+```
+
+- `data_sources` - a list of iterables, `load` calls, or generators. These will be efficiently combined into multiple resources in the output stream.
 
 #### printer
 Just prints whatever it sees. Good for debugging.

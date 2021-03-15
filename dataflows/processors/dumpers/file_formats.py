@@ -1,6 +1,6 @@
 import csv
 import json
-import os
+from pathlib import Path
 import isodate
 import logging
 import datetime
@@ -131,8 +131,7 @@ class CSVFormat(FileFormat):
     def prepare_resource(cls, resource):
         descriptor = resource.descriptor
         descriptor['encoding'] = 'utf-8'
-        basename, _ = os.path.splitext(descriptor['path'])
-        descriptor['path'] = basename + '.csv'
+        descriptor['path'] = str(Path(descriptor['path']).with_suffix('.csv'))
         descriptor['format'] = 'csv'
         descriptor['dialect'] = dict(
             lineTerminator='\r\n',
@@ -188,8 +187,7 @@ class JSONFormat(FileFormat):
     def prepare_resource(cls, resource):
         descriptor = resource.descriptor
         descriptor['encoding'] = 'utf-8'
-        basename, _ = os.path.splitext(resource.source)
-        descriptor['path'] = basename + '.json'
+        descriptor['path'] = str(Path(descriptor['path']).with_suffix('.csv'))
         descriptor['format'] = 'json'
         descriptor['mediatype'] = 'text/json'
         super(JSONFormat, cls).prepare_resource(resource)

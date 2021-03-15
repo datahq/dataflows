@@ -19,6 +19,7 @@ from .join import join, join_self, join_with_self
 from .select_fields import select_fields
 from .set_primary_key import set_primary_key
 from .sort_rows import sort_rows
+from .sources import sources
 from .stream import stream
 from .unpivot import unpivot
 from .unstream import unstream

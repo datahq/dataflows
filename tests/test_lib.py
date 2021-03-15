@@ -252,7 +252,7 @@ def test_unpivot_simple():
         unpivot(
             [
                 dict(
-                    name='v\d',
+                    name=r'v\d',
                     keys=dict()
                 ),
             ],
@@ -866,6 +866,54 @@ def test_load_from_checkpoint():
     assert Flow(
         checkpoint('test_load_from_checkpoint')
     ).results()[0] == [[{'foo': 'bar'}]]
+
+def test_sources_iterables():
+    from dataflows import Flow, sources
+
+    iterables = [[dict(x=a, y=i) for i in range(3)] for a in ['a', 'b', 'c']]
+    res, dp, _ = Flow(
+        sources(*iterables)
+    ).results()
+    assert len(dp.resources)==3
+    assert res == iterables
+
+def test_sources_iterables_previous():
+    from dataflows import Flow, sources
+
+    previous = [[dict(x=a, y=i) for i in range(3)] for a in ['d', 'e', 'f']]
+    iterables = [[dict(x=a, y=i) for i in range(3)] for a in ['a', 'b', 'c']]
+    res, dp, _ = Flow(
+        *previous,
+        sources(*iterables)
+    ).results()
+    assert len(dp.resources)==6
+    assert res == previous + iterables
+
+def test_sources_load():
+    from dataflows import Flow, sources, load
+
+    iterables = [[dict(x=a, y=i) for i in range(3)] for a in ['a', 'b', 'c']]
+    previous = [[dict(x=a, y=i) for i in range(3)] for a in ['d', 'e', 'f']]
+    expected = [
+        {'age': '18', 'name': 'john'},
+        {'age': '16', 'name': 'paul'},
+        {'age': '17', 'name': 'george'},
+        {'age': '22', 'name': 'ringo'},
+    ]
+
+    flow = Flow(
+        sources(
+            *previous,
+            load(
+                'data/beatles_age.json',
+                infer_strategy='strings',
+            ),
+            *iterables
+        )
+    )
+    res, dp, _ = flow.results()
+    assert len(dp.resources)==7
+    assert res == previous + [expected] + iterables
 
 
 def test_update_resource():
