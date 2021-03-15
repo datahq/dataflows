@@ -2,6 +2,7 @@ import os
 import json
 import tempfile
 import hashlib
+from dataflows.base.resource_wrapper import ResourceWrapper
 
 from datapackage import Resource
 
@@ -104,7 +105,7 @@ class FileDumper(DumperBase):
         self.write_file_to_output(filename, resource.res.source)
         os.unlink(filename)
 
-    def process_resource(self, resource):
+    def process_resource(self, resource: ResourceWrapper):
         if resource.res.name in self.file_formatters:
             schema = resource.res.schema
 

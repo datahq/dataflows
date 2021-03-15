@@ -115,6 +115,10 @@ class CSVFormat(FileFormat):
         'datetime': {
             'format': DATETIME_P_FORMAT
         },
+        'boolean': {
+            'trueValues': ['True'],
+            'falseValues': ['False']
+        }
     }
 
     def __init__(self, file, schema, use_titles=False, **options):
@@ -187,9 +191,10 @@ class JSONFormat(FileFormat):
     def prepare_resource(cls, resource):
         descriptor = resource.descriptor
         descriptor['encoding'] = 'utf-8'
-        descriptor['path'] = str(Path(descriptor['path']).with_suffix('.csv'))
+        descriptor['path'] = str(Path(descriptor['path']).with_suffix('.json'))
         descriptor['format'] = 'json'
         descriptor['mediatype'] = 'text/json'
+        descriptor['profile'] = 'tabular-data-resource'
         super(JSONFormat, cls).prepare_resource(resource)
 
     def write_transformed_row(self, transformed_row):
