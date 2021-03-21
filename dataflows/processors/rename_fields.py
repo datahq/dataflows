@@ -38,12 +38,16 @@ def rename_fields(fields, resources=None, regex=True):
                         if src.match(sf_name):
                             matched.add(src.pattern)
                             target_name = src.sub(tgt, sf_name)
-                            assert target_name not in renamed_fields[res_name], f'Renaming two fields to the same name "{target_name}"'
+                            assert target_name not in renamed_fields[res_name],\
+                                f'Renaming two fields to the same name "{target_name}"'
                             renamed_fields[res_name].add(target_name)
                             renames[res_name][sf_name] = target_name
                             sf['name'] = target_name
                             break
-        not_matched = [src.pattern for src, _ in field_res if src.pattern not in matched]
+        not_matched = [
+            src.pattern for src, _ in field_res
+            if src.pattern not in matched
+        ]
         if len(not_matched) > 0:
             print('WARNING: Failed to match these fields to rename {!r}'.format(not_matched))
         yield package.pkg
