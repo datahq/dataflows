@@ -2082,3 +2082,76 @@ def test_dump_to_geojson():
         delete_fields(['lat', 'long']),
         dump_to_path(out_path='out', format='geojson'),
     ).process()
+
+def test_rename_fields_simple():
+    from dataflows import Flow, rename_fields
+
+    data = [dict(a=i, b=i, c=i) for i in range(5)]
+    res = Flow(
+        data,
+        rename_fields(dict(
+            a='A', b='B'
+        ), regex=False),
+    ).results()[0][0]
+
+    assert res == [dict(A=i, B=i, c=i) for i in range(5)]
+
+def test_rename_fields_regex():
+    from dataflows import Flow, rename_fields
+
+    data = [dict(a1=i, a2=i, c=i) for i in range(5)]
+    res = Flow(
+        data,
+        rename_fields({
+            r'a(\d)': r'A\1'
+        }),
+    ).results()[0][0]
+
+    assert res == [dict(A1=i, A2=i, c=i) for i in range(5)]
+
+def test_rename_fields_double_rename():
+    from dataflows import Flow, rename_fields, exceptions
+
+    data = [dict(a1=i, a2=i, c=i) for i in range(5)]
+    with pytest.raises(exceptions.ProcessorError):
+        Flow(
+            data,
+            rename_fields({
+                r'a(\d)': r'A'
+            }),
+        ).results()[0][0]
+
+def test_rename_fields_double_rename_different_resources():
+    from dataflows import Flow, rename_fields, exceptions
+
+    data1 = [dict(a1=i, b=i, c=i) for i in range(5)]
+    data2 = [dict(a2=i, b=i, c=i) for i in range(5)]
+    res = Flow(
+        data1,
+        data2,
+        rename_fields({
+            r'a(\d)': r'A'
+        }),
+    ).results()[0]
+    assert res == [
+        [dict(A=i, b=i, c=i) for i in range(5)],
+        [dict(A=i, b=i, c=i) for i in range(5)],
+    ]
+ 
+def test_rename_fields_specify_resource():
+    from dataflows import Flow, rename_fields, exceptions
+
+    data1 = [dict(a1=i, b=i, c=i) for i in range(5)]
+    data2 = [dict(a2=i, b=i, c=i) for i in range(5)]
+    res = Flow(
+        data1,
+        data2,
+        rename_fields({
+            r'a(\d)': r'A'
+        }, resources=-1),
+    ).results()[0]
+    assert res == [
+        [dict(a1=i, b=i, c=i) for i in range(5)],
+        [dict(A=i, b=i, c=i) for i in range(5)],
+    ]
+ 

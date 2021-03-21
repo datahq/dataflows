@@ -20,6 +20,7 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 - **add_field** - Adds a column to the data
 - **select_fields** - Selects and keeps some columns in the data
 - **delete_fields** - Removes some columns from the data
+- **rename_fields** - Changes the names of some columns from the data
 - **add_computed_field** - Adds new fields whose values are based on existing columns
 - **find_replace** - Look for specific patterns in specific fields and replace them with new data
 - **set_type** - Modify schema, parse incoming data based on new schema, validate the data in the process
@@ -389,6 +390,28 @@ def delete_fields(fields, resources=None, regex=True):
 ```
 
 - `fields` - List of field (column) names to be removed (exact names or regular expressions for matching field names)
+- `resources`
+  - A name of a resource to operate on
+  - A regular expression matching resource names
+  - A list of resource names
+  - `None` indicates operation should be done on all resources
+  - The index of the resource in the package
+- `regex` - if set to `False` field names will be interpreted as strings not as regular expressions (`True` by default)
+
+#### rename_fields
+Changes the names of some fields (columns) from streamed resources
+
+`rename_fields` accepts a list of resources and list of fields to rename
+
+```python
+def delete_fields(fields, resources=None, regex=True):
+    pass
+```
+
+- `fields` - Dictionary mapping original field names to renamed field names (exact names or regular expressions for matching field names)
+  Examples:
+    - ```dict(a='A', b='B')   # renaming a->A, b->B```
+    - ```{r'a(\d)': r'A\1'}   # renaming a1->A1, a2->A2, ...```
 - `resources`
   - A name of a resource to operate on
   - A regular expression matching resource names
