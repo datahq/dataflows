@@ -45,7 +45,7 @@ def rename_fields(fields, resources=None, regex=True):
                             break
         not_matched = [src.pattern for src, _ in field_res if src.pattern not in matched]
         if len(not_matched) > 0:
-            print('WARNING: Failed to match these fields to delete {!r}'.format(not_matched))
+            print('WARNING: Failed to match these fields to rename {!r}'.format(not_matched))
         yield package.pkg
 
         for resource in package:
