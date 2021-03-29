@@ -186,7 +186,7 @@ def test_unpivot_no_regex():
         for r in
         [
             ['x', 0],
-            ['y', '0'],            
+            ['y', '0'],
             ['x', 1],
             ['y', '1'],
             ['x', 2],
@@ -643,6 +643,29 @@ def test_duplicate_many_rows():
     assert len(results[0]) == 10000
     assert len(results[1]) == 10000
 
+def test_duplicate_to_end():
+    from dataflows import duplicate
+
+    a = [
+        {"a": 1, "b": 3},
+    ]
+    b = [
+        {"c": 1, "d": 3},
+    ]
+
+    f = Flow(
+        a,
+        b,
+        duplicate(duplicate_to_end=True),
+    )
+    results, _, _ = f.results()
+    assert list(results[0]) == a
+    assert list(results[1]) == b
+    assert list(results[2]) == a
+
+
+
+
 
 def test_flow_as_step():
     def upper(row):
@@ -993,7 +1016,7 @@ def test_set_type_errors():
     )
     results, *_ = f.results(on_error=ignore)
     assert results[0] == data[:4]
-    
+
     f = Flow(
         data,
         set_type('b', type='integer', on_error=clear),
@@ -1025,7 +1048,7 @@ def test_set_type_transform():
     data = [
         dict(a=i) for i in range(5)
     ]
-    
+
     with pytest.raises(exceptions.ProcessorError):
         Flow(
             data,
@@ -2137,7 +2160,7 @@ def test_rename_fields_double_rename_different_resources():
         [dict(A=i, b=i, c=i) for i in range(5)],
         [dict(A=i, b=i, c=i) for i in range(5)],
     ]
- 
+
 def test_rename_fields_specify_resource():
     from dataflows import Flow, rename_fields, exceptions
 
@@ -2154,4 +2177,4 @@ def test_rename_fields_specify_resource():
         [dict(a1=i, b=i, c=i) for i in range(5)],
         [dict(A=i, b=i, c=i) for i in range(5)],
     ]
- 
+
