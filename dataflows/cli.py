@@ -140,72 +140,72 @@ or leave empty for an interactive walkthrough.
 
         # Input Parameters
         inquirer.Text('input_url',
-                    message="What is the path of that file",
+                    message='What is the path of that file',
                     ignore=fany(lambda ctx: ctx.get('input') != 'file',
                                 lambda ctx: ctx.get('input_url') is not None),
                     validate=fall(not_empty, extract_format)),
         inquirer.List('format',
-                    message="We couldn't detect the file format - which is it?",
+                    message='We couldn''t detect the file format - which is it?',
                     choices=FORMATS[:-1],
                     ignore=fany(lambda ctx: ctx.get('input') != 'file',
                                 lambda ctx: ctx.get('format') in FORMATS)),
 
         inquirer.Text('input_url',
-                    message="Where is that file located (URL)",
+                    message='Where is that file located (URL)',
                     ignore=fany(lambda ctx: ctx.get('input') != 'remote',
                                 lambda ctx: ctx.get('input_url') is not None),
                     validate=fall(extract_format, not_empty, valid_url)),
         inquirer.List('format',
-                      message="We couldn't detect the source format - which is it",
+                      message='We couldn''t detect the source format - which is it',
                       choices=FORMATS,
                       ignore=fany(lambda ctx: ctx['input'] != 'remote',
                                   lambda ctx: ctx.get('format') in FORMATS)
                       ),
         inquirer.Text('sheet',
-                      message="Which sheet in the spreadsheet should be processed (name or index)",
+                      message='Which sheet in the spreadsheet should be processed (name or index)',
                       validate=not_empty,
                       ignore=lambda ctx: ctx.get('format') not in ('xls', 'xlsx', 'ods'),
                       ),
         inquirer.Text('input_url',
-                      message="What is the connection string to the database",
+                      message='What is the connection string to the database',
                       validate=not_empty,
                       ignore=fany(lambda ctx: ctx['input'] != 'sql',
                                   lambda ctx: ctx.get('input_url') is not None),
                       ),
         inquirer.Text('input_db_table',
-                      message="...and the name of the database table to extract",
+                      message='...and the name of the database table to extract',
                       validate=not_empty,
                       ignore=fany(lambda ctx: ctx['input'] != 'sql',
                                   lambda ctx: ctx.get('input_db_table') is not None),
                       ),
 
         inquirer.Text('input_url',
-                      message="Describe that other source (shortly)",
+                      message='Describe that other source (shortly)',
                       ignore=fany(lambda ctx: ctx['input'] != 'other',
                                   lambda ctx: ctx.get('input_url') is not None),
                       ),
 
         # Processing
         inquirer.Checkbox('processing_str',
-                        message="What kind of processing would you like to run on the data",
+                        message='What kind of processing would you like to run on the data',
                         choices=PROCESSING.keys(),
                         ignore=lambda ctx: ctx.get('processing') is not None,
                         validate=convert_processing),
 
         # Output
         inquirer.List('output_str',
-                    message="Finally, where would you like the output data",
+                    message='Finally, where would you like the output data',
                     choices=OUTPUTS.keys(),
                     ignore=lambda ctx: ctx.get('output') is not None,
                     validate=convert_output),
         inquirer.Text('output_url',
-                      message="What is the connection string to the database",
+                      message='What is the connection string to the database',
                       validate=not_empty,
                       ignore=fany(lambda ctx: ctx['output'] != 'sql',
                                   lambda ctx: ctx.get('output_url') is not None),
                       ),
         inquirer.Text('output_db_table',
-                      message="...and the name of the database table to write to",
+                      message='...and the name of the database table to write to',
                       validate=not_empty,
                       ignore=fany(lambda ctx: ctx['output'] != 'sql',
                                   lambda ctx: ctx.get('output_db_table') is not None),
@@ -213,7 +213,7 @@ or leave empty for an interactive walkthrough.
 
         # # Finalize
         inquirer.Text('title',
-                    message="That's it! Now, just provide a title for your processing flow",
+                    message='That''s it! Now, just provide a title for your processing flow',
                     ignore=lambda ctx: ctx.get('title') is not None,
                     validate=not_empty),
     ]
@@ -234,7 +234,7 @@ or leave empty for an interactive walkthrough.
         print(ret)
         print('Done!')
     except subprocess.CalledProcessError as e:
-        print("Processing failed, here's the error:")
+        print('Processing failed, here''s the error:')
         print(e.stderr)
         answers = inquirer.prompt([
             inquirer.Confirm('edit',

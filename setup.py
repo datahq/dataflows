@@ -39,7 +39,7 @@ SPEEDUP_REQUIRES = [
     'plyvel',
 ]
 LINT_REQUIRES = [
-    'pylama',
+    'pylama', 'pylama_quotes'
 ]
 TESTS_REQUIRE = [
     'tox',
@@ -83,9 +83,5 @@ setup(
       'console_scripts': [
         'dataflows = dataflows.cli:cli',
       ]
-    },
-    dependency_links=[
-        'https://github.com/frictionlessdata/datapackage-py/archive/feature/expose-tableschema-infer-options.zip#egg=datapackage-1.3.1alpha'  # Link with version at the end
-    ]
-
+    }
 )

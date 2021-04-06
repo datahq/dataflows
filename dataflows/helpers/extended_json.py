@@ -41,13 +41,13 @@ class CommonJSONDecoder(json.JSONDecoder):
         if 'type{time}' in obj:
             try:
                 return datetime.datetime \
-                    .strptime(obj["type{time}"], TIME_P_FORMAT) \
+                    .strptime(obj['type{time}'], TIME_P_FORMAT) \
                     .time()
             except ValueError:
                 pass
         if 'type{datetime}' in obj:
             try:
-                (isoformat, tzofs, tzname) = obj["type{datetime}"]
+                (isoformat, tzofs, tzname) = obj['type{datetime}']
                 parsed = datetime.datetime \
                     .strptime(isoformat, DATETIME_P_FORMAT)
                 if tzname is not None:
@@ -61,13 +61,13 @@ class CommonJSONDecoder(json.JSONDecoder):
         if 'type{date}' in obj:
             try:
                 return datetime.datetime \
-                    .strptime(obj["type{date}"], DATE_P_FORMAT) \
+                    .strptime(obj['type{date}'], DATE_P_FORMAT) \
                     .date()
             except ValueError:
                 pass
         if 'type{duration}' in obj:
             try:
-                return isodate.parse_duration(obj["type{duration}"])
+                return isodate.parse_duration(obj['type{duration}'])
             except ValueError:
                 pass
         if 'type{set}' in obj:

@@ -58,7 +58,7 @@ class FileDumper(DumperBase):
                             field['format'] = format
             self.datapackage.commit()
 
-        temp_file = tempfile.NamedTemporaryFile(mode="w+", delete=False, encoding='utf-8')
+        temp_file = tempfile.NamedTemporaryFile(mode='w+', delete=False, encoding='utf-8')
         indent = 2 if self.pretty_descriptor else None
         json.dump(self.datapackage.descriptor, temp_file, indent=indent, sort_keys=True, ensure_ascii=False)
         temp_file_name = temp_file.name
@@ -109,7 +109,7 @@ class FileDumper(DumperBase):
         if resource.res.name in self.file_formatters:
             schema = resource.res.schema
 
-            temp_file = tempfile.NamedTemporaryFile(mode="w+", delete=False, newline='')
+            temp_file = tempfile.NamedTemporaryFile(mode='w+', delete=False, newline='')
             writer_kwargs = {'use_titles': True} if self.use_titles else {}
             writer_kwargs['temporal_format_property'] = self.temporal_format_property
             writer = self.file_formatters[resource.res.name](temp_file, schema, **writer_kwargs)
