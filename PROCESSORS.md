@@ -798,13 +798,14 @@ It will then duplicate it in the output datapackage, with a different name and p
 The duplicated resource will appear immediately after its original.
 
 ```python
-def duplicate(source=None, target_name=None, target_path=None):
+def duplicate(source=None, target_name=None, target_path=None, duplicate_to_end=False):
     pass
 ```
 
 - `source` - The name of the resource to duplicate.
 - `target_name` - Name of the new, duplicated resource.
 - `target_path` - Path for the new, duplicated resource.
+- `duplicate_to_end` - Add the duplicate to the end of the resource list.
 
 #### join.py
 Joins two streamed resources.
