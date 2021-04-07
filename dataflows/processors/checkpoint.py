@@ -11,7 +11,7 @@ def _notify_checkpoint_saved(checkpoint_name):
         yield package.pkg
         for rows in package:
             yield (row for row in rows)
-        print(f"checkpoint saved: {checkpoint_name}")
+        print(f'checkpoint saved: {checkpoint_name}')
 
     return step
 

@@ -25,7 +25,8 @@ def test_exception_information():
     )
     with pytest.raises(exceptions.ProcessorError) as excinfo:
         flow.results()
-    assert str(excinfo.value.cause) == "Failed to load source 'data/bad-path1.csv' and options {'custom_parsers': {'xml': <class 'dataflows.processors.load.XMLParser'>}, 'ignore_blank_headers': True, 'headers': 1}: [Errno 2] No such file or directory: 'data/bad-path1.csv'"
+    assert str(excinfo.value.cause).startswith("Failed to load source 'data/bad-path1.csv' and options")
+    assert str(excinfo.value.cause).endswith("[Errno 2] No such file or directory: 'data/bad-path1.csv'")
     assert excinfo.value.processor_name == 'load'
     assert excinfo.value.processor_object.load_source == 'data/bad-path1.csv'
     assert excinfo.value.processor_position == 1
@@ -39,7 +40,8 @@ def test_exception_information_multiple_processors_simple():
     )
     with pytest.raises(exceptions.ProcessorError) as excinfo:
         flow.results()
-    assert str(excinfo.value.cause) == "Failed to load source 'data/bad-path1.csv' and options {'custom_parsers': {'xml': <class 'dataflows.processors.load.XMLParser'>}, 'ignore_blank_headers': True, 'headers': 1}: [Errno 2] No such file or directory: 'data/bad-path1.csv'"
+    assert str(excinfo.value.cause).startswith("Failed to load source 'data/bad-path1.csv' and options")
+    assert str(excinfo.value.cause).endswith(": [Errno 2] No such file or directory: 'data/bad-path1.csv'")
     assert excinfo.value.processor_name == 'load'
     assert excinfo.value.processor_object.load_source == 'data/bad-path1.csv'
     assert excinfo.value.processor_position == 1
@@ -53,7 +55,8 @@ def test_exception_information_multiple_processors_last_errored():
     )
     with pytest.raises(exceptions.ProcessorError) as excinfo:
         flow.results()
-    assert str(excinfo.value.cause) == "Failed to load source 'data/bad-path2.csv' and options {'custom_parsers': {'xml': <class 'dataflows.processors.load.XMLParser'>}, 'ignore_blank_headers': True, 'headers': 1}: [Errno 2] No such file or directory: 'data/bad-path2.csv'"
+    assert str(excinfo.value.cause).startswith("Failed to load source 'data/bad-path2.csv' and options")
+    assert str(excinfo.value.cause).endswith(": [Errno 2] No such file or directory: 'data/bad-path2.csv'")
     assert excinfo.value.processor_name == 'load'
     assert excinfo.value.processor_object.load_source == 'data/bad-path2.csv'
     assert excinfo.value.processor_position == 2
