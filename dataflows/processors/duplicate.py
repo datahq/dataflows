@@ -28,20 +28,20 @@ def duplicate(
     def func(package):
         source_, target_name_, target_path_ = source, target_name, target_path
         if source_ is None:
-            source_ = package.pkg.descriptor["resources"][0]["name"]
+            source_ = package.pkg.descriptor['resources'][0]['name']
         if target_name_ is None:
-            target_name_ = source_ + "_copy"
+            target_name_ = source_ + '_copy'
         if target_path is None:
-            target_path_ = target_name_ + ".csv"
+            target_path_ = target_name_ + '.csv'
 
         def traverse_resources(resources):
             new_res_list = []
             for res in resources:
                 yield res
-                if res["name"] == source_:
+                if res['name'] == source_:
                     res = copy.deepcopy(res)
-                    res["name"] = target_name_
-                    res["path"] = target_path_
+                    res['name'] = target_name_
+                    res['path'] = target_path_
                     if duplicate_to_end:
                         new_res_list.append(res)
                     else:
@@ -50,7 +50,7 @@ def duplicate(
                 yield res
 
         descriptor = package.pkg.descriptor
-        descriptor["resources"] = list(traverse_resources(descriptor["resources"]))
+        descriptor['resources'] = list(traverse_resources(descriptor['resources']))
         yield package.pkg
 
         dbs = []
