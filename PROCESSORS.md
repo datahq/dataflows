@@ -360,16 +360,17 @@ def add_field(name, type, default=None, resources=None, **options):
 #### select_fields
 Select fields (columns) in streamed resources and remove all other fields. Can also be used to reorder schema fields.
 
-`select_fields` accepts a list of resources and list of fields to remove
+`select_fields` accepts a list of resources and list of fields to select, either as literal strings or as regular expressions
 
 _Note: if multiple resources provided, all of them should contain all fields to select_
 
 ```python
-def select_fields(fields, resources=None):
+def select_fields(fields, resources=None, regex=True):
     pass
 ```
 
-- `fields` - List of field (column) names to keep
+- `fields` - List of field (column) names to keep (supports regular expressions as well - if `regex` is `True`)
+- `regex` - allow specifying regular expressions as field names (defaults to `True`)
 - `resources`
   - A name of a resource to operate on
   - A regular expression matching resource names

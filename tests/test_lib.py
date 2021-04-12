@@ -1,3 +1,4 @@
+from dataflows.base.exceptions import ProcessorError
 import pytest
 from dataflows import Flow
 
@@ -115,17 +116,59 @@ def test_delete_field():
         [dict(name='y', type='string', format='default')]
 
 
-def test_select_field():
+def test_select_field_no_regex():
     from dataflows import select_fields
+    data = [
+        {'x':i, '.':i}
+        for i in range(3)
+    ]
+
     f = Flow(
         data,
-        select_fields(['y'])
+        select_fields(['.'], regex=False)
     )
     results, dp, _ = f.results()
     for i in results[0]:
-        assert list(i.keys()) == ['y']
+        assert list(i.keys()) == ['.']
     assert dp.descriptor['resources'][0]['schema']['fields'] == \
-        [dict(name='y', type='string', format='default')]
+        [dict(name='.', type='integer', format='default')]
+
+
+def test_select_field_regex():
+    from dataflows import select_fields
+    data = [
+        dict(x=i, y2=i, y1=i)
+        for i in range(3)
+    ]
+
+    f = Flow(
+        data,
+        select_fields(['y\d'])
+    )
+    results, dp, _ = f.results()
+    for i in results[0]:
+        assert list(i.keys()) == ['y2', 'y1']
+    assert dp.descriptor['resources'][0]['schema']['fields'] == \
+        [
+            dict(name='y2', type='integer', format='default'),
+            dict(name='y1', type='integer', format='default')
+        ]
+
+def test_select_field_no_fields_selected():
+    from dataflows import select_fields, exceptions
+    data = [
+        dict(x=i, y2=i, y1=i)
+        for i in range(3)
+    ]
+
+    f = Flow(
+        data,
+        select_fields(['x\d'])
+    )
+    with pytest.raises(exceptions.ProcessorError):
+        results, dp, _ = f.results()
+        print(results)
+        print(dp)
 
 
 def test_find_replace():
