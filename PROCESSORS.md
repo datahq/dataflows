@@ -22,24 +22,24 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 - [**delete_fields**](#delete_fields) - Removes some columns from the data
 - [**rename_fields**](#rename_fields) - Changes the names of some columns from the data
 - [**add_computed_field**](#add_computed_field) - Adds new fields whose values are based on existing columns
-- [**find_replace**](#find_replace.py) - Look for specific patterns in specific fields and replace them with new data
-- [**set_type**](#set_type.py) - Modify schema, parse incoming data based on new schema, validate the data in the process
-- [**validate**](#validate.py) - Parse incoming data based on existing schema, validate the incoming data in the process
+- [**find_replace**](#find_replacepy) - Look for specific patterns in specific fields and replace them with new data
+- [**set_type**](#set_typepy) - Modify schema, parse incoming data based on new schema, validate the data in the process
+- [**validate**](#validatepy) - Parse incoming data based on existing schema, validate the incoming data in the process
 
 ### Manipulate the entire resource
-- [**sort_rows**](#sort_rows.py) - Sort incoming data based on key
-- [**unpivot**](#unpivot.py) - Unpivot a table - convert one row with multiple value columns to multiple rows with one value column
+- [**sort_rows**](#sort_rowspy) - Sort incoming data based on key
+- [**unpivot**](#unpivotpy) - Unpivot a table - convert one row with multiple value columns to multiple rows with one value column
 - [**filter_rows**](#filter_rows) - Filter rows based on inclusive and exclusive value filters
-- [**deduplicate**](#deduplicate.py) - Deduplicates rows in resources based on the resources' primary key
+- [**deduplicate**](#deduplicatepy) - Deduplicates rows in resources based on the resources' primary key
 
 
 ### Manipulate package
-- [**update_package**](#update_package.py) - Updates metadata of entire package
-- [**update_resource**](#update_resource.py) - Updates metadata of one or more resources
-- [**update_schema**](#update_schema.py) - Update schema properties for one or more resources in the package
-- [**set_primary_key**](#set_primary_key.py) - Updates the primary key of one or more resources
-- [**concatenate**](#concatenate.py) - Concatenate multiple streams of data to a single one, resolving differently named columns along the way
-- [**duplicate**](#duplicate.py) - Duplicate a single stream of data to make two streams
+- [**update_package**](#update_packagepy) - Updates metadata of entire package
+- [**update_resource**](#update_resourcepy) - Updates metadata of one or more resources
+- [**update_schema**](#update_schemapy) - Update schema properties for one or more resources in the package
+- [**set_primary_key**](#set_primary_keypy) - Updates the primary key of one or more resources
+- [**concatenate**](#concatenatepy) - Concatenate multiple streams of data to a single one, resolving differently named columns along the way
+- [**duplicate**](#duplicatepy) - Duplicate a single stream of data to make two streams
 
 ### API Reference
 
