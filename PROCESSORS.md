@@ -3,40 +3,43 @@
 DataFlows comes with a few built-in processors which do most of the heavy lifting in many common scenarios, leaving you to implement only the minimum code that is specific to your specific problem.
 
 ### Load and Save Data
-- **load** - Loads data from various source types (local files, remote URLS, Google Spreadsheets, databases...)
-- **sources** - Combines efficiently data loading from multiple sources
-- **printer** - Just prints whatever it sees. Good for debugging.
+- [**load**](#load) - Loads data from various source types (local files, remote URLS, Google Spreadsheets, databases...)
+- [**sources**](#sources) - Combines efficiently data loading from multiple sources
+- [**printer**](#printer) - Just prints whatever it sees. Good for debugging.
 
-- **dump_to_path** - Store the results to a specified path on disk, in a valid datapackage
-- **dump_to_zip** - Store the results in a valid datapackage, all files archived in one zipped file
-- **dump_to_sql** - Store the results in a relational database (creates one or more tables or updates existing tables)
+- [**dump_to_path**](#dump_to_path) - Store the results to a specified path on disk, in a valid datapackage
+- [**dump_to_zip**](#dump_to_zip) - Store the results in a valid datapackage, all files archived in one zipped file
+- [**dump_to_sql**](#dump_to_sql) - Store the results in a relational database (creates one or more tables or updates existing tables)
 
 ### Flow Control
-- **conditional** - Run parts of the flow based on the structure of the datapackage at the calling point 
-- **finalizer** - Call a function when all data had been processed
-- **checkpoint** - Cache results of a subflow in a datapackage and load it upon request
+- [**conditional**](#conditional) - Run parts of the flow based on the structure of the datapackage at the calling point
+- [**finalizer**](#finalizer) - Call a function when all data had been processed
+- [**checkpoint**](#checkpoint) - Cache results of a subflow in a datapackage and load it upon request
 
 ### Manipulate row-by-row
-- **add_field** - Adds a column to the data
-- **select_fields** - Selects and keeps some columns in the data
-- **delete_fields** - Removes some columns from the data
-- **rename_fields** - Changes the names of some columns from the data
-- **add_computed_field** - Adds new fields whose values are based on existing columns
-- **find_replace** - Look for specific patterns in specific fields and replace them with new data
-- **set_type** - Modify schema, parse incoming data based on new schema, validate the data in the process
-- **validate** - Parse incoming data based on existing schema, validate the incoming data in the process
+- [**add_field**](#add_field) - Adds a column to the data
+- [**select_fields**](#select_fields) - Selects and keeps some columns in the data
+- [**delete_fields**](#delete_fields) - Removes some columns from the data
+- [**rename_fields**](#rename_fields) - Changes the names of some columns from the data
+- [**add_computed_field**](#add_computed_field) - Adds new fields whose values are based on existing columns
+- [**find_replace**](#find_replace.py) - Look for specific patterns in specific fields and replace them with new data
+- [**set_type**](#set_type.py) - Modify schema, parse incoming data based on new schema, validate the data in the process
+- [**validate**](#validate.py) - Parse incoming data based on existing schema, validate the incoming data in the process
 
 ### Manipulate the entire resource
-- **sort_rows** - Sort incoming data based on key
-- **unpivot** - Unpivot a table - convert one row with multiple value columns to multiple rows with one value column
-- **filter_rows** - Filter rows based on inclusive and exclusive value filters
+- [**sort_rows**](#sort_rows.py) - Sort incoming data based on key
+- [**unpivot**](#unpivot.py) - Unpivot a table - convert one row with multiple value columns to multiple rows with one value column
+- [**filter_rows**](#filter_rows) - Filter rows based on inclusive and exclusive value filters
+- [**deduplicate**](#deduplicate.py) - Deduplicates rows in resources based on the resources' primary key
+
 
 ### Manipulate package
-- **update_package** - Updates metadata of entire package
-- **update_resource** - Updates metadata of one or more resources
-- **set_primary_key** - Updates the primary key of one or more resources
-- **concatenate** - Concatenate multiple streams of data to a single one, resolving differently named columns along the way
-- **duplicate** - Duplicate a single stream of data to make two streams
+- [**update_package**](#update_package.py) - Updates metadata of entire package
+- [**update_resource**](#update_resource.py) - Updates metadata of one or more resources
+- [**update_schema**](#update_schema.py) - Update schema properties for one or more resources in the package
+- [**set_primary_key**](#set_primary_key.py) - Updates the primary key of one or more resources
+- [**concatenate**](#concatenate.py) - Concatenate multiple streams of data to a single one, resolving differently named columns along the way
+- [**duplicate**](#duplicate.py) - Duplicate a single stream of data to make two streams
 
 ### API Reference
 
@@ -156,7 +159,7 @@ def dump_to_path(out_path='.',
 - `force-format` - Specifies whether to force all output files to be generated with the same format
     - if `True` (the default), all resources will use the same format
     - if `False`, format will be deduced from the file extension. Resources with unknown extensions will be discarded.
-- `format` - Specifies the type of output files to be generated (if `force-format` is true): `csv` (the default), `json` or `geojson` 
+- `format` - Specifies the type of output files to be generated (if `force-format` is true): `csv` (the default), `json` or `geojson`
 - `temporal-format-property` - Specifies a property to be used for temporal values serialization. For example, if some field has a property `outputFormat: %d/%m/%y` setting `temporal-format-property` to `outputFormat` will lead to using this format for this field serialization.
 - `add-filehash-to-path`: Specifies whether to include file md5 hash into the resource path. Defaults to `False`. If `True` Embeds hash in path like so:
     - If original path is `path/to/the/file.ext`
@@ -524,7 +527,7 @@ def set_type(name, resources=-1, regex=True, on_error=None, transform=None, **op
   Function can have the signature
   - `callback(resource_name, row, row_index, exception)` - will receive the resource name, the contents of the offending row, its index and the raised exception
   - `callback(resource_name, row, row_index, exception, field)` - will receive the resource name, the contents of the offending row, its index and the raised exception and the offending field (as a Field object)
-  
+
   This function may raise an exception, return `True` for keeping the row anyway or `False` for dropping it.
 
   A few predefined options are:
