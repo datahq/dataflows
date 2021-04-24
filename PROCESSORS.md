@@ -22,7 +22,7 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 - [**delete_fields**](#delete_fields) - Removes some columns from the data
 - [**rename_fields**](#rename_fields) - Changes the names of some columns from the data
 - [**add_computed_field**](#add_computed_field) - Adds new fields whose values are based on existing columns
-- [**find_replace**](#find_replace.py) - Look for specific patterns in specific fields and replace them with new data
+- [**find_replace**](#find_replacepy) - Look for specific patterns in specific fields and replace them with new data
 - [**set_type**](#set_typepy) - Modify schema, parse incoming data based on new schema, validate the data in the process
 - [**validate**](#validatepy) - Parse incoming data based on existing schema, validate the incoming data in the process
 
