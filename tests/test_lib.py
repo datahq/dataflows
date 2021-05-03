@@ -2221,3 +2221,16 @@ def test_rename_fields_specify_resource():
         [dict(A=i, b=i, c=i) for i in range(5)],
     ]
 
+def test_parallelize():
+    from dataflows import Flow, parallelize, add_field
+    data = [dict(a=i, b=i) for i in range(3300)]
+    print('created data')
+    def mult(row):
+        row['c'] = row['a'] * row['b']
+
+    res = Flow(
+        data,
+        add_field('c', 'integer'),
+        parallelize(mult),
+    ).results()[0][0][:100]
+    print(res)
