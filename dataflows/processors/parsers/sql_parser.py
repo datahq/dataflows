@@ -59,16 +59,6 @@ class ExtendedSQLParser(Parser):
         return self.__extended_rows
 
     # Private
-
-    def __iter_extended_rows(self):
-        table = sql.table(self.__table)
-        order = sql.text(self.__order_by) if self.__order_by else None
-        query = sql.select(['*']).select_from(table).order_by(order)
-        result = self.__engine.execute(query)
-        for row_number, row in enumerate(iter(result), start=1):
-            yield (row_number, row.keys(), list(row))
-
-
     def __iter_extended_rows(self):
         if self.__query is not None:
             query = self.__query
