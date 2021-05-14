@@ -60,12 +60,17 @@ def load(source, name=None, resources=None, strip=True, limit_rows=None,
 - `source` - location of the data that is to be loaded. This can be either:
     - a local path (e.g. `/path/to/the/data.csv`)
     - a remote URL (e.g. `https://path.to/the/data.csv`)
-    - Other supported links, based on the current support of schemes and formats in [tabulator](https://github.com/frictionlessdata/tabulator-py#schemes)
     - a local path or remote URL to a datapackage.json file (e.g. `https://path.to/data_package/datapackage.json`)
     - a local path or remote URL to a zipped datapackage.json file (e.g. `https://path.to/data_package/datapackage.zip`) - add a `format='datapackage'` option in this scenario
     - a reference to an environment variable containing the source location,
       in the form of `env://ENV_VAR`
     - a tuple containing (datapackage_descriptor, resources_iterator)
+    - Other supported links, based on the current support of schemes and formats in [tabulator](https://github.com/frictionlessdata/tabulator-py#schemes)
+    - Other formats:
+      - XML files
+      - Excel-XML format
+      - SQL Sources, which on top the current the functionality already supported in `tabulator`, also supports the `query` parameter for using custom query results as a source.
+
 - `resources` - optional, relevant only if source points to a datapackage.json file or datapackage/resource tuple. Value should be one of the following:
     - Name of a single resource to load
     - A regular expression matching resource names to load

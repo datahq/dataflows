@@ -10,7 +10,7 @@ from ..base.exceptions import SourceLoadError
 from ..base.schema_validator import schema_validator, ignore, drop, raise_exception, clear
 from ..helpers.resource_matcher import ResourceMatcher
 
-from .parsers import XMLParser, ExcelXMLParser
+from .parsers import XMLParser, ExcelXMLParser, ExtendedSQLParser
 
 
 class StringsGuesser():
@@ -166,6 +166,7 @@ class load(DataStreamProcessor):
                     descriptor['encoding'] = self.options['encoding']
                 self.options.setdefault('custom_parsers', {}).setdefault('xml', XMLParser)
                 self.options.setdefault('custom_parsers', {}).setdefault('excel-xml', ExcelXMLParser)
+                self.options.setdefault('custom_parsers', {}).setdefault('sql', ExtendedSQLParser)
                 self.options.setdefault('ignore_blank_headers', True)
                 self.options.setdefault('headers', 1)
                 stream: Stream = Stream(self.load_source, **self.options).open()

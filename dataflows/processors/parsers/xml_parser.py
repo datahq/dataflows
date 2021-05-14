@@ -47,7 +47,6 @@ class XMLParser(Parser):
         from xmljson import parker
 
         parsed = parker.data(parse(self.__chars).getroot())
-        print('parsed', parsed)
         elements = list(parsed.values())
         if len(elements) > 0:
             elements = elements[0]
