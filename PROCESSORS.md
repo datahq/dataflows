@@ -618,7 +618,9 @@ def sort_rows(key, resources=None, reverse=False):
     pass
 ```
 
-- `key` - String, which would be interpreted as a Python format string used to form the key (e.g. `{<field_name_1>}:{field_name_2}`)
+- `key` - either:
+  - string, which would be interpreted as a Python format string used to form the key (e.g. `{<field_name_1>}:{field_name_2}`)
+  - callable, which receives a row and returns a string, to be used as the sorting key
 - `resources`
   - A name of a resource to operate on
   - A regular expression matching resource names

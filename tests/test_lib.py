@@ -521,6 +521,27 @@ def test_sort_rows():
     ]
 
 
+def test_sort_rows_callable():
+    from dataflows import sort_rows
+
+    f = Flow(
+        [
+            {'a': 1, 'b': 3},
+            {'a': 2, 'b': 3},
+            {'a': 3, 'b': 1},
+            {'a': 4, 'b': 1},
+        ],
+        sort_rows(key=lambda r: '%04d|%04d' % (r['b'], r['a'])),
+    )
+    results, _, _ = f.results()
+    assert list(results[0]) == [
+        {'a': 3, 'b': 1},
+        {'a': 4, 'b': 1},
+        {'a': 1, 'b': 3},
+        {'a': 2, 'b': 3},
+    ]
+
+
 def test_sort_reverse_many_rows():
     from dataflows import sort_rows
 

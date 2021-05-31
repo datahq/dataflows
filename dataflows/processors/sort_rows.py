@@ -7,25 +7,35 @@ from ..helpers.resource_matcher import ResourceMatcher
 
 class KeyCalc(object):
     def __init__(self, key_spec):
-        self.key_spec = key_spec
-        self.key_list = re.findall(r'\{(.*?)\}', key_spec)
+        self.calculator = self.__calculator(key_spec)
+
+    def __calculator(self, key_spec):
+        if callable(key_spec):
+            return key_spec
+        if isinstance(key_spec, str):
+            key_list = re.findall(r'\{(.*?)\}', key_spec)
+
+            def func(row):
+                context = row.copy()
+                for key, value in row.items():
+                    # We need to stringify some types to make them properly comparable
+                    if key in key_list:
+                        # numbers
+                        # https://www.h-schmidt.net/FloatConverter/IEEE754.html
+                        if isinstance(value, (int, float, decimal.Decimal)):
+                            bits = BitArray(float=value, length=64)
+                            # invert the sign bit
+                            bits.invert(0)
+                            # invert negative numbers
+                            if value < 0:
+                                bits.invert(range(1, 64))
+                            context[key] = bits.hex
+                return key_spec.format(**context)
+            return func
+        assert False, 'key should be either a format string or a row->string callable'
 
     def __call__(self, row):
-        context = row.copy()
-        for key, value in row.items():
-            # We need to stringify some types to make them properly comparable
-            if key in self.key_list:
-                # numbers
-                # https://www.h-schmidt.net/FloatConverter/IEEE754.html
-                if isinstance(value, (int, float, decimal.Decimal)):
-                    bits = BitArray(float=value, length=64)
-                    # invert the sign bit
-                    bits.invert(0)
-                    # invert negative numbers
-                    if value < 0:
-                        bits.invert(range(1, 64))
-                    context[key] = bits.hex
-        return self.key_spec.format(**context)
+        return self.calculator(row)
 
 
 def _sorter(rows, key_calc, reverse, batch_size):
