@@ -47,15 +47,18 @@ def country_population():
             for row in rows:
                 cells = row.findall('td')
                 if len(cells) > 3:
-                    name = cells[0].find('.//a').attrib.get('title')
-                    population = cells[1].text
+                    name = cells[0].findall('.//a')
+                    if not name:
+                        continue
+                    name = name[0].text
+                    population = cells[2].text
                     yield(dict(
                         name=name,
                         population=population
                     ))
 
 def test_example_3():
-    from dataflows import Flow
+    from dataflows import Flow, printer
 
     f = Flow(
         country_population(),
