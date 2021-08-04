@@ -216,16 +216,15 @@ class GeoJSONFormat(JSONFormat):
 
     def write_transformed_row(self, transformed_row):
         properties = dict()
+        geometry = None
         for k, v in transformed_row.items():
             if self.fields[k].type == 'geopoint':
                 geometry = dict(
                     type='Point',
                     coordinates=v
                 )
-                break
             elif self.fields[k].type == 'geojson':
                 geometry = v
-                break
             else:
                 properties[k] = v
         feature = dict(
