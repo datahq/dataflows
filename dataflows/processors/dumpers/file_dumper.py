@@ -2,28 +2,30 @@ import os
 import json
 import tempfile
 import hashlib
+from typing import Dict
 from dataflows.base.resource_wrapper import ResourceWrapper
 
 from datapackage import Resource
 
 from .dumper_base import DumperBase
-from .file_formats import CSVFormat, JSONFormat, GeoJSONFormat
+from .formats import CSVFormat, JSONFormat, GeoJSONFormat, ExcelFormat, FileFormat
 
 
 class FileDumper(DumperBase):
 
-    def __init__(self, options):
+    def __init__(self, options: dict):
         super(FileDumper, self).__init__(options)
-        self.force_format = options.get('force_format', True)
-        self.forced_format = options.get('format', 'csv')
-        self.temporal_format_property = options.get('temporal_format_property', None)
-        self.use_titles = options.get('use_titles', False)
+        self.force_format = options.pop('force_format', True)
+        self.forced_format = options.pop('format', 'csv')
+        self.temporal_format_property = options.pop('temporal_format_property', None)
+        self.use_titles = options.pop('use_titles', False)
+        self.writer_options = options.pop('options', dict())
 
     def process_datapackage(self, datapackage):
         datapackage = \
             super(FileDumper, self).process_datapackage(datapackage)
 
-        self.file_formatters = {}
+        self.file_formatters: Dict[str, FileFormat] = {}
 
         # Make sure all resources are proper CSVs
         resource: Resource = None
@@ -36,7 +38,9 @@ class FileDumper(DumperBase):
             file_formatter = {
                 'csv': CSVFormat,
                 'json': JSONFormat,
-                'geojson': GeoJSONFormat
+                'geojson': GeoJSONFormat,
+                'excel': ExcelFormat,
+                'xlsx': ExcelFormat,
             }.get(file_format)
             if file_format is not None:
                 self.file_formatters[resource.name] = file_formatter
@@ -109,10 +113,15 @@ class FileDumper(DumperBase):
         if resource.res.name in self.file_formatters:
             schema = resource.res.schema
 
-            temp_file = tempfile.NamedTemporaryFile(mode='w+', delete=False, newline='')
-            writer_kwargs = {'use_titles': True} if self.use_titles else {}
+            file_formatter = self.file_formatters[resource.res.name]
+
+            temp_file = tempfile.NamedTemporaryFile(mode=file_formatter.FILE_MODE, delete=False, newline='' if 'b' not in file_formatter.FILE_MODE else None)
+            writer_kwargs = self.writer_options
+            if self.use_titles:
+                writer_kwargs['use_titles'] = True
             writer_kwargs['temporal_format_property'] = self.temporal_format_property
-            writer = self.file_formatters[resource.res.name](temp_file, schema, **writer_kwargs)
+            writer_kwargs['resource'] = resource.res
+            writer = file_formatter(temp_file, schema, **writer_kwargs)
 
             return self.rows_processor(resource,
                                        writer,

@@ -1,3 +1,4 @@
+import datetime
 from dataflows.base.exceptions import ProcessorError
 import pytest
 from dataflows import Flow
@@ -2169,6 +2170,57 @@ def test_dump_to_geojson():
         delete_fields(['lat', 'long']),
         dump_to_path(out_path='out', format='geojson'),
     ).process()
+
+
+def test_dump_to_excel():
+    import datetime
+    import openpyxl
+    from dataflows import Flow, dump_to_path, update_resource
+    data1 = [
+        dict(
+            a=str(i) + 'str',
+            b=i,
+            c=datetime.datetime.now() + datetime.timedelta(days=i),
+            d=datetime.date.today() + datetime.timedelta(days=i),
+            e=bool(i % 2),
+        ) for i in range(10)
+    ]
+    data2 = [
+        dict(
+            a=str(i) + 'str',
+            b=i,
+            c=datetime.datetime.now() + datetime.timedelta(days=i),
+            d=datetime.date.today() + datetime.timedelta(days=i),
+            e=bool(i % 2),
+        ) for i in range(10, 20)
+    ]
+    filename = 'test_excel/test_excel.xlsx'
+    Flow(
+        data1,
+        update_resource(-1, name='test_update', path='test_excel.xslx'),
+        dump_to_path(out_path='test_excel', format='excel', options=dict(sheetname='test1', update_existing=filename)),
+    ).process()
+    Flow(
+        data2,
+        update_resource(-1, name='test_update', path='test_excel.xslx'),
+        dump_to_path(out_path='test_excel', format='excel', options=dict(sheetname='test2', update_existing=filename)),
+    ).process()
+    wb = openpyxl.load_workbook(filename)
+    assert len(wb.sheetnames) == 2
+    assert wb.sheetnames[0] == 'test1'
+    assert wb.sheetnames[1] == 'test2'
+    assert wb['test2']['A11'].value == '19str'
+
+    Flow(
+        data1,
+        update_resource(-1, name='test_overwrite', path='test_excel.xlsx'),
+        dump_to_path(out_path='test_excel', format='excel'),
+    ).process()
+    wb = openpyxl.load_workbook('test_excel/test_excel.xlsx')
+    assert len(wb.sheetnames) == 1
+    assert wb.sheetnames[0] == 'test_overwrite'
+    assert wb['test_overwrite']['A11'].value == '9str'
+
 
 def test_rename_fields_simple():
     from dataflows import Flow, rename_fields

@@ -152,7 +152,8 @@ def dump_to_path(out_path='.',
                  temporal_format_property='format',
                  counters={},
                  add_filehash_to_path=False,
-                 pretty_Descriptor=True):
+                 pretty_descriptor=True,
+                 options=None):
     pass
 ```
 
@@ -165,7 +166,7 @@ def dump_to_path(out_path='.',
 - `force-format` - Specifies whether to force all output files to be generated with the same format
     - if `True` (the default), all resources will use the same format
     - if `False`, format will be deduced from the file extension. Resources with unknown extensions will be discarded.
-- `format` - Specifies the type of output files to be generated (if `force-format` is true): `csv` (the default), `json` or `geojson`
+- `format` - Specifies the type of output files to be generated (if `force-format` is true): `csv` (the default), `json`, `geojson` or `excel`/`xlsx`
 - `temporal-format-property` - Specifies a property to be used for temporal values serialization. For example, if some field has a property `outputFormat: %d/%m/%y` setting `temporal-format-property` to `outputFormat` will lead to using this format for this field serialization.
 - `add-filehash-to-path`: Specifies whether to include file md5 hash into the resource path. Defaults to `False`. If `True` Embeds hash in path like so:
     - If original path is `path/to/the/file.ext`
@@ -193,6 +194,10 @@ def dump_to_path(out_path='.',
 - `pretty_descriptor` - Should the resulting descriptor be JSON pretty-formatted with indentation for readability, or as compact as possible (default `True`)
 
 - `use_titles` - If set to True, will use the field titles for header rows rather then field names (relevant for csv format only, default `False`)
+- `options` - Format specific options. At the moment, only relevant to the Excel format:
+    - `sheetname` - Provide the name of the sheet that will be used when creating the Excel file (otherwise will use the resource name)
+    - `update_existing` - Instead of creating a new file, update the file specified by this option (needs to be a string path to the excel file).
+                          If a sheet with the same name exists, it will be removed and re-added.
 
 #### dump_to_zip
 Store the results in a valid datapackage, all files archived in one zipped file

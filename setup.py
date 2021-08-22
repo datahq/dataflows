@@ -33,7 +33,8 @@ INSTALL_REQUIRES = [
     'tableschema-sql',
     'xmljson',
     'bitstring>=3',
-    'python-dateutil'
+    'python-dateutil',
+    'openpyxl',
 ]
 SPEEDUP_REQUIRES = [
     'plyvel',
