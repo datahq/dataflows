@@ -115,7 +115,10 @@ class FileDumper(DumperBase):
 
             file_formatter = self.file_formatters[resource.res.name]
 
-            temp_file = tempfile.NamedTemporaryFile(mode=file_formatter.FILE_MODE, delete=False, newline='' if 'b' not in file_formatter.FILE_MODE else None)
+            temp_file = tempfile.NamedTemporaryFile(
+                mode=file_formatter.FILE_MODE, delete=False,
+                newline='' if 'b' not in file_formatter.FILE_MODE else None
+            )
             writer_kwargs = self.writer_options
             if self.use_titles:
                 writer_kwargs['use_titles'] = True

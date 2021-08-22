@@ -2175,6 +2175,7 @@ def test_dump_to_geojson():
 def test_dump_to_excel():
     import datetime
     import openpyxl
+    import os
     from dataflows import Flow, dump_to_path, update_resource
     data1 = [
         dict(
@@ -2216,10 +2217,12 @@ def test_dump_to_excel():
         update_resource(-1, name='test_overwrite', path='test_excel.xlsx'),
         dump_to_path(out_path='test_excel', format='excel'),
     ).process()
-    wb = openpyxl.load_workbook('test_excel/test_excel.xlsx')
+    wb = openpyxl.load_workbook(filename)
     assert len(wb.sheetnames) == 1
     assert wb.sheetnames[0] == 'test_overwrite'
     assert wb['test_overwrite']['A11'].value == '9str'
+
+    os.unlink(filename)
 
 
 def test_rename_fields_simple():

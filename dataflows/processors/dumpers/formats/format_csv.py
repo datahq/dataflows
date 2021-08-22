@@ -87,4 +87,3 @@ class CSVFormat(FileFormat):
 
     def finalize_file(self):
         pass
-

@@ -30,4 +30,3 @@ class GeoJSONFormat(JSONFormat):
     def finalize_file(self):
         super(GeoJSONFormat, self).finalize_file()
         self.writer.write('}')
-

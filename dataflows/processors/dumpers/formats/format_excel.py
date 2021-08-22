@@ -1,5 +1,4 @@
 import json
-import pathlib
 from datapackage.resource import Resource
 import isodate
 import openpyxl
