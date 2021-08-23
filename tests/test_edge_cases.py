@@ -103,6 +103,8 @@ def test_exception_information_multiple_processors_iterable_error():
 
 def test_fullouter_join_dump_different_keys():
     from dataflows import Flow, join, dump_to_path
+    from decimal import Decimal
+
     data1 = [
         {"col1": 1.531, "col2": "hello"},
         {"col1": 1.132, "col2": "goodbye"},
@@ -124,6 +126,10 @@ def test_fullouter_join_dump_different_keys():
         ),
         dump_to_path(out_path='out/test_join_dump'),
     )
-    f.results()
+    results = f.results()[0][0]
+    assert results == [
+        {'colA': Decimal('1.531'), 'col2': 'hello', 'colB': '123'},
+        {'colA': Decimal('1.132'), 'col2': 'goodbye', 'colB': 1.132},
+    ]
 
 

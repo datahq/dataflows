@@ -214,8 +214,7 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
                 elif field not in current:
                     current[field] = None
             if mode == 'full-outer':
-                for field in source_key.key_list:
-                    current[field] = row.get(field)
+                current['__key__'] = [row.get(field) for field in source_key.key_list]
             db.set(key, current)
             db_keys_usage.set(key, False)
             yield row
@@ -258,11 +257,15 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
     # Creates extra by key
     def create_extra_by_key(key):
         extra = db.get(key)
+        key = extra.pop('__key__', None)
         extra = dict(
             (k, AGGREGATORS[fields[k]['aggregate']].finaliser(v))
             for k, v in extra.items()
             if k in fields
         )
+        if key:
+            for k, v in zip(target_key.key_list, key):
+                extra[k] = v
         return extra
 
     # Yields the new resources
