@@ -11,6 +11,20 @@ from .dumper_base import DumperBase
 from .formats import CSVFormat, JSONFormat, GeoJSONFormat, ExcelFormat, FileFormat
 
 
+# see https://stackoverflow.com/questions/7150826/how-can-i-get-the-default-file-permissions-in-python
+def UmaskNamedTemporaryFile(*args, **kargs):
+    fdesc = tempfile.NamedTemporaryFile(*args, **kargs)
+    # we need to set umask to get its current value. As noted
+    # by Florian Brucker (comment), this is a potential security
+    # issue, as it affects all the threads. Considering that it is
+    # less a problem to create a file with permissions 000 than 666,
+    # we use 666 as the umask temporary value.
+    umask = os.umask(0o666)
+    os.umask(umask)
+    os.chmod(fdesc.name, 0o666 & ~umask)
+    return fdesc
+
+
 class FileDumper(DumperBase):
 
     def __init__(self, options: dict):
@@ -62,7 +76,7 @@ class FileDumper(DumperBase):
                             field['format'] = format
             self.datapackage.commit()
 
-        temp_file = tempfile.NamedTemporaryFile(mode='w+', delete=False, encoding='utf-8')
+        temp_file = UmaskNamedTemporaryFile(mode='w+', delete=False, encoding='utf-8')
         indent = 2 if self.pretty_descriptor else None
         json.dump(self.datapackage.descriptor, temp_file, indent=indent, sort_keys=True, ensure_ascii=False)
         temp_file_name = temp_file.name
@@ -115,7 +129,7 @@ class FileDumper(DumperBase):
 
             file_formatter = self.file_formatters[resource.res.name]
 
-            temp_file = tempfile.NamedTemporaryFile(
+            temp_file = UmaskNamedTemporaryFile(
                 mode=file_formatter.FILE_MODE, delete=False,
                 newline='' if 'b' not in file_formatter.FILE_MODE else None
             )
