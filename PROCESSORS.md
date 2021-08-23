@@ -197,6 +197,7 @@ def dump_to_path(out_path='.',
 - `options` - Format specific options. At the moment, only relevant to the Excel format:
     - `sheetname` - Provide the name of the sheet that will be used when creating the Excel file (otherwise will use the resource name)
     - `update_existing` - Instead of creating a new file, update the file specified by this option (needs to be a string path to the excel file).
+                          If the file does not exist, it will be created in this location.
                           If a sheet with the same name exists, it will be removed and re-added.
 
 #### dump_to_zip
