@@ -258,11 +258,11 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
     # Creates extra by key
     def create_extra_by_key(key):
         extra = db.get(key)
-        extra.update(dict(
+        extra = dict(
             (k, AGGREGATORS[fields[k]['aggregate']].finaliser(v))
             for k, v in extra.items()
             if k in fields
-        ))
+        )
         return extra
 
     # Yields the new resources
