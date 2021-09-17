@@ -2310,3 +2310,98 @@ def test_parallelize():
         parallelize(mult),
     ).results()[0][0][:100]
     print(res)
+
+
+def test_unwind_basic():
+    from dataflows import Flow, unwind
+
+    data = [
+        {'id': 1, 'title': 'Blog Post', 'tags': ['hello', 'world'], 'comments': ['Nice post.', 'Well written']}
+    ]
+    results, dp, _ = Flow(
+        data,
+        unwind('tags', 'tag'),
+    ).results()
+
+    assert len(results[0]) == 2
+    assert results[0][0]['tag'] == 'hello'
+
+
+def test_unwind_twice_in_flow():
+    from dataflows import Flow, unwind
+
+    data = [
+        {'id': 1, 'title': 'Blog Post', 'tags': ['hello', 'world'], 'comments': ['Nice post.', 'Well written']}
+    ]
+    results, dp, _ = Flow(
+        data,
+        unwind('tags', 'tag'),
+        unwind('comments', 'comment'),
+    ).results()
+
+    assert len(results[0]) == 4
+    assert results[0][0]['tag'] == 'hello'
+    assert results[0][0]['comment'] == 'Nice post.'
+
+
+def test_unwind_from_key_not_iterable():
+    from dataflows import Flow, unwind
+
+    data = [
+        {'id': 1, 'title': 'Blog Post', 'tags': None, 'comments': ['Nice post.', 'Well written']}
+    ]
+    results, dp, _ = Flow(
+        data,
+        unwind('tags', 'tag'),
+    ).results()
+
+    assert len(results[0]) == 1
+    assert results[0][0]['tag'] == None
+
+
+def test_unwind_source_delete():
+    from dataflows import Flow, unwind
+
+    data = [
+        {'id': 1, 'title': 'Blog Post', 'tags': ['hello', 'world']}
+    ]
+    results, dp, _ = Flow(
+        data,
+        unwind('tags', 'tag'),
+    ).results()
+
+    assert len(results[0]) == 2
+    assert results[0][0]['tag']
+    assert not results[0][0]['tags']
+
+
+def test_unwind_source_keep():
+    from dataflows import Flow, unwind
+
+    data = [
+        {'id': 1, 'title': 'Blog Post', 'tags': ['hello', 'world']}
+    ]
+    results, dp, _ = Flow(
+        data,
+        unwind('tags', 'tag', source_delete=False),
+    ).results()
+
+    assert len(results[0]) == 2
+    assert results[0][0]['tag']
+    assert results[0][0]['tags'] == data[0]['tags']
+
+
+def test_unwind_with_transformer():
+    from dataflows import Flow, unwind
+
+    data = [
+        {'id': 1, 'title': 'Blog Post', 'tags': ['hello', 'world']}
+    ]
+    results, dp, _ = Flow(
+        data,
+        unwind('tags', 'tag', lambda v: v.title()),
+    ).results()
+
+    assert len(results[0]) == 2
+    assert results[0][0]['tag'] == 'Hello'
+    assert results[0][1]['tag'] == 'World'
