@@ -2310,3 +2310,24 @@ def test_parallelize():
         parallelize(mult),
     ).results()[0][0][:100]
     print(res)
+
+def test_noop():
+    from dataflows import noop
+
+    datas1 = [
+        {'a': 1, 'b': True, 'c': 'c1'},
+        {'a': 2, 'b': True, 'c': 'c2'},
+    ]
+    datas2 = [
+        {'a': 3, 'b': True, 'c': 'c3'},
+        {'a': 4, 'b': True, 'c': 'c4'},
+        {'a': 5, 'b': True, 'c': 'c5'},
+    ]
+    results, dp, _ = Flow(
+        datas1,
+        datas2,
+        noop,
+    ).results()
+
+    assert results[0] == datas1
+    assert results[1] == datas2
