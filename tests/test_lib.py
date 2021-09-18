@@ -47,14 +47,14 @@ def test_dump_to_sql_with_indexes():
         ],
         dump_to_sql(
             dict(output_table={'resource-name': 'res_1'}),
-            engine='sqlite:///out/test.db',
-            indexes_fields=['x', 'y']
+            engine='sqlite:///out/sql_with_indexes.db',
+            indexes_fields=[['id']],
         ),
     )
     f.process()
 
     # Check indexes are present
-    engine = create_engine('sqlite:///out/test.db')
+    engine = create_engine('sqlite:///out/sql_with_indexes.db')
     inspector = reflection.Inspector.from_engine(engine)
     indexes = [index for index in inspector.get_indexes('output_table')]
     assert indexes
