@@ -33,6 +33,33 @@ def test_dump_to_sql():
     assert result == data
 
 
+def test_dump_to_sql_with_indexes():
+    from dataflows import Flow, printer, dump_to_sql
+    from sqlalchemy import create_engine
+    from sqlalchemy.engine import reflection
+
+    f = Flow(
+        [
+            dict(id=1, name='Paul'),
+            dict(id=2, name='John'),
+            dict(id=3, name='George'),
+            dict(id=3, name='Ringo'),
+        ],
+        dump_to_sql(
+            dict(output_table={'resource-name': 'res_1'}),
+            engine='sqlite:///out/sql_with_indexes.db',
+            indexes_fields=[['id']],
+        ),
+    )
+    f.process()
+
+    # Check indexes are present
+    engine = create_engine('sqlite:///out/sql_with_indexes.db')
+    inspector = reflection.Inspector.from_engine(engine)
+    indexes = [index for index in inspector.get_indexes('output_table')]
+    assert indexes
+
+
 def test_add_computed_field():
     from dataflows import add_computed_field
     f = Flow(
