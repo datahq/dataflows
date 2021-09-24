@@ -25,6 +25,7 @@ from .sources import sources
 from .stream import stream
 from .unpivot import unpivot
 from .unstream import unstream
+from .unwind import unwind
 from .update_package import update_package, add_metadata
 from .update_resource import update_resource
 from .update_schema import update_schema
