@@ -13,16 +13,14 @@ install:
 list:
 	@grep '^\.PHONY' Makefile | cut -d' ' -f2- | tr ' ' '\n'
 
-lint:
-	pylama $(PACKAGE)
-
 release:
 	bash -c '[[ -z `git status -s` ]]'
 	git tag -a -m release $(VERSION)
 	git push --tags
 
 test:
-	tox
+	pylama $(PACKAGE)
+	py.test -s --cov dataflows --cov-report term-missing 
 
 version:
 	@echo $(VERSION)
