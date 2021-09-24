@@ -2336,4 +2336,3 @@ def test_parallelize():
         add_field('c', 'integer'),
         parallelize(mult),
     ).results()[0][0][:100]
-    print(res)
