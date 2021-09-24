@@ -28,7 +28,8 @@ def fini_mp(processes, t_fetch):
             except Exception:
                 pass
         finally:
-            process.close()
+            if hasattr(process, 'close'):
+                process.close()
     t_fetch.join()
 
 

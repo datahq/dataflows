@@ -40,10 +40,15 @@ SPEEDUP_REQUIRES = [
     'plyvel',
 ]
 LINT_REQUIRES = [
-    'pylama', 'pylama_quotes'
+    'pylama',
+    'pylama_quotes'
 ]
 TESTS_REQUIRE = [
-    'tox',
+    'mock',
+    'pytest',
+    'pytest-cov',
+    'coverage',
+    'lxml',
 ]
 README = read('README.md')
 VERSION = read(PACKAGE, 'VERSION')
