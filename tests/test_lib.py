@@ -2316,27 +2316,38 @@ def test_unwind_basic():
     from dataflows import Flow, unwind
 
     data = [
-        {'id': 1, 'title': 'Blog Post', 'tags': ['hello', 'world'], 'comments': ['Nice post.', 'Well written']}
+        {
+            'id': 1,
+            'title': 'Blog Post',
+            'tags': ['hello', 'world'],
+            'comments': ['Nice post.', 'Well written'],
+        }
     ]
     results, dp, _ = Flow(
         data,
-        unwind('tags', 'tag'),
+        unwind('tags', {'name': 'tag', 'type': 'string'}),
     ).results()
 
     assert len(results[0]) == 2
     assert results[0][0]['tag'] == 'hello'
+    assert 'tag' in [f.name for f in dp.resources[0].schema.fields]
 
 
 def test_unwind_twice_in_flow():
     from dataflows import Flow, unwind
 
     data = [
-        {'id': 1, 'title': 'Blog Post', 'tags': ['hello', 'world'], 'comments': ['Nice post.', 'Well written']}
+        {
+            'id': 1,
+            'title': 'Blog Post',
+            'tags': ['hello', 'world'],
+            'comments': ['Nice post.', 'Well written'],
+        }
     ]
     results, dp, _ = Flow(
         data,
-        unwind('tags', 'tag'),
-        unwind('comments', 'comment'),
+        unwind('tags', {'name': 'tag', 'type': 'string'}),
+        unwind('comments', {'name': 'comment', 'type': 'string'}),
     ).results()
 
     assert len(results[0]) == 4
@@ -2352,7 +2363,7 @@ def test_unwind_from_key_not_iterable():
     ]
     results, dp, _ = Flow(
         data,
-        unwind('tags', 'tag'),
+        unwind('tags', {'name': 'tag', 'type': 'string'}),
     ).results()
 
     assert len(results[0]) == 1
@@ -2362,44 +2373,40 @@ def test_unwind_from_key_not_iterable():
 def test_unwind_source_delete():
     from dataflows import Flow, unwind
 
-    data = [
-        {'id': 1, 'title': 'Blog Post', 'tags': ['hello', 'world']}
-    ]
+    data = [{'id': 1, 'title': 'Blog Post', 'tags': ['hello', 'world']}]
     results, dp, _ = Flow(
         data,
-        unwind('tags', 'tag'),
+        unwind('tags', {'name': 'tag', 'type': 'string'}),
     ).results()
 
     assert len(results[0]) == 2
     assert results[0][0]['tag']
-    assert not results[0][0]['tags']
+    assert not results[0][0].get('tags')
+    assert 'tags' not in [f.name for f in dp.resources[0].schema.fields]
 
 
 def test_unwind_source_keep():
     from dataflows import Flow, unwind
 
-    data = [
-        {'id': 1, 'title': 'Blog Post', 'tags': ['hello', 'world']}
-    ]
+    data = [{'id': 1, 'title': 'Blog Post', 'tags': ['hello', 'world']}]
     results, dp, _ = Flow(
         data,
-        unwind('tags', 'tag', source_delete=False),
+        unwind('tags', {'name': 'tag', 'type': 'string'}, source_delete=False),
     ).results()
 
     assert len(results[0]) == 2
     assert results[0][0]['tag']
     assert results[0][0]['tags'] == data[0]['tags']
+    assert 'tags' in [f.name for f in dp.resources[0].schema.fields]
 
 
 def test_unwind_with_transformer():
     from dataflows import Flow, unwind
 
-    data = [
-        {'id': 1, 'title': 'Blog Post', 'tags': ['hello', 'world']}
-    ]
+    data = [{'id': 1, 'title': 'Blog Post', 'tags': ['hello', 'world']}]
     results, dp, _ = Flow(
         data,
-        unwind('tags', 'tag', lambda v: v.title()),
+        unwind('tags', {'name': 'tag', 'type': 'string'}, lambda v: v.title()),
     ).results()
 
     assert len(results[0]) == 2
