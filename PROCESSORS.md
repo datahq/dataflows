@@ -239,7 +239,7 @@ def dump_to_sql(tables,
         If so - update the rest of the columns in the existing row. Otherwise - insert a new row to the DB.
   - `update_keys` - Only applicable for the `update` mode. A list of field names that should be used to check for row existence.
         If left unspecified, will use the schema's `primaryKey` as default.
-  - `indexes` - TBD
+  - `indexes_fields` - list of lists of fields on which indexes will be created
 - `engine` - Connection string for connecting to the SQL Database (URL syntax)
   Also supports `env://<environment-variable>`, which indicates that the connection string should be fetched from the indicated environment variable.
   If not specified, assumes a default of `env://DATAFLOWS_DB_ENGINE`
