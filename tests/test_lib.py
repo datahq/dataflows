@@ -46,9 +46,13 @@ def test_dump_to_sql_with_indexes():
             dict(id=3, name='Ringo'),
         ],
         dump_to_sql(
-            dict(output_table={'resource-name': 'res_1'}),
+            dict(
+                output_table={
+                    'resource-name': 'res_1',
+                    'indexes_fields': [['id']]
+                }
+            ),
             engine='sqlite:///out/sql_with_indexes.db',
-            indexes_fields=[['id']],
         ),
     )
     f.process()

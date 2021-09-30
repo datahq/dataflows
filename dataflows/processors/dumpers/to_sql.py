@@ -79,7 +79,6 @@ class SQLDumper(DumperBase):
         self.updated_id_column = updated_id_column
         self.batch_size = options.get('batch_size', 1000)
         self.use_bloom_filter = options.get('use_bloom_filter', True)
-        self.indexes_fields = options.get('indexes_fields', None)
 
     def normalize_for_engine(self, dialect, resource, schema_descriptor):
         actions = {}
@@ -103,6 +102,7 @@ class SQLDumper(DumperBase):
             converted_resource = self.converted_resources[resource_name]
             mode = converted_resource.get('mode', 'rewrite')
             table_name = converted_resource['table-name']
+            indexes_fields = converted_resource.get('indexes_fields', None)
             storage = Storage(self.engine, prefix=table_name)
             if mode == 'rewrite' and '' in storage.buckets:
                 storage.delete('')
@@ -112,7 +112,7 @@ class SQLDumper(DumperBase):
             if '' not in storage.buckets:
                 logging.info('Creating DB table %s', table_name)
                 try:
-                    storage.create('', schema, indexes_fields=self.indexes_fields)
+                    storage.create('', schema, indexes_fields=indexes_fields)
                 except ValidationError as e:
                     logging.error('Error validating schema %r', schema_descriptor)
                     for err in e.errors:
