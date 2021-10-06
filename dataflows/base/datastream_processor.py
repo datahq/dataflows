@@ -4,7 +4,7 @@ import collections
 import copy
 
 from datapackage import Package
-from tableschema.exceptions import CastError
+from tableschema.exceptions import CastError, UniqueKeyError
 
 from . import exceptions
 from .datastream import DataStream
@@ -107,6 +107,8 @@ class DataStreamProcessor:
                     ))
                 else:
                     collections.deque(res, maxlen=0)
+        except UniqueKeyError as e:
+            self.raise_exception(e)
         except CastError as e:
             for err in e.errors:
                 logging.error('%s', err)
