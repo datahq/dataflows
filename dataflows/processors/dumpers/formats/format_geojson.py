@@ -10,7 +10,7 @@ class GeoJSONFormat(JSONFormat):
 
     @classmethod
     def prepare_resource(cls, resource):
-        super(JSONFormat, cls).prepare_resource(resource)
+        super(GeoJSONFormat, cls).prepare_resource(resource)
         descriptor = resource.descriptor
         descriptor['path'] = str(Path(descriptor['path']).with_suffix('.geojson'))
         descriptor['format'] = 'geojson'
