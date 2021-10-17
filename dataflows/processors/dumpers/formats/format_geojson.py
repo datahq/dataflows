@@ -7,6 +7,14 @@ class GeoJSONFormat(JSONFormat):
         file.write('{"type": "FeatureCollection","features":')
         super(GeoJSONFormat, self).initialize_file(file)
 
+    @classmethod
+    def prepare_resource(cls, resource):
+        super(JSONFormat, cls).prepare_resource(resource)
+        descriptor = resource.descriptor
+        descriptor['path'] = str(Path(descriptor['path']).with_suffix('.geojson'))
+        descriptor['format'] = 'geojson'
+        descriptor['mediatype'] = 'application/geo+json'
+
     def write_transformed_row(self, transformed_row):
         properties = dict()
         geometry = None
