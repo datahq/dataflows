@@ -1181,6 +1181,25 @@ def test_set_type_transform():
     ).results()[0][0][0]
     assert r['a'] == 'a'
 
+def test_set_type_same_field_multi_resource():
+    from dataflows import Flow, set_type, validate, concatenate
+    data1 = [
+        dict(a=[i, 2]) for i in range(5)
+    ]
+    data2 = [
+        dict(a=[i, 2]) for i in range(5)
+    ]
+    res = Flow(
+        data1, data2,
+        set_type('a', type='integer', transform=lambda v: v[0], resources=None),
+        concatenate(dict(a=[])),
+        validate()
+    ).results()[0][0]
+    assert res == [
+        dict(a=i)
+        for i in [0, 1, 2, 3, 4] * 2
+    ]
+
 
 def test_dump_to_path_use_titles():
     from dataflows import Flow, dump_to_path, set_type

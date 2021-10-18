@@ -15,7 +15,7 @@ class set_type(DataStreamProcessor):
         self.name = re.compile(f'^{name}$')
         self.options = options
         self.resources = resources
-        self.field_names = []
+        self.field_names = dict()
         self.on_error = on_error
         self.transform = self.wrap_transformer(transform) if transform else None
 
@@ -35,21 +35,22 @@ class set_type(DataStreamProcessor):
             return transform(v, **kw)
         return func
 
-    def transformer(self, rows):
+    def transformer(self, rows, field_names):
         for row in rows:
-            for field_name in self.field_names:
+            for field_name in field_names:
                 row[field_name] = self.transform(row.get(field_name), field_name=field_name, row=row)
             yield row
 
     def process_resources(self, resources):
         for res in resources:
             if self.matcher.match(res.res.name):
-                if len(self.field_names) > 0:
+                field_names = self.field_names.get(res.res.name, [])
+                if len(field_names) > 0:
                     it = res
                     if self.transform is not None:
-                        it = self.transformer(it)
+                        it = self.transformer(it, field_names)
                     yield schema_validator(res.res, it,
-                                           field_names=self.field_names,
+                                           field_names=field_names,
                                            on_error=self.on_error)
                 else:
                     yield res
@@ -65,7 +66,7 @@ class set_type(DataStreamProcessor):
                 for field in res['schema']['fields']:
                     if self.name.match(field['name']):
                         field.update(self.options)
-                        self.field_names.append(field['name'])
+                        self.field_names.setdefault(res['name'], []).append(field['name'])
                         added = True
         assert added, 'Failed to find field {} in schema'.format(self.name)
         return dp
