@@ -31,6 +31,7 @@ def stream(file=sys.stdout):
         for res in package:
             yield res_writer(res)
             file.write('\n')
+        file.close()
         if filename:
             os.rename(filename, filename[:-len(ACTIVE_SUFFIX)])
 

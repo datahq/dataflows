@@ -31,6 +31,7 @@ def concatenate(fields, target={}, resources=None):
         target.update(dict(
             mediatype='text/csv',
             schema=dict(fields=[], primaryKey=[]),
+            profile='tabular-data-resource'
         ))
 
         # Create mapping between source field names to target field names
