@@ -31,7 +31,7 @@ jobs:
         env:
           PLYVEL: ${{ matrix.plyvel }}
         run: |
-          [ "${PLYVEL}" != "true" ] || (echo installing plyvel && sudo apt-get install libleveldb-dev libleveldb1v5 libsnappy-dev && pip install plyvel)
+          [ "${PLYVEL}" != "true" ] || (echo installing plyvel && sudo apt-get install libleveldb-dev libleveldb1d libsnappy-dev && pip install plyvel)
           make install
       - name: Test software
         run: make test
