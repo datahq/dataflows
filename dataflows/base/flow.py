@@ -45,9 +45,9 @@ class Flow:
                     elif params[0] == 'package':
                         ds = datapackage_processor(link)(ds, position=position)
                     else:
-                        assert False, 'Failed to parse function signature %r' % params
+                        assert False, 'Failed to parse function signature {!r}'.format(params)
                 else:
-                    assert False, 'Failed to parse function signature %r' % params
+                    assert False, 'Failed to parse function signature {!r}'.format(params)
             elif isinstance(link, Iterable):
                 ds = iterable_loader(link)(ds, position=position)
 
