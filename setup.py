@@ -41,7 +41,8 @@ SPEEDUP_REQUIRES = [
 ]
 LINT_REQUIRES = [
     'pylama',
-    'pylama_quotes'
+    'pylama_quotes',
+    'pyflakes<2.5',
 ]
 TESTS_REQUIRE = [
     'mock',
