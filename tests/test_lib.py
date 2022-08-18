@@ -175,7 +175,7 @@ def test_select_field_regex():
 
     f = Flow(
         data,
-        select_fields(['y\d'])
+        select_fields([r'y\d'])
     )
     results, dp, _ = f.results()
     for i in results[0]:
@@ -195,7 +195,7 @@ def test_select_field_no_fields_selected():
 
     f = Flow(
         data,
-        select_fields(['x\d'])
+        select_fields([r'x\d'])
     )
     with pytest.raises(exceptions.ProcessorError):
         results, dp, _ = f.results()
@@ -2366,6 +2366,7 @@ def test_delete_resource():
     from dataflows import Flow, delete_resource, update_resource
     data = [dict(a=i, b=i) for i in range(3300)]
     data2 = [dict(c=i, d=i) for i in range(3300)]
+    data3 = [dict(e=i, f=i) for i in range(3300)]
     print('created data')
 
     res, dp, _ = Flow(
@@ -2378,3 +2379,15 @@ def test_delete_resource():
     assert len(res) == 1
     rows= res[0]
     assert rows[50]['c'] == 50
+
+    res, dp, _ = Flow(
+        data,
+        data2,        
+        update_resource(-1, name='boop'),
+        data3,
+        delete_resource('boop'),
+    ).results()
+    
+    assert len(res) == 2
+    rows= res[1]
+    assert rows[50]['e'] == 50
