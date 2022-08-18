@@ -41,6 +41,7 @@ DataFlows comes with a few built-in processors which do most of the heavy liftin
 - [**set_primary_key**](#set_primary_keypy) - Updates the primary key of one or more resources
 - [**concatenate**](#concatenatepy) - Concatenate multiple streams of data to a single one, resolving differently named columns along the way
 - [**duplicate**](#duplicatepy) - Duplicate a single stream of data to make two streams
+- [**delete_resource**](#delete_resourcepy) - Delete one or more resources from the package
 
 ### API Reference
 
@@ -860,6 +861,23 @@ def duplicate(source=None, target_name=None, target_path=None, duplicate_to_end=
 - `target_name` - Name of the new, duplicated resource.
 - `target_path` - Path for the new, duplicated resource.
 - `duplicate_to_end` - Add the duplicate to the end of the resource list.
+
+#### delete_resource.py
+Delete resources from the package.
+
+`delete_resource` will delete one or more resources/streams from the package.
+
+```python
+def delete_resource(resources):
+    pass
+```
+
+- `resources`
+  - A name of a resource to operate on
+  - A regular expression matching resource names
+  - A list of resource names
+  - `None` indicates operation should be done on all resources
+  - The index of the resource in the package
 
 #### join.py
 Joins two streamed resources.

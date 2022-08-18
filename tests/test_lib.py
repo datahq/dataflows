@@ -2360,3 +2360,21 @@ def test_parallelize():
         add_field('c', 'integer'),
         parallelize(mult),
     ).results()[0][0][:100]
+
+
+def test_delete_resource():
+    from dataflows import Flow, delete_resource, update_resource
+    data = [dict(a=i, b=i) for i in range(3300)]
+    data2 = [dict(c=i, d=i) for i in range(3300)]
+    print('created data')
+
+    res, dp, _ = Flow(
+        data,
+        update_resource(-1, name='boop'),
+        data2,        
+        delete_resource('boop'),
+    ).results()
+    
+    assert len(res) == 1
+    rows= res[0]
+    assert rows[50]['c'] == 50

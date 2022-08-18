@@ -10,6 +10,7 @@ from .checkpoint import checkpoint
 from .concatenate import concatenate
 from .conditional import conditional
 from .delete_fields import delete_fields
+from .delete_resource import delete_resource
 from .deduplicate import deduplicate
 from .duplicate import duplicate
 from .filter_rows import filter_rows
