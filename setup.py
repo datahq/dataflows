@@ -35,6 +35,7 @@ INSTALL_REQUIRES = [
     'bitstring>=3',
     'python-dateutil',
     'openpyxl',
+    'sqlalchemy<2'
 ]
 SPEEDUP_REQUIRES = [
     'plyvel',
