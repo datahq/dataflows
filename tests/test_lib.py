@@ -1394,6 +1394,19 @@ def test_load_xml():
     ]
 
 
+def test_load_geojson():
+    from dataflows import Flow, load
+    from decimal import Decimal
+
+    results, dp, stats = Flow(load('data/cities_location.geojson')).results()
+
+    assert results[0] == [
+        {'id': 1, 'city': 'london', '__geometry': {'type': 'Point', 'coordinates': [Decimal('51.509865'), Decimal('-0.118092')]}},
+        {'id': 2, 'city': 'paris', '__geometry': {'type': 'Point', 'coordinates': [Decimal('48.8566'), Decimal('2.3522')]}},
+        {'id': 3, 'city': 'rome', '__geometry': {'type': 'Point', 'coordinates': [Decimal('41.9028'), Decimal('2.4964')]}},
+    ]
+
+
 def test_save_load_dates():
     from dataflows import Flow, dump_to_path, load, set_type, printer
     import datetime
