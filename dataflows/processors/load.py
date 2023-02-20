@@ -132,7 +132,6 @@ class load(DataStreamProcessor):
         custom_parsers.setdefault('geojson', GeoJsonParser)
         return custom_parsers
 
-
     def safe_process_datapackage(self, dp: Package):
 
         # If loading from datapackage & resource iterator:
