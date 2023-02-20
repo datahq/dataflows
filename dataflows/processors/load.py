@@ -123,6 +123,16 @@ class load(DataStreamProcessor):
             raise SourceLoadError('Failed to load source {!r} and options {!r}: {}'
                                   .format(self.load_source, self.options, e)) from e
 
+    @classmethod
+    def get_custom_parsers(cls, custom_parsers=None):
+        custom_parsers = custom_parsers or dict()
+        custom_parsers.setdefault('xml', XMLParser)
+        custom_parsers.setdefault('excel-xml', ExcelXMLParser)
+        custom_parsers.setdefault('sql', ExtendedSQLParser)
+        custom_parsers.setdefault('geojson', GeoJsonParser)
+        return custom_parsers
+
+
     def safe_process_datapackage(self, dp: Package):
 
         # If loading from datapackage & resource iterator:
@@ -164,10 +174,7 @@ class load(DataStreamProcessor):
                 descriptor['name'] = self.name or path
                 if 'encoding' in self.options:
                     descriptor['encoding'] = self.options['encoding']
-                self.options.setdefault('custom_parsers', {}).setdefault('xml', XMLParser)
-                self.options.setdefault('custom_parsers', {}).setdefault('excel-xml', ExcelXMLParser)
-                self.options.setdefault('custom_parsers', {}).setdefault('sql', ExtendedSQLParser)
-                self.options.setdefault('custom_parsers', {}).setdefault('geojson', GeoJsonParser)
+                self.options['custom_parsers'] = self.get_custom_parsers(self.options.get('custom_parsers'))
                 self.options.setdefault('ignore_blank_headers', True)
                 self.options.setdefault('headers', 1)
                 stream: Stream = Stream(self.load_source, **self.options).open()
