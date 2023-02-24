@@ -2228,14 +2228,80 @@ def test_dump_to_zip():
     Flow([dict(a=1)], zz).process()
     assert zz.out_file.closed
 
-def test_dump_to_geojson():
+def test_dump_to_geopoint():
     from dataflows import Flow, dump_to_path, load, add_computed_field, delete_fields
+    import json
     Flow(
         load('data/cities_location.csv'),
         add_computed_field(target=dict(name='Location', type='geopoint'), operation='format', with_='{lat}, {long}'),
         delete_fields(['lat', 'long']),
         dump_to_path(out_path='out', format='geojson'),
     ).process()
+
+    assert json.load(open('out/cities_location.geojson')) == {
+        "type": "FeatureCollection",
+        "features":[{
+            "geometry": {"coordinates": [51.509865, -0.118092], "type": "Point"},
+            "properties": {"city": "london", "id": 1}, "type": "Feature"
+        }, {
+            "geometry": {"coordinates": [48.8566, 2.3522], "type": "Point"},
+            "properties": {"city": "paris", "id": 2}, "type": "Feature"
+        },{
+            "geometry": {"coordinates": [41.9028, 2.4964], "type": "Point"},
+            "properties": {"city": "rome", "id": 3}, "type": "Feature"
+        }]
+    }
+
+
+def test_dump_to_geopoint_array():
+    from dataflows import Flow, dump_to_path, load, add_field, delete_fields, set_type
+    import json
+    Flow(
+        load('data/cities_location.csv'),
+        set_type('l.+', type='number', resources='cities_location'),
+        add_field(name='Location', type='geopoint', default=lambda row: [row['lat'], row['long']]),
+        delete_fields(['lat', 'long']),
+        dump_to_path(out_path='out', format='geojson'),
+    ).process()
+
+    assert json.load(open('out/cities_location.geojson')) == {
+        "type": "FeatureCollection",
+        "features":[{
+            "geometry": {"coordinates": [51.509865, -0.118092], "type": "Point"},
+            "properties": {"city": "london", "id": 1}, "type": "Feature"
+        }, {
+            "geometry": {"coordinates": [48.8566, 2.3522], "type": "Point"},
+            "properties": {"city": "paris", "id": 2}, "type": "Feature"
+        },{
+            "geometry": {"coordinates": [41.9028, 2.4964], "type": "Point"},
+            "properties": {"city": "rome", "id": 3}, "type": "Feature"
+        }]
+    }
+
+def test_dump_to_geojson():
+    from dataflows import Flow, dump_to_path, load, add_field, delete_fields, set_type
+    import json
+    Flow(
+        load('data/cities_location.csv'),
+        set_type('l.+', type='number', resources='cities_location'),
+        add_field(name='Location', type='geojson', default=lambda row: dict(type='Point', coordinates=[float(row['lat']), float(row['long'])])),
+        delete_fields(['lat', 'long']),
+        dump_to_path(out_path='out', format='geojson'),
+    ).process()
+
+    assert json.load(open('out/cities_location.geojson')) == {
+        "type": "FeatureCollection",
+        "features":[{
+            "geometry": {"coordinates": [51.509865, -0.118092], "type": "Point"},
+            "properties": {"city": "london", "id": 1}, "type": "Feature"
+        }, {
+            "geometry": {"coordinates": [48.8566, 2.3522], "type": "Point"},
+            "properties": {"city": "paris", "id": 2}, "type": "Feature"
+        },{
+            "geometry": {"coordinates": [41.9028, 2.4964], "type": "Point"},
+            "properties": {"city": "rome", "id": 3}, "type": "Feature"
+        }]
+    }
 
 
 def test_dump_to_excel():
