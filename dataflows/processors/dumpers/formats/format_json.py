@@ -1,6 +1,8 @@
 import json
 import isodate
 from pathlib import Path
+import datetime
+import decimal
 
 from dataflows.helpers.extended_json import (
     DATETIME_F_FORMAT, DATE_F_FORMAT, TIME_F_FORMAT,
@@ -59,7 +61,18 @@ class JSONFormat(FileFormat):
             self.writer.write(',')
         else:
             self.writer.__first = False
-        self.writer.write(json.dumps(transformed_row, sort_keys=True, ensure_ascii=True))
+        self.writer.write(json.dumps(transformed_row, sort_keys=True, ensure_ascii=True, cls=self.Encoder))
 
     def finalize_file(self):
         self.writer.write(']')
+
+    # create encoder class
+    class Encoder(json.JSONEncoder):
+        def default(self, o):
+            if isinstance(o, (datetime.date, datetime.time, datetime.datetime)):
+                return o.isoformat()
+            elif isinstance(o, isodate.Duration):
+                return isodate.duration_isoformat(o)
+            elif isinstance(o, decimal.Decimal):
+                return float(o)
+            return super().default(o)

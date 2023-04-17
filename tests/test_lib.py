@@ -2473,3 +2473,34 @@ def test_delete_resource():
     assert len(res) == 2
     rows= res[1]
     assert rows[50]['e'] == 50
+
+def test_dump_to_json():
+    import datetime
+    import json
+    from dataflows import Flow, dump_to_path
+    data = [dict(a=str(i), b=i, c=datetime.date.today(), d=datetime.datetime.now()) for i in range(100)]
+    Flow(
+        data,
+        dump_to_path(out_path='out/test_json', format='json'),
+    ).process()
+    with open('out/test_json/res_1.json') as f:
+        res = json.load(f)
+        for x in ['a', 'b']:
+            assert res[50][x] == data[50][x]
+        for x in ['c', 'd']:
+            assert res[50][x] in data[50][x].isoformat()
+
+def test_dump_to_json_objects():
+    import json
+    from dataflows import Flow, dump_to_path, add_field
+    data = [dict(a=i/100, b=i/10) for i in range(100)]
+    Flow(
+        data,
+        add_field('c', 'object', lambda r: dict(a=r['a'], b=r['b'])),
+        dump_to_path(out_path='out/test_json_c', format='json'),
+    ).process()
+    with open('out/test_json_c/res_1.json') as f:
+        res = json.load(f)
+        for x in ['a', 'b']:
+            assert res[50][x] == data[50][x]
+            assert res[50]['c'][x] == data[50][x]
