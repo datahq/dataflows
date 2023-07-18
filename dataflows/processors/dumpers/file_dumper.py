@@ -34,6 +34,7 @@ class FileDumper(DumperBase):
         self.temporal_format_property = options.pop('temporal_format_property', None)
         self.use_titles = options.pop('use_titles', False)
         self.writer_options = options.pop('options', dict())
+        self.custom_formatters = options.pop('file_formatters', dict())
 
     def process_datapackage(self, datapackage):
         datapackage = \
@@ -49,14 +50,14 @@ class FileDumper(DumperBase):
             else:
                 _, file_format = os.path.splitext(resource.source)
                 file_format = file_format[1:]
-            file_formatter = {
+            file_formatter = self.custom_formatters.get(file_format) or {
                 'csv': CSVFormat,
                 'json': JSONFormat,
                 'geojson': GeoJSONFormat,
                 'excel': ExcelFormat,
                 'xlsx': ExcelFormat,
             }.get(file_format)
-            if file_format is not None:
+            if file_formatter is not None:
                 self.file_formatters[resource.name] = file_formatter
                 self.file_formatters[resource.name].prepare_resource(resource)
                 resource.commit()
