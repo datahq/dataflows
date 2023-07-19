@@ -13,7 +13,7 @@ data = [
 
 def test_dump_to_sql():
     from dataflows import Flow, printer, dump_to_sql
-    from sqlalchemy import create_engine
+    from sqlalchemy import create_engine, text
 
     f = Flow(
         data,
@@ -29,7 +29,7 @@ def test_dump_to_sql():
 
     # Check validity
     engine = create_engine('sqlite:///out/test.db')
-    result = list(dict(x) for x in engine.execute('select * from output_table'))
+    result = list(x._mapping for x in engine.connect().execute(text('select * from output_table')))
     assert result == data
 
 

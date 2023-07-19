@@ -30,12 +30,11 @@ INSTALL_REQUIRES = [
     'awesome-slugify',
     'inquirer',
     'tabulate',
-    'tableschema-sql',
+    'tableschema-sql>=2',
     'xmljson',
     'bitstring>=3',
     'python-dateutil',
     'openpyxl',
-    'sqlalchemy<2'
 ]
 SPEEDUP_REQUIRES = [
     'plyvel',
