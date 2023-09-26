@@ -69,4 +69,5 @@ class ExtendedSQLParser(Parser):
         with self.__engine.connect() as connection:
             result = connection.execute(query)
             for row_number, row in enumerate(iter(result), start=1):
+                row = dict(row)
                 yield (row_number, list(row.keys()), list(row))
