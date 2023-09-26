@@ -65,9 +65,9 @@ class ExtendedSQLParser(Parser):
         else:
             table = sql.table(self.__table)
             order = sql.text(self.__order_by) if self.__order_by else None
-            query = sql.select(['*']).select_from(table).order_by(order)
+            query = sql.select(sql.text('*')).select_from(table).order_by(order)
         with self.__engine.connect() as connection:
             result = connection.execute(query)
             for row_number, row in enumerate(iter(result), start=1):
-                row = dict(row)
-                yield (row_number, list(row.keys()), list(row))
+                row = row._asdict()
+                yield (row_number, list(row.keys()), list(row.values()))
