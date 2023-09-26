@@ -35,8 +35,7 @@ def test_dump_to_sql():
 
 def test_dump_to_sql_with_indexes():
     from dataflows import Flow, printer, dump_to_sql
-    from sqlalchemy import create_engine
-    from sqlalchemy.engine import reflection
+    from sqlalchemy import create_engine, inspect
 
     f = Flow(
         [
@@ -59,7 +58,7 @@ def test_dump_to_sql_with_indexes():
 
     # Check indexes are present
     engine = create_engine('sqlite:///out/sql_with_indexes.db')
-    inspector = reflection.Inspector.from_engine(engine)
+    inspector = inspect(engine)
     indexes = [index for index in inspector.get_indexes('output_table')]
     assert indexes
 

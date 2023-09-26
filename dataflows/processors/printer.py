@@ -3,7 +3,8 @@ from ..helpers.resource_matcher import ResourceMatcher
 
 
 try:
-    from IPython.core.display import display, HTML
+    from IPython import display
+    from IPython.core.display import HTML
     get_ipython
     def display_html(data):
         display(HTML(data))

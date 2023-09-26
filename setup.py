@@ -30,7 +30,7 @@ INSTALL_REQUIRES = [
     'awesome-slugify',
     'inquirer',
     'tabulate',
-    'tableschema-sql>=2',
+    'tableschema-sql>=2.0.1',
     'xmljson',
     'bitstring>=3',
     'python-dateutil',

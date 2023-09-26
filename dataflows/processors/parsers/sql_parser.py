@@ -61,11 +61,12 @@ class ExtendedSQLParser(Parser):
     # Private
     def __iter_extended_rows(self):
         if self.__query is not None:
-            query = self.__query
+            query = sql.text(self.__query)
         else:
             table = sql.table(self.__table)
             order = sql.text(self.__order_by) if self.__order_by else None
             query = sql.select(['*']).select_from(table).order_by(order)
-        result = self.__engine.execute(query)
-        for row_number, row in enumerate(iter(result), start=1):
-            yield (row_number, list(row.keys()), list(row))
+        with self.__engine.connect() as connection:
+            result = connection.execute(query)
+            for row_number, row in enumerate(iter(result), start=1):
+                yield (row_number, list(row.keys()), list(row))
