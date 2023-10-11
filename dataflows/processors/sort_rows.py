@@ -27,7 +27,8 @@ class KeyCalc(object):
                     value = row[key]
                     # numbers
                     # https://www.h-schmidt.net/FloatConverter/IEEE754.html
-                    if isinstance(value, (int, float, decimal.Decimal)):
+                    raw = not formatters or formatters[i] == '{' + key + '}'
+                    if raw and isinstance(value, (int, float, decimal.Decimal)):
                         bits = BitArray(float=value, length=64)
                         # invert the sign bit
                         bits.invert(0)
