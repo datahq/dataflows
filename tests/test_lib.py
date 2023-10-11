@@ -551,6 +551,26 @@ def test_sort_rows():
         {'a': 2, 'b': 3},
     ]
 
+def test_sort_rows_list():
+    from dataflows import sort_rows
+
+    f = Flow(
+        [
+            {'a': 1, 'b': 3},
+            {'a': 2, 'b': 3},
+            {'a': 3, 'b': 1},
+            {'a': 4, 'b': 1},
+        ],
+        sort_rows(key=('b', 'a')),
+    )
+    results, _, _ = f.results()
+    assert list(results[0]) == [
+        {'a': 3, 'b': 1},
+        {'a': 4, 'b': 1},
+        {'a': 1, 'b': 3},
+        {'a': 2, 'b': 3},
+    ]
+
 
 def test_sort_rows_callable():
     from dataflows import sort_rows

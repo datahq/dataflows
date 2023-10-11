@@ -627,6 +627,7 @@ def sort_rows(key, resources=None, reverse=False):
 
 - `key` - either:
   - string, which would be interpreted as a Python format string used to form the key (e.g. `{<field_name_1>}:{field_name_2}`)
+  - list or tuple, which would be interpreted as a list of field names to be used as the key
   - callable, which receives a row and returns a string, to be used as the sorting key
 - `resources`
   - A name of a resource to operate on

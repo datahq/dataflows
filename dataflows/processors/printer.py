@@ -3,11 +3,11 @@ from ..helpers.resource_matcher import ResourceMatcher
 
 
 try:
-    from IPython import display
-    from IPython.core.display import HTML
-    get_ipython
+    from IPython import get_ipython    
+    from IPython.core.display import display_html as _display_html
+    get_ipython()
     def display_html(data):
-        display(HTML(data))
+        _display_html(data, raw=True)
 except (NameError, ImportError):
     def display_html(data):
         print(data)
