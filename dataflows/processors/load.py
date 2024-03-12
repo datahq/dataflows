@@ -176,6 +176,7 @@ class load(DataStreamProcessor):
                 self.options['custom_parsers'] = self.get_custom_parsers(self.options.get('custom_parsers'))
                 self.options.setdefault('ignore_blank_headers', True)
                 self.options.setdefault('headers', 1)
+                self.options.setdefault('skip_rows', [{'type': 'preset', 'value': 'auto'}])
                 stream: Stream = Stream(self.load_source, **self.options).open()
                 if len(stream.headers) != len(set(stream.headers)):
                     if not self.deduplicate_headers:

@@ -21,9 +21,9 @@ def read(*paths):
 PACKAGE = 'dataflows'
 NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
-    'tabulator>=1.53.5',
-    'datapackage>=1.5.0',
-    'tableschema>=1.20',
+    'dataflows-tabulator>=1.54.0',
+    'datapackage>=1.15.4',
+    'tableschema>=1.20.4',
     'kvfile>=0.0.9',
     'click',
     'jinja2',
