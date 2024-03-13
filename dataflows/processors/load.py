@@ -185,7 +185,7 @@ class load(DataStreamProcessor):
                             'Found duplicate headers.' +
                             'Use the `deduplicate_headers` flag (found headers=%r)' % stream.headers)
                     stream.headers = self.rename_duplicate_headers(stream.headers)
-                schema = Schema().infer(
+                schema = Schema(self.override_schema).infer(
                     stream.sample, headers=stream.headers,
                     confidence=1, guesser_cls=self.guesser)
                 # restore schema field names to original headers

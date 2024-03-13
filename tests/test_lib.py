@@ -1746,10 +1746,10 @@ def test_set_type_regex():
 def test_load_override_schema():
     from dataflows import load
     flow = Flow(
-        load('data/beatles_age.csv',
+        load('data/beatles_drumkits.csv',
             override_schema={
                 'title': 'title',
-                'missingValues': ['ringo'],
+                'missingValues': ['N/A'],
             }
         ),
     )
@@ -1758,24 +1758,24 @@ def test_load_override_schema():
         'profile': 'data-package',
         'resources': [{
             'format': 'csv',
-            'name': 'beatles_age',
-            'path': 'beatles_age.csv',
+            'name': 'beatles_drumkits',
+            'path': 'beatles_drumkits.csv',
             'profile': 'tabular-data-resource',
             'schema': {
                 'fields': [
                     {'format': 'default', 'name': 'name', 'type': 'string'},
-                    {'format': 'default', 'name': 'age', 'type': 'integer'}
+                    {'format': 'default', 'name': '# drum kits', 'type': 'integer'}
                 ],
-                'missingValues': ['ringo'],
+                'missingValues': ['N/A'],
                 'title': 'title'
             }
         }]
     }
     assert data == [[
-        {'name': 'john', 'age': 18},
-        {'name': 'paul', 'age': 16},
-        {'name': 'george', 'age': 17},
-        {'name': None, 'age': 22},
+        {'name': 'john', '# drum kits': None},
+        {'name': 'paul', '# drum kits': None},
+        {'name': 'george', '# drum kits': None},
+        {'name': 'ringo', '# drum kits': 1},
     ]]
 
 
