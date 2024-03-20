@@ -24,7 +24,7 @@ INSTALL_REQUIRES = [
     'dataflows-tabulator>=1.54.0',
     'datapackage>=1.15.4',
     'tableschema>=1.20.9',
-    'kvfile>=0.0.9',
+    'kvfile>=1.0.0',
     'click',
     'jinja2',
     'awesome-slugify',
@@ -83,7 +83,7 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.12',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     entry_points={
