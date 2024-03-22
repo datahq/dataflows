@@ -24,7 +24,7 @@ INSTALL_REQUIRES = [
     'dataflows-tabulator>=1.54.0',
     'datapackage>=1.15.4',
     'tableschema>=1.20.9',
-    'kvfile>=1.0.0',
+    'kvfile>=1.1.0',
     'click',
     'jinja2',
     'awesome-slugify',
