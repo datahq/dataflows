@@ -59,6 +59,7 @@ def _sorter(rows, key_calc, reverse, batch_size):
     db.insert(process(rows), batch_size=batch_size)
     for _, value in db.items(reverse=reverse):
         yield value
+    db.close()
 
 
 def sort_rows(key, resources=None, reverse=False, batch_size=1000):

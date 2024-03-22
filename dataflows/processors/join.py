@@ -371,6 +371,8 @@ def join_aux(source_name, source_key, source_delete,  # noqa: C901
         process_datapackage(package.pkg.descriptor)
         yield package.pkg
         yield from new_resource_iterator(package)
+        db.close()
+        db_keys_usage.close()
 
     return func
 

@@ -16,6 +16,7 @@ def saver(resource, db, batch_size):
 def loader(db):
     for _, value in db.items():
         yield value
+    db.close()
 
 
 def duplicate(
