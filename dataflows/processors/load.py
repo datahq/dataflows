@@ -175,9 +175,10 @@ class load(DataStreamProcessor):
                     descriptor['encoding'] = self.options['encoding']
                 self.options['custom_parsers'] = self.get_custom_parsers(self.options.get('custom_parsers'))
                 self.options.setdefault('ignore_blank_headers', True)
+                if 'headers' not in self.options:
+                    self.options.setdefault('skip_rows', [{'type': 'preset', 'value': 'auto'}])
                 self.options.setdefault('headers', 1)
                 self.options.setdefault('sample_size', 1000)
-                self.options.setdefault('skip_rows', [{'type': 'preset', 'value': 'auto'}])
                 stream: Stream = Stream(self.load_source, **self.options).open()
                 if len(stream.headers) != len(set(stream.headers)):
                     if not self.deduplicate_headers:
@@ -215,11 +216,16 @@ class load(DataStreamProcessor):
         return dp
 
     def stripper(self, iterator):
+        whitespace = set(' \t\n\r')
         for r in iterator:
-            yield dict(
-                (k, v.strip()) if isinstance(v, str) else (k, v)
-                for k, v in r.items()
-            )
+            for k, v in r.items():
+                if v and isinstance(v, str) and (v[-1] in whitespace or v[0] in whitespace):
+                    r[k] = v.strip()
+            yield r
+            # yield dict(
+            #     (k, v.strip()) if isinstance(v, str) else (k, v)
+            #     for k, v in r.items()
+            # )
 
     def limiter(self, iterator):
         count = 0

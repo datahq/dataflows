@@ -23,7 +23,7 @@ NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
     'dataflows-tabulator>=1.54.0',
     'datapackage>=1.15.4',
-    'tableschema>=1.20.10',
+    'tableschema>=1.20.11',
     'kvfile>=1.1.1',
     'click',
     'jinja2',

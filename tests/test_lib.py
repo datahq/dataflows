@@ -2523,3 +2523,32 @@ def test_dump_to_json_objects():
         for x in ['a', 'b']:
             assert res[50][x] == data[50][x]
             assert res[50]['c'][x] == data[50][x]
+
+
+def aux_profile(filename, fast=False):
+    from dataflows import Flow, load, schema_validator
+    return Flow(
+        load(filename, cast_strategy=load.CAST_WITH_SCHEMA),
+    ).results(on_error=None if fast else schema_validator.raise_exception)[0][0]
+
+@pytest.mark.parametrize('fast', [False, True])
+def test_profile(fast):
+    import csv
+    import tempfile
+    import os
+    from decimal import Decimal
+
+    NUM = 1000000
+
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        filename = os.path.join(tmpdirname, 'test.csv')
+        with open(filename, 'w') as f:
+            writer = csv.writer(f)
+            writer.writerow(['id', 'name', 'age', 'percent'])
+            for i in range(NUM):
+                writer.writerow([str(i), 'name is ' + str(i), i % 100, i / 100])
+        res = aux_profile(filename, fast)
+        for i in range(NUM):
+            assert res[i]['id'] == i
+            assert res[i]['name'] == 'name is ' + str(i)
+            assert res[i]['age'] == i % 100

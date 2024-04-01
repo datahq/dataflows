@@ -96,15 +96,18 @@ class DataStreamProcessor:
             raise error from cause
         raise cause
 
-    def safe_process(self, on_error=None):
+    def safe_process(self, return_results=False, on_error=None):
         results = []
         try:
             ds = self._process()
             for res in ds.res_iter:
-                if on_error is not None:
-                    results.append(list(
-                        schema_validator(res.res, res, on_error=on_error)
-                    ))
+                if return_results:
+                    if on_error is not None:
+                        results.append(list(
+                            schema_validator(res.res, res, on_error=on_error)
+                        ))
+                    else:
+                        results.append(list(res))
                 else:
                     collections.deque(res, maxlen=0)
         except UniqueKeyError as e:
@@ -121,7 +124,5 @@ class DataStreamProcessor:
         return ds.dp, ds.merge_stats()
 
     def results(self, on_error=None):
-        if on_error is None:
-            on_error = raise_exception
-        ds, results = self.safe_process(on_error=on_error)
+        ds, results = self.safe_process(return_results=True, on_error=on_error)
         return results, ds.dp, ds.merge_stats()

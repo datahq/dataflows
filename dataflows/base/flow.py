@@ -2,13 +2,14 @@ from inspect import isfunction, signature
 from collections.abc import Iterable
 
 from .datastream_processor import DataStreamProcessor
+from .schema_validator import raise_exception
 
 
 class Flow:
     def __init__(self, *args):
         self.chain = args
 
-    def results(self, on_error=None):
+    def results(self, on_error=raise_exception):
         return self._chain().results(on_error=on_error)
 
     def process(self):
