@@ -9,7 +9,7 @@ from tableschema.exceptions import CastError, UniqueKeyError
 from . import exceptions
 from .datastream import DataStream
 from .resource_wrapper import ResourceWrapper
-from .schema_validator import schema_validator, raise_exception
+from .schema_validator import schema_validator
 
 
 class LazyIterator:
