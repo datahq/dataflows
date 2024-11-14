@@ -37,7 +37,12 @@ def test_example_2():
 def country_population():
     from lxml import etree
     from urllib.request import urlopen
-    page = urlopen('https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population').read()
+    for i in range(3):
+        try:
+            page = urlopen('https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population', timeout=30).read()
+            break
+        except:
+            pass
     parser = etree.HTMLParser()
     tree = etree.fromstring(page, parser=parser)
     tables = tree.findall('.//table')
