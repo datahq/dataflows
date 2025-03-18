@@ -3,7 +3,7 @@ name: general
 on:
   push:
     branches:
-      - master
+      - '*'
     tags:
       - '*.*.*'
   pull_request:
@@ -15,10 +15,10 @@ jobs:
   # Test
 
   test-linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
-        python-version: ['3.7.15', '3.8.16', '3.9.16', '3.10.10', '3.11.2']
+        python-version: ['3.7.15', '3.8.16', '3.9.16', '3.10.10', '3.11.2', '3.12.1']
         plyvel: ['true', 'false']
     steps:
       - name: Checkout repository
@@ -35,8 +35,8 @@ jobs:
           make install
       - name: Test software
         run: make test
-      - name: Report coverage
-        uses: codecov/codecov-action@v1
+      # - name: Report coverage
+      #   uses: codecov/codecov-action@v1
 
   # Release
 
