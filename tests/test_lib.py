@@ -1955,6 +1955,21 @@ def test_load_duplicate_headers():
     assert 'duplicate headers' in str(cause)
 
 
+def test_load_duplicate_headers_with_deduplicate_headers_flag_and_format():
+    from dataflows import load
+    flow = Flow(
+        load('data/duplicate_headers.csv', deduplicate_headers=True, deduplicate_headers_format='__%s'),
+    )
+    data, package, stats = flow.results()
+    assert package.descriptor['resources'][0]['schema']['fields'] == [
+        {'name': 'header1', 'type': 'string', 'format': 'default'},
+        {'name': 'header2__1', 'type': 'string', 'format': 'default'},
+        {'name': 'header2__2', 'type': 'string', 'format': 'default'},
+    ]
+    assert data == [[
+        {'header1': 'value1', 'header2__1': 'value2', 'header2__2': 'value3'},
+    ]]
+
 def test_load_duplicate_headers_with_deduplicate_headers_flag():
     from dataflows import load
     flow = Flow(
@@ -1968,6 +1983,40 @@ def test_load_duplicate_headers_with_deduplicate_headers_flag():
     ]
     assert data == [[
         {'header1': 'value1', 'header2 (1)': 'value2', 'header2 (2)': 'value3'},
+    ]]
+
+def test_load_duplicate_headers_case():
+    from dataflows import load, exceptions
+    flow = Flow(
+        load('data/duplicate_headers_case.csv'),
+    )
+    data, package, stats = flow.results()
+    assert data == [[
+        {'header1': 'value1', 'header2': 'value2', 'HEADER2': 'value3'},
+    ]]
+
+    flow = Flow(
+        load('data/duplicate_headers_case.csv', deduplicate_headers_case_sensitive=False),
+    )
+    with pytest.raises(exceptions.ProcessorError) as excinfo:
+        flow.results()
+    cause = excinfo.value.cause
+    assert 'duplicate headers' in str(cause)
+
+
+def test_load_duplicate_headers_case_with_deduplicate_headers_flag():
+    from dataflows import load
+    flow = Flow(
+        load('data/duplicate_headers_case.csv', deduplicate_headers=True, deduplicate_headers_case_sensitive=False),
+    )
+    data, package, stats = flow.results()
+    assert package.descriptor['resources'][0]['schema']['fields'] == [
+        {'name': 'header1', 'type': 'string', 'format': 'default'},
+        {'name': 'header2 (1)', 'type': 'string', 'format': 'default'},
+        {'name': 'HEADER2 (2)', 'type': 'string', 'format': 'default'},
+    ]
+    assert data == [[
+        {'header1': 'value1', 'header2 (1)': 'value2', 'HEADER2 (2)': 'value3'},
     ]]
 
 
@@ -2388,6 +2437,28 @@ def test_rename_fields_simple():
     ).results()[0][0]
 
     assert res == [dict(A=i, B=i, c=i) for i in range(5)]
+
+
+def test_rename_fields_disable_regex():
+    from dataflows import Flow, rename_fields
+
+    data = []
+    for i in range(5):
+        x = dict()
+        x['a (1)'] = i
+        x['b (2)'] = i
+        x['c (3)'] = i
+        data.append(x)
+    rename = dict()
+    rename['a (1)'] = 'A'
+    rename['b (2)'] = 'B'
+    rename['c (3)'] = 'C'
+    res = Flow(
+        data,
+        rename_fields(rename, regex=False),
+    ).results()[0][0]
+
+    assert res == [dict(A=i, B=i, C=i) for i in range(5)]
 
 def test_rename_fields_regex():
     from dataflows import Flow, rename_fields

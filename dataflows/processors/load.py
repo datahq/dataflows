@@ -57,6 +57,8 @@ class load(DataStreamProcessor):
                  override_schema=None, override_fields=None,
                  extract_missing_values=None,
                  deduplicate_headers=False,
+                 deduplicate_headers_case_sensitive=True,
+                 deduplicate_headers_format=' (%s)',
                  on_error=raise_exception,
                  **options):
         super(load, self).__init__()
@@ -70,6 +72,8 @@ class load(DataStreamProcessor):
         self.override_schema = override_schema
         self.override_fields = override_fields
         self.deduplicate_headers = deduplicate_headers
+        self.deduplicate_headers_case_sensitive = deduplicate_headers_case_sensitive
+        self.deduplicate_headers_format = deduplicate_headers_format
 
         # Extract missing values
         self.extract_missing_values = None
@@ -180,12 +184,21 @@ class load(DataStreamProcessor):
                 self.options.setdefault('headers', 1)
                 self.options.setdefault('sample_size', 1000)
                 stream: Stream = Stream(self.load_source, **self.options).open()
-                if len(stream.headers) != len(set(stream.headers)):
+                if self.deduplicate_headers_case_sensitive:
+                    duplication_test = len(stream.headers) != len(set(stream.headers))
+                else:
+                    lower_headers = [header.lower() for header in stream.headers]
+                    duplication_test = len(lower_headers) != len(set(lower_headers))
+                # duplication_test = len(stream.headers) != len(set(stream.headers))
+                if duplication_test:
                     if not self.deduplicate_headers:
                         raise ValueError(
                             'Found duplicate headers.' +
                             'Use the `deduplicate_headers` flag (found headers=%r)' % stream.headers)
-                    stream.headers = self.rename_duplicate_headers(stream.headers)
+                    stream.headers = self.rename_duplicate_headers(
+                        stream.headers, case_sensitive=self.deduplicate_headers_case_sensitive,
+                        deduplicate_format=self.deduplicate_headers_format
+                    )
                 schema = Schema(self.override_schema or {}).infer(
                     stream.sample, headers=stream.headers,
                     confidence=1, guesser_cls=self.guesser)
@@ -269,15 +282,21 @@ class load(DataStreamProcessor):
             yield it
 
     @staticmethod
-    def rename_duplicate_headers(duplicate_headers):
+    def rename_duplicate_headers(duplicate_headers, case_sensitive=True, deduplicate_format=' (%s)'):
         counter = {}
         headers = []
+        header_keys = []
         for header in duplicate_headers:
-            counter.setdefault(header, 0)
-            counter[header] += 1
-            if counter[header] > 1:
-                if counter[header] == 2:
-                    headers[headers.index(header)] = '%s (%s)' % (header, 1)
-                header = '%s (%s)' % (header, counter[header])
+            header_key = header
+            header_keys.append(header_key)
+            if not case_sensitive:
+                header_key = header_key.lower()
+            counter.setdefault(header_key, 0)
+            counter[header_key] += 1
+            if counter[header_key] > 1:
+                if counter[header_key] == 2:
+                    prev_index = header_keys.index(header_key) 
+                    headers[prev_index] = ('%s' + deduplicate_format) % (headers[prev_index], 1)
+                header = ('%s' + deduplicate_format) % (header, counter[header_key])
             headers.append(header)
         return headers
