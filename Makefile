@@ -20,7 +20,7 @@ release:
 
 test:
 	pylama $(PACKAGE)
-	py.test -s --cov dataflows --cov-report term-missing 
+	py.test -vvv -s --cov dataflows --cov-report term-missing 
 
 version:
 	@echo $(VERSION)
