@@ -15,10 +15,10 @@ jobs:
   # Test
 
   test-linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
-        python-version: ['3.7.15', '3.8.16', '3.9.16', '3.10.10', '3.11.2']
+        python-version: ['3.7.15', '3.8.16', '3.9.16', '3.10.10', '3.11.2', '3.12.1']
         plyvel: ['true', 'false']
     steps:
       - name: Checkout repository
