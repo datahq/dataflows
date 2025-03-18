@@ -43,6 +43,7 @@ LINT_REQUIRES = [
     'pylama',
     'pylama_quotes',
     'pyflakes<2.5',
+    'setuptools',
 ]
 TESTS_REQUIRE = [
     'mock',
