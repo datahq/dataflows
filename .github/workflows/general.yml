@@ -31,6 +31,7 @@ jobs:
         env:
           PLYVEL: ${{ matrix.plyvel }}
         run: |
+          sudo apt-get install --reinstall python-pkg-resources
           [ "${PLYVEL}" != "true" ] || (echo installing plyvel && sudo apt-get install libleveldb-dev libleveldb1d libsnappy-dev && pip install plyvel)
           make install
       - name: Test software
