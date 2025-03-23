@@ -288,9 +288,9 @@ class load(DataStreamProcessor):
         header_keys = []
         for header in duplicate_headers:
             header_key = header
-            header_keys.append(header_key)
             if not case_sensitive:
                 header_key = header_key.lower()
+            header_keys.append(header_key)
             counter.setdefault(header_key, 0)
             counter[header_key] += 1
             if counter[header_key] > 1:
