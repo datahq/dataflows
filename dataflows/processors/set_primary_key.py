@@ -8,7 +8,10 @@ def set_primary_key(primary_key, resources=None):
         matcher = ResourceMatcher(resources, package.pkg)
         for resource in package.pkg.descriptor['resources']:
             if matcher.match(resource['name']):
-                resource.setdefault('schema', {})['primaryKey'] = primary_key
+                if primary_key:
+                    resource.setdefault('schema', {})['primaryKey'] = primary_key
+                else:
+                    resource.get('schema', {}).pop('primaryKey', None)
         yield package.pkg
 
         res_iter = iter(package)
